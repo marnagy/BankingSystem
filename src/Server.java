@@ -10,16 +10,21 @@ public class Server {
 
     static final PrintWriter errWriter = new PrintWriter(new OutputStreamWriter(System.err));
     static final PrintWriter outWriter = new PrintWriter(new OutputStreamWriter(System.out));
-    static File RootFolder = Paths.get("Server").toFile();
-    static File AccountsFolder = Paths.get("Server" + FileSystemSeparator + "Accounts").toFile();
-    static File PaymentsFolder = Paths.get("Server" + FileSystemSeparator + "Payments").toFile();
+    static final File RootFolder = Paths.get("Server").toFile();
+    static final File AccountsFolder = Paths.get("Server" + FileSystemSeparator + "Accounts").toFile();
+    static final File PaymentsFolder = Paths.get("Server" + FileSystemSeparator + "Payments").toFile();
+    static final File ConfFile = Paths.get("Server" + FileSystemSeparator + "server.conf").toFile();
 
     public static void main(String[] args) {
         //Init folders for accounts and payments
         try {
             InitFolders();
         } catch (InitException e) {
-            outWriter.println("Error while initialization of folders");
+            errWriter.println("Error while initialization of folders");
+            e.printStackTrace(errWriter);
+        }
+        catch (IOException e){
+            errWriter.println("IOException while creating config file");
             e.printStackTrace(errWriter);
         }
 
@@ -42,12 +47,17 @@ public class Server {
         }
         return result;
     }
-    private static void InitFolders() throws InitException {
-        RootFolder.mkdir();
-        AccountsFolder.mkdir();
-        PaymentsFolder.mkdir();
+    private static void InitFolders() throws InitException, IOException {
+        boolean rootRes = RootFolder.mkdir();
+        boolean accountsRes = AccountsFolder.mkdir();
+        boolean paymentsRes = PaymentsFolder.mkdir();
+        boolean confRes = ConfFile.createNewFile();
 
-        if ( !(RootFolder.exists() && AccountsFolder.exists() && PaymentsFolder.exists())){
+//        if (confRes){
+//
+//        }
+
+        if ( !(RootFolder.exists() && AccountsFolder.exists() && PaymentsFolder.exists() && ConfFile.exists())){
             throw new InitException();
         }
     }
