@@ -4,16 +4,26 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.Random;
+import java.util.Set;
 
 public class Server {
     static final String FileSystemSeparator = FileSystems.getDefault().getSeparator();
 
     static final PrintWriter errWriter = new PrintWriter(new OutputStreamWriter(System.err));
     static final PrintWriter outWriter = new PrintWriter(new OutputStreamWriter(System.out));
+
     static final File RootFolder = Paths.get("Server").toFile();
     static final File AccountsFolder = Paths.get("Server" + FileSystemSeparator + "Accounts").toFile();
     static final File PaymentsFolder = Paths.get("Server" + FileSystemSeparator + "Payments").toFile();
     static final File ConfFile = Paths.get("Server" + FileSystemSeparator + "server.conf").toFile();
+
+    static final Set<String> loggedUsers = new HashSet<String>();
+    static final Set<ServerSession> sessions = new HashSet<ServerSession>();
+    static final Set<Long> threadIDs = new HashSet<Long>();
+
+    static final Random rand = new Random(System.nanoTime());
 
     public static void main(String[] args) {
         //Init folders for accounts and payments
@@ -29,13 +39,23 @@ public class Server {
         }
 
         //start server
-//        try {
-//            ServerSocket ss = new ServerSocket(5000);
-//
-//        } catch (IOException e) {
-//            errWriter.println("Failed to initiate ServerSocket");
-//            e.printStackTrace(errWriter);
-//        }
+        try {
+            ServerSocket ss = new ServerSocket(5000);
+            long l;
+            while (true){
+                ServerSession session = new ServerSession(ss.accept());
+                do {
+                    l = rand.nextLong();
+                } while (threadIDs.contains(l));
+                session.setName(l + "");
+                sessions.add(session);
+
+            }
+
+        } catch (IOException e) {
+            errWriter.println("Failed to initiate ServerSocket");
+            e.printStackTrace(errWriter);
+        }
     }
     private static boolean ContainsFileWithName(File[] fileNames, File fileToFind) {
         boolean result = false;
