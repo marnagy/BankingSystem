@@ -16,41 +16,39 @@ public class Server {
 
     public static void main(String[] args) {
         //Init folders for accounts and payments
-        InitFolders();
-        File rootFile = Paths.get("").toFile();
-        File[] RootFolderFiles = rootFile.listFiles();
-        File ServerFolder = Paths.get("Server").toFile();
-        if (!ServerFolder.mkdir()){
-            outWriter.println("Created Server folder");
+        try {
+            InitFolders();
+        } catch (InitException e) {
+            outWriter.println("Error while initialization of folders");
+            e.printStackTrace(errWriter);
         }
 
         //start server
-        try {
-            ServerSocket ss = new ServerSocket(5000);
-
-        } catch (IOException e) {
-            errWriter.println("Failed to initiate ServerSocket");
-            e.printStackTrace(errWriter);
-        }
+//        try {
+//            ServerSocket ss = new ServerSocket(5000);
+//
+//        } catch (IOException e) {
+//            errWriter.println("Failed to initiate ServerSocket");
+//            e.printStackTrace(errWriter);
+//        }
     }
     private static boolean ContainsFileWithName(File[] fileNames, File fileToFind) {
         boolean result = false;
         for ( File file : fileNames) {
-            if (file.equals(fileToFind)){
+            if (file.equals(fileToFind)) {
                 result = true;
                 break;
             }
         }
         return result;
     }
-    private static void InitFolders(){
-        File rootFile = Paths.get("").toFile();
-        File[] RootFolderFiles = rootFile.listFiles();
-        File ServerFolder = Paths.get("Server").toFile();
-        if (!ServerFolder.mkdir()){
-            outWriter.println("Created Server folder");
+    private static void InitFolders() throws InitException {
+        RootFolder.mkdir();
+        AccountsFolder.mkdir();
+        PaymentsFolder.mkdir();
+
+        if ( !(RootFolder.exists() && AccountsFolder.exists() && PaymentsFolder.exists())){
+            throw new InitException();
         }
-        File AccountsFolder = Paths.get("Server" + FileSystemSeparator + "Accounts").toFile();
-        File PaymentsFolder = Paths.get("Server" + FileSystemSeparator + "Payments").toFile();
     }
 }
