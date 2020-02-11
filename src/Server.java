@@ -4,15 +4,14 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 public class Server {
     static final String FileSystemSeparator = FileSystems.getDefault().getSeparator();
 
     static final PrintWriter errWriter = new PrintWriter(new OutputStreamWriter(System.err));
     static final PrintWriter outWriter = new PrintWriter(new OutputStreamWriter(System.out));
+    static final Reader inReader = new BufferedReader(new InputStreamReader(System.in));
 
     static final File RootFolder = Paths.get("Server").toFile();
     static final File AccountsFolder = Paths.get("Server" + FileSystemSeparator + "Accounts").toFile();
@@ -20,8 +19,9 @@ public class Server {
     static final File ConfFile = Paths.get("Server" + FileSystemSeparator + "server.conf").toFile();
 
     static final Set<String> loggedUsers = new HashSet<String>();
-    static final Set<ServerSession> sessions = new HashSet<ServerSession>();
+    static final Dictionary<Long, ServerSession> threads = new Hashtable<Long, ServerSession>();
     static final Set<Long> threadIDs = new HashSet<Long>();
+    static final Set<Long> accountIDs = new HashSet<Long>();
 
     static final Random rand = new Random(System.nanoTime());
 
@@ -43,13 +43,13 @@ public class Server {
             ServerSocket ss = new ServerSocket(5000);
             long l;
             while (true){
-                ServerSession session = new ServerSession(ss.accept());
+                ServerSession session = new ServerSession(ss.accept(), threadIDs, accountIDs);
                 do {
                     l = rand.nextLong();
                 } while (threadIDs.contains(l));
                 session.setName(l + "");
-                sessions.add(session);
-
+                threadIDs.add(l);
+                session.start();
             }
 
         } catch (IOException e) {
