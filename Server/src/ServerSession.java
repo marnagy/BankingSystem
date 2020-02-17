@@ -1,17 +1,19 @@
 import java.io.*;
 import java.net.Socket;
+import java.util.Map;
 import java.util.Set;
 
 public class ServerSession extends Thread {
     Socket socket;
     long sessionID;
-    Set<ServerSession> sessions;
+    // on account number get active thread or null
+    Map<Long, ServerSession> threadMap;
     Set<Long> accountIDs;
     long timer;
     ObjectInput oi;
     ObjectOutput oo;
 
-    public ServerSession(Socket socket, Set<Long> threadIDs, Set<Long> accountIDs) throws IOException {
+    public ServerSession(Socket socket, Set<Long> loggedUsers, Set<Long> accountIDs) throws IOException {
         this.socket = socket;
         this.accountIDs = accountIDs;
         oi = new ObjectInputStream(socket.getInputStream());
@@ -55,6 +57,12 @@ public class ServerSession extends Thread {
     public void setID(long id){
         this.sessionID = id;
     }
+
+    /**
+     * @param email
+     * @param passwd
+     * @return
+     */
     private boolean CreateAccount(String email, String passwd){
 
     }

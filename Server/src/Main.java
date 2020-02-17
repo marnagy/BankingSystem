@@ -22,7 +22,7 @@ public class Main {
     static final File PaymentsFolder = Paths.get(RootFolderName + FileSystemSeparator + PaymentsFolderName).toFile();
     static final File ConfFile = Paths.get(RootFolderName + FileSystemSeparator + ServerConfFileName).toFile();
 
-    static final Set<String> loggedUsers = new HashSet<String>();
+    static final Set<Long> loggedUsers = new HashSet<Long>();
 
     // insert account ID, get ServerSession or null if the user is logged in currently
     static final Dictionary<Long, ServerSession> threads = new Hashtable<Long, ServerSession>();
@@ -59,12 +59,12 @@ public class Main {
             ServerSocket ss = SSLServerSocketFactory.getDefault().createServerSocket(5000);
             long l;
             while (true){
-                ServerSession session = new ServerSession(ss.accept(), threadIDs, accountIDs);
-                do {
-                    l = rand.nextLong();
-                } while (threadIDs.contains(l));
-                session.setName(l + "");
-                threadIDs.add(l);
+                ServerSession session = new ServerSession(ss.accept(), loggedUsers, accountIDs);
+//                do {
+//                    l = rand.nextLong();
+//                } while (threadIDs.contains(l));
+//                session.setName(l + "");
+//                threadIDs.add(l);
                 session.start();
             }
 
