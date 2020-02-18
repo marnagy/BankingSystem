@@ -2,6 +2,7 @@ import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import java.io.*;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.nio.file.FileSystems;
 import java.nio.file.Paths;
 import java.util.*;
@@ -56,10 +57,16 @@ public class Main {
 
         //start server
         try {
-            ServerSocket ss = SSLServerSocketFactory.getDefault().createServerSocket(5000);
+            //ServerSocket ss = SSLServerSocketFactory.getDefault().createServerSocket(5000);
+            ServerSocket ss = new ServerSocket(5000);
             long l;
             while (true){
-                ServerSession session = new ServerSession(ss.accept(), loggedUsers, accountIDs);
+                outWriter.println("Waiting for connection");
+                outWriter.flush();
+                Socket s = ss.accept();
+                outWriter.println("Connection accepted");
+                outWriter.flush();
+                ServerSession session = new ServerSession(s, loggedUsers, accountIDs);
 //                do {
 //                    l = rand.nextLong();
 //                } while (threadIDs.contains(l));

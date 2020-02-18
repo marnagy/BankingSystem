@@ -16,19 +16,22 @@ public class ServerSession extends Thread {
     public ServerSession(Socket socket, Set<Long> loggedUsers, Set<Long> accountIDs) throws IOException {
         this.socket = socket;
         this.accountIDs = accountIDs;
-        oi = new ObjectInputStream(socket.getInputStream());
-        oo = new ObjectOutputStream(socket.getOutputStream());
+
     }
 
     @Override
     public void run() {
         while (true){
             try{
-                RequestType reqType = RequestType.valueOf(oi.readUTF());
+//                oi = new ObjectInputStream(socket.getInputStream());
+//                oo = new ObjectOutputStream(socket.getOutputStream());
+                BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                System.out.println("Thread running");
+                RequestType reqType = RequestType.valueOf(br.readLine());
                 switch (reqType){
                     case CreateAccount:
-                        String email = oi.readUTF();
-                        String passwd = oi.readUTF();
+                        String email = br.readLine();
+                        String passwd = br.readLine();
                         //check if email is already registered
                         if (!accountIDs.contains(email)){
                             // CONTINUE HERE
@@ -63,7 +66,7 @@ public class ServerSession extends Thread {
      * @param passwd
      * @return
      */
-    private boolean CreateAccount(String email, String passwd){
-
-    }
+//    private boolean CreateAccount(String email, String passwd){
+//
+//    }
 }

@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.io.Writer;
 
 public abstract class Request {
     RequestType type;
@@ -9,4 +10,6 @@ public abstract class Request {
     }
     public abstract void Send(ObjectOutput oo) throws IOException;
     public abstract void ReadArgs(ObjectInput oi) throws IOException, ArgsException;
+
+    public abstract void Send(Writer writer) throws IOException;
 }

@@ -9,30 +9,60 @@ public class ClientCLI {
         ObjectOutput oo;
         ObjectInput oi;
 
-        Pattern emailPattern = Pattern.compile("^[\\\\w!#$%&’*+/=?`{|}~^-]+(?:\\\\.[\\\\w!#$%&’*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\\\.)+[a-zA-Z]{2,6}$");
+        Pattern emailPattern = Pattern.compile("^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$");
         try {
             ClientSession session = new ClientSession();
             session.connect();
-            oo = new ObjectOutputStream(session.getOutputStream());
-            oi = new ObjectInputStream(session.getInputStream());
+//            oo = new ObjectOutputStream(session.getOutputStream());
+//            oi = new ObjectInputStream(session.getInputStream());
             pw.println("Connected");
             pw.println("Do you want to create an account? [yes / (default) no]");
+            pw.flush();
             String resp;
             RequestType rType;
-            if ( (resp = br.readLine()) == "yes" ){
+            resp = br.readLine();
+            if ( resp.equals("yes") ){
                 rType = RequestType.CreateAccount;
                 String email;
-                do {
-                    pw.println("Enter your email:");
-                    email = br.readLine();
-                } while (!emailPattern.matcher(email).matches());
-                pw.println("Enter your password:");
-                char[] passwd = br.readLine().toCharArray();
-                Request req = new AccountCreateRequest(email, passwd);
-                //sending
-                req.Send(oo);
-                //receiving response
-                req.ReadArgs(oi);
+                boolean success = false;
+                do{
+                    boolean emailValidation = false;
+                    do {
+                        pw.println("Enter your email:");
+                        pw.flush();
+                        email = br.readLine();
+                        emailValidation = emailPattern.matcher(email).matches();
+                    } while (!emailValidation);
+
+                    success = false;
+
+                    pw.println("Enter your password:");
+                    pw.flush();
+                    char[] passwd = br.readLine().toCharArray();
+                    Request req = new AccountCreateRequest(email, passwd);
+                    //sending
+                    Writer writer = new OutputStreamWriter(session.getOutputStream());
+                    req.Send(writer);
+                    //receiving response
+                    BufferedReader socketbr = new BufferedReader(new InputStreamReader(session.getInputStream()));
+                    ResponseType respType = ResponseType.valueOf(socketbr.readLine());
+                    switch (respType){
+                        case Successful:
+                            success = true;
+                            break;
+                        case EmailAlreadySignedUp:
+                            pw.println("Email you entered is already signed up.");
+                            pw.println("Use different email or sign in using the email.");
+                            break;
+                        default:
+                            throw new UnknownTypeException("Received unknown ResponseType");
+                    }
+                    pw.println("Do you want to sign in now?");
+                    if ( (resp = br.readLine()) == "yes" ){
+                        break;
+                    }
+//                    req.ReadArgs(oi);
+                } while (!success);
             }
 
             pw.println("Enter your email:");
@@ -42,9 +72,11 @@ public class ClientCLI {
         } catch (IOException e) {
             System.err.println("IOException occurred");
             e.printStackTrace(System.err);
-        } catch (ArgsException e) {
-            System.err.println("ArgsException occurred");
-            e.printStackTrace();
+//        } catch (ArgsException e) {
+//            System.err.println("ArgsException occurred");
+//            e.printStackTrace();
+        } catch (UnknownTypeException e){
+
         }
     }
 }

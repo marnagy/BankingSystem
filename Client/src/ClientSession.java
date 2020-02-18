@@ -15,7 +15,8 @@ public class ClientSession {
     }
 
     public void connect() throws IOException {
-        socket = SSLSocketFactory.getDefault().createSocket(host, port);
+        //socket = SSLSocketFactory.getDefault().createSocket("localhost", 5000);
+        socket = new Socket(host, port);
     }
 
     public OutputStream getOutputStream() throws IOException {

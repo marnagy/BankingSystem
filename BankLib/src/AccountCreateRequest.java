@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.io.Writer;
 
 public class AccountCreateRequest extends Request {
     final RequestType rType = RequestType.CreateAccount;
@@ -14,7 +15,7 @@ public class AccountCreateRequest extends Request {
 
     @Override
     public void Send(ObjectOutput oo) throws IOException {
-        oo.writeUTF(rType.toString());
+        oo.writeInt(rType.ordinal());
         oo.writeUTF(email);
         oo.writeUTF(new String(passwd));
     }
@@ -30,5 +31,16 @@ public class AccountCreateRequest extends Request {
             default:
                 throw new ArgsException("Received response type " + type);
         }
+    }
+
+    @Override
+    public void Send(Writer writer) throws IOException {
+        writer.write(rType.toString());
+        writer.write('\n');
+        writer.write(email);
+        writer.write('\n');
+        writer.write(passwd);
+        writer.write('\n');
+        writer.flush();
     }
 }
