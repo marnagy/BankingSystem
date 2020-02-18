@@ -70,13 +70,13 @@ public class ServerSession extends Thread {
         File newAccountFolder = new File(Main.AccountsFolder.getAbsolutePath() + Main.FileSystemSeparator + email);
         if ( newAccountFolder.mkdir() ) {
             File infoFile = new File(newAccountFolder.getAbsolutePath() + Main.FileSystemSeparator + ".info");
-            CreateAccountInfoFile(infoFile, email, passwd);
+            return CreateAccountInfoFile(infoFile, email, passwd);
         }
         else{
             throw new IOException("Directory " + email + " already created");
         }
     }
-    private void CreateAccountInfoFile(File infoFile, String email, String passwd) throws IOException {
+    private boolean CreateAccountInfoFile(File infoFile, String email, String passwd) throws IOException {
         if (infoFile.createNewFile()){
             try (BufferedWriter bw = new BufferedWriter(new FileWriter(infoFile))){
                 //hash of email will be accountID
@@ -86,11 +86,12 @@ public class ServerSession extends Thread {
                 int checkHash = email.hashCode() + salt + passwd.hashCode();
                 bw.write(checkHash + "\n");
                 // CONTINUE HERE
+                return true;
             }
 
         }
         else{
-            throw new IOException("Folder .info already created in " + newAccountFolder.getAbsolutePath());
+            throw new IOException("Folder .info already created in " + infoFile.getParentFile().getAbsolutePath());
         }
     }
 }
