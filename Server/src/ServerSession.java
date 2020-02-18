@@ -70,27 +70,27 @@ public class ServerSession extends Thread {
         File newAccountFolder = new File(Main.AccountsFolder.getAbsolutePath() + Main.FileSystemSeparator + email);
         if ( newAccountFolder.mkdir() ) {
             File infoFile = new File(newAccountFolder.getAbsolutePath() + Main.FileSystemSeparator + ".info");
-            if (infoFile.createNewFile()){
-                try (BufferedWriter bw = new BufferedWriter(new FileWriter(infoFile))){
-                    //hash of email will be accountID
-                    bw.write(email.hashCode() + "\n");
-                    int salt = Main.rand.nextInt();
-                    bw.write(salt + "\n");
-                    int checkHash = email.hashCode() + salt + passwd.hashCode();
-                    bw.write(checkHash + "\n");
-                    // CONTINUE HERE
-                }
-
-            }
-            else{
-                throw new IOException("Folder .info already created in " + newAccountFolder.getAbsolutePath());
-            }
+            CreateAccountInfoFile(infoFile, email, passwd);
         }
         else{
             throw new IOException("Directory " + email + " already created");
         }
     }
-    private boolean CreateAccountInfoFile(){
+    private void CreateAccountInfoFile(File infoFile, String email, String passwd) throws IOException {
+        if (infoFile.createNewFile()){
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter(infoFile))){
+                //hash of email will be accountID
+                bw.write(email.hashCode() + "\n");
+                int salt = Main.rand.nextInt();
+                bw.write(salt + "\n");
+                int checkHash = email.hashCode() + salt + passwd.hashCode();
+                bw.write(checkHash + "\n");
+                // CONTINUE HERE
+            }
 
+        }
+        else{
+            throw new IOException("Folder .info already created in " + newAccountFolder.getAbsolutePath());
+        }
     }
 }
