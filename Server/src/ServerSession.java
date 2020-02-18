@@ -34,7 +34,7 @@ public class ServerSession extends Thread {
                         String passwd = br.readLine();
                         //check if email is already registered
                         if (!accountIDs.contains(email)){
-                            // CONTINUE HERE
+                            CreateAccount(email, passwd);
                         }
                         break;
                     default:
@@ -66,7 +66,31 @@ public class ServerSession extends Thread {
      * @param passwd
      * @return
      */
-//    private boolean CreateAccount(String email, String passwd){
-//
-//    }
+    private boolean CreateAccount(String email, String passwd) throws IOException {
+        File newAccountFolder = new File(Main.AccountsFolder.getAbsolutePath() + Main.FileSystemSeparator + email);
+        if ( newAccountFolder.mkdir() ) {
+            File infoFile = new File(newAccountFolder.getAbsolutePath() + Main.FileSystemSeparator + ".info");
+            if (infoFile.createNewFile()){
+                try (BufferedWriter bw = new BufferedWriter(new FileWriter(infoFile))){
+                    //hash of email will be accountID
+                    bw.write(email.hashCode() + "\n");
+                    int salt = Main.rand.nextInt();
+                    bw.write(salt + "\n");
+                    int checkHash = email.hashCode() + salt + passwd.hashCode();
+                    bw.write(checkHash + "\n");
+                    // CONTINUE HERE
+                }
+
+            }
+            else{
+                throw new IOException("Folder .info already created in " + newAccountFolder.getAbsolutePath());
+            }
+        }
+        else{
+            throw new IOException("Directory " + email + " already created");
+        }
+    }
+    private boolean CreateAccountInfoFile(){
+
+    }
 }
