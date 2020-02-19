@@ -13,8 +13,7 @@ public class EmailAlreadySignedUpResponse extends Response {
 		oo.flush();
 	}
 
-	@Override
-	public void ReadArgs(ObjectInput oi) throws IOException, ArgsException {
-		return;
+	public static Response ReadArgs(ObjectInput oi) throws IOException, ArgsException {
+		throw new RuntimeException("Method not yet implemented");
 	}
 }

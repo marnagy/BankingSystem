@@ -17,7 +17,8 @@ public class AccountCreateRequest extends Request {
     public void Send(ObjectOutput oo) throws IOException {
         oo.writeInt(rType.ordinal());
         oo.writeUTF(email);
-        oo.writeUTF(new String(passwd));
+        oo.writeObject(passwd);
+//        oo.writeUTF(new String(passwd));
         oo.flush();
     }
 
@@ -26,22 +27,11 @@ public class AccountCreateRequest extends Request {
         char[] passwd = null;
         try {
             email = oi.readUTF();
-            passwd = oi.readUTF().toCharArray();
+            passwd = (char[])oi.readObject();
             return new AccountCreateRequest(email, passwd);
-        } catch (IOException e) {
+        } catch (IOException | ClassNotFoundException e) {
             return null;
         }
 
     }
-//
-//    @Override
-//    public void Send(Writer writer) throws IOException {
-//        writer.write(rType.toString());
-//        writer.write('\n');
-//        writer.write(email);
-//        writer.write('\n');
-//        writer.write(passwd);
-//        writer.write('\n');
-//        writer.flush();
-//    }
 }

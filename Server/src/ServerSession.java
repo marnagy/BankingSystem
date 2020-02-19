@@ -56,6 +56,8 @@ public class ServerSession extends Thread {
 						accountCreated = true;
 						break;
 					case Login:
+						// read args
+						req = LoginRequest.ReadArgs(oi);
 						break;
 					case Payment:
 						break;
@@ -98,7 +100,7 @@ public class ServerSession extends Thread {
 			return CreateAccountInfoFile(infoFile, email, passwd);
 		}
 		else{
-			throw new IOException("Directory " + email + " already created");
+			return false;
 		}
 	}
 	private boolean CreateAccountInfoFile(File infoFile, String email, char[] passwd) throws IOException {
@@ -116,7 +118,7 @@ public class ServerSession extends Thread {
 
 		}
 		else{
-			throw new IOException("Folder .info already created in " + infoFile.getParentFile().getAbsolutePath());
+			return false;
 		}
 	}
 }
