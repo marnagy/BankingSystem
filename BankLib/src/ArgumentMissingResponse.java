@@ -8,10 +8,11 @@ public class ArgumentMissingResponse extends Response {
 	}
 	@Override
 	void Send(ObjectOutput oo) throws IOException {
-
+		oo.writeInt(ResponseType.ArgumentMissingError.ordinal());
+		oo.flush();
 	}
 
-	public static Response ReadArgs(ObjectInput oi) throws IOException, ArgsException {
-
+	public static Response ReadArgs(ObjectInput oi) {
+		return new ArgumentMissingResponse();
 	}
 }
