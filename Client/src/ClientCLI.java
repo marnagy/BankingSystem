@@ -72,7 +72,16 @@ public class ClientCLI {
             pw.println("Enter your email:");
             String email = br.readLine();
             pw.println("Enter your password:");
-            String passwd = br.readLine();
+            char[] passwd = br.readLine().toCharArray();
+            Request req = new LoginRequest(email, passwd);
+            req.Send(oo);
+            // if success, client receives AccountInfo
+            ResponseType respType = ResponseType.values()[oi.readInt()];
+            switch (respType){
+                case AccountInfo:
+                    Response response = A
+                    break;
+            }
         } catch (IOException e) {
             System.err.println("IOException occurred");
             e.printStackTrace(System.err);
