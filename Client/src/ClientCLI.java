@@ -13,14 +13,15 @@ public class ClientCLI {
         try {
             ClientSession session = new ClientSession();
             session.connect();
-//            oo = new ObjectOutputStream(session.getOutputStream());
-//            oi = new ObjectInputStream(session.getInputStream());
+            oo = new ObjectOutputStream(session.getOutputStream());
+            oi = new ObjectInputStream(session.getInputStream());
             pw.println("Connected");
             pw.println("Do you want to create an account? [yes / (default) no]");
             pw.flush();
             String resp;
             RequestType rType;
-            resp = br.readLine();
+//            resp = br.readLine();
+            resp = "yes";
             if ( resp.equals("yes") ){
                 rType = RequestType.CreateAccount;
                 String email;
@@ -30,7 +31,8 @@ public class ClientCLI {
                     do {
                         pw.println("Enter your email:");
                         pw.flush();
-                        email = br.readLine();
+                        //email = br.readLine();
+                        email = "test@test.cz";
                         emailValidation = emailPattern.matcher(email).matches();
                     } while (!emailValidation);
 
@@ -38,16 +40,17 @@ public class ClientCLI {
 
                     pw.println("Enter your password:");
                     pw.flush();
-                    char[] passwd = br.readLine().toCharArray();
+                    //char[] passwd = br.readLine().toCharArray();
+                    char[] passwd = "test".toCharArray();
                     Request req = new AccountCreateRequest(email, passwd);
                     //sending
-                    Writer writer = new OutputStreamWriter(session.getOutputStream());
-                    req.Send(writer);
+                    //Writer writer = new OutputStreamWriter(session.getOutputStream());
+                    req.Send(oo);
                     //receiving response
-                    BufferedReader socketbr = new BufferedReader(new InputStreamReader(session.getInputStream()));
-                    ResponseType respType = ResponseType.valueOf(socketbr.readLine());
+                    //BufferedReader socketbr = new BufferedReader(new InputStreamReader(session.getInputStream()));
+                    ResponseType respType = ResponseType.values()[oi.readInt()];
                     switch (respType){
-                        case Successful:
+                        case Success:
                             success = true;
                             break;
                         case EmailAlreadySignedUp:
@@ -58,6 +61,7 @@ public class ClientCLI {
                             throw new UnknownTypeException("Received unknown ResponseType");
                     }
                     pw.println("Do you want to sign in now?");
+                    pw.flush();
                     if ( (resp = br.readLine()) == "yes" ){
                         break;
                     }

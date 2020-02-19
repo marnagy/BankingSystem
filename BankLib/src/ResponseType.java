@@ -1,5 +1,5 @@
 public enum ResponseType {
-    Successful,
+    Success,
     EmailAlreadySignedUp,
     AccountInfo,
     InternalError,

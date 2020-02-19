@@ -5,8 +5,8 @@ import java.io.Writer;
 
 public class AccountCreateRequest extends Request {
     final RequestType rType = RequestType.CreateAccount;
-    String email;
-    char[] passwd;
+    public final String email;
+    public final char[] passwd;
     public AccountCreateRequest(String email, char[] passwd){
         super(RequestType.CreateAccount);
         this.email = email;
@@ -18,29 +18,30 @@ public class AccountCreateRequest extends Request {
         oo.writeInt(rType.ordinal());
         oo.writeUTF(email);
         oo.writeUTF(new String(passwd));
+        oo.flush();
     }
 
-    @Override
-    public void ReadArgs(ObjectInput oi) throws IOException, ArgsException {
-        ResponseType type;
-        String respTypeStr = oi.readUTF();
-        type = ResponseType.valueOf(respTypeStr);
-        switch (type){
-            case Successful:
-                return;
-            default:
-                throw new ArgsException("Received response type " + type);
+    public static Request ReadArgs(ObjectInput oi){
+        String email = null;
+        char[] passwd = null;
+        try {
+            email = oi.readUTF();
+            passwd = oi.readUTF().toCharArray();
+            return new AccountCreateRequest(email, passwd);
+        } catch (IOException e) {
+            return null;
         }
-    }
 
-    @Override
-    public void Send(Writer writer) throws IOException {
-        writer.write(rType.toString());
-        writer.write('\n');
-        writer.write(email);
-        writer.write('\n');
-        writer.write(passwd);
-        writer.write('\n');
-        writer.flush();
     }
+//
+//    @Override
+//    public void Send(Writer writer) throws IOException {
+//        writer.write(rType.toString());
+//        writer.write('\n');
+//        writer.write(email);
+//        writer.write('\n');
+//        writer.write(passwd);
+//        writer.write('\n');
+//        writer.flush();
+//    }
 }

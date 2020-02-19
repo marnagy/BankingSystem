@@ -28,11 +28,6 @@ public class Main {
     // insert account ID, get ServerSession or null if the user is logged in currently
     static final Dictionary<Long, ServerSession> threads = new Hashtable<Long, ServerSession>();
 
-    // what is this set for ???
-    // for keeping track of number of threads currently running?
-    // wouldn't one number be enough?
-    static final Set<Long> threadIDs = new HashSet<Long>();
-
     // all valid account IDs, loaded from appropriate folder
     // new are added
     static final Set<Long> accountIDs = new HashSet<Long>();
@@ -40,7 +35,15 @@ public class Main {
     // random variable
     static final Random rand = new Random(System.nanoTime());
 
+    // used for testing
+    static final boolean IsTest = true;
+
     public static void main(String[] args) {
+
+        if (IsTest && RootFolder.exists()){
+            deleteDirectory(RootFolder);
+        }
+
         //Init folders for accounts and payments
         try {
             InitFolders();
@@ -103,5 +106,17 @@ public class Main {
         if ( !(RootFolder.exists() && AccountsFolder.exists() && PaymentsFolder.exists() && ConfFile.exists())){
             throw new InitException();
         }
+    }
+    private static boolean deleteDirectory(File directoryToBeDeleted){
+        if (!directoryToBeDeleted.exists()){
+            return true;
+        }
+        File[] allContents = directoryToBeDeleted.listFiles();
+        if (allContents != null) { // is directory
+            for (File file : allContents) {
+                deleteDirectory(file);
+                }
+        }
+        return directoryToBeDeleted.delete();
     }
 }
