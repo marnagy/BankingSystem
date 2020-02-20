@@ -42,7 +42,7 @@ public class ClientCLI {
                     pw.flush();
                     //char[] passwd = br.readLine().toCharArray();
                     char[] passwd = "test".toCharArray();
-                    Request req = new AccountCreateRequest(email, passwd);
+                    Request req = new AccountCreateRequest(email, passwd, Currency.EUR);
                     //sending
                     //Writer writer = new OutputStreamWriter(session.getOutputStream());
                     req.Send(oo);
@@ -79,7 +79,7 @@ public class ClientCLI {
             ResponseType respType = ResponseType.values()[oi.readInt()];
             switch (respType){
                 case AccountInfo:
-                    Response response = A
+                    //Response response = A
                     break;
             }
         } catch (IOException e) {

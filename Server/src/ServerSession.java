@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.Socket;
+import java.util.Currency;
 import java.util.Map;
 import java.util.Set;
 
@@ -42,7 +43,7 @@ public class ServerSession extends Thread {
 						if (req != null){
 							acr = (AccountCreateRequest)req;
 							//check if email is already registered
-							if (!accountIDs.contains(acr.email) && CreateAccount(acr.email, acr.passwd) ) {
+							if (!accountIDs.contains(acr.email) && CreateAccount(acr.email, acr.passwd, acr.currency) ) {
 								resp = new SuccessResponse();
 							}
 							else{
@@ -93,17 +94,17 @@ public class ServerSession extends Thread {
 	 * @param passwd
 	 * @return
 	 */
-	private boolean CreateAccount(String email, char[] passwd) throws IOException {
+	private boolean CreateAccount(String email, char[] passwd, Currency curr) throws IOException {
 		File newAccountFolder = new File(Main.AccountsFolder.getAbsolutePath() + Main.FileSystemSeparator + email);
 		if ( newAccountFolder.mkdir() ) {
 			File infoFile = new File(newAccountFolder.getAbsolutePath() + Main.FileSystemSeparator + ".info");
-			return CreateAccountInfoFile(infoFile, email, passwd);
+			return CreateAccountInfoFile(infoFile, email, passwd, curr);
 		}
 		else{
 			return false;
 		}
 	}
-	private boolean CreateAccountInfoFile(File infoFile, String email, char[] passwd) throws IOException {
+	private boolean CreateAccountInfoFile(File infoFile, String email, char[] passwd, Currency curr) throws IOException {
 		if (infoFile.createNewFile()){
 			try (BufferedWriter bw = new BufferedWriter(new FileWriter(infoFile))){
 				//hash of email will be accountID
@@ -112,7 +113,8 @@ public class ServerSession extends Thread {
 				bw.write(salt + "\n");
 				int checkHash = email.hashCode() + salt + passwd.hashCode();
 				bw.write(checkHash + "\n");
-				// CONTINUE HERE
+				bw.write(curr.toString() + "\n");
+				bw.flush();
 				return true;
 			}
 
