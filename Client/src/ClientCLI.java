@@ -42,7 +42,7 @@ public class ClientCLI {
                     pw.flush();
                     //char[] passwd = br.readLine().toCharArray();
                     char[] passwd = "test".toCharArray();
-                    Request req = new AccountCreateRequest(email, passwd, Currency.EUR);
+                    Request req = new AccountCreateRequest(email, passwd, CurrencyType.EUR);
                     //sending
                     //Writer writer = new OutputStreamWriter(session.getOutputStream());
                     req.Send(oo);

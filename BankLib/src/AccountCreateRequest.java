@@ -7,8 +7,8 @@ public class AccountCreateRequest extends Request {
     final RequestType rType = RequestType.CreateAccount;
     public final String email;
     public final char[] passwd;
-    public final Currency currency;
-    public AccountCreateRequest(String email, char[] passwd, Currency currency){
+    public final CurrencyType currency;
+    public AccountCreateRequest(String email, char[] passwd, CurrencyType currency){
         super(RequestType.CreateAccount);
         this.email = email;
         this.passwd = passwd;
@@ -27,11 +27,11 @@ public class AccountCreateRequest extends Request {
     public static Request ReadArgs(ObjectInput oi){
         String email = null;
         char[] passwd = null;
-        Currency cur;
+        CurrencyType cur;
         try {
             email = oi.readUTF();
             passwd = (char[])oi.readObject();
-            cur = Currency.values()[oi.readInt()];
+            cur = CurrencyType.values()[oi.readInt()];
             return new AccountCreateRequest(email, passwd, cur);
         } catch (IOException | ClassNotFoundException e) {
             return null;

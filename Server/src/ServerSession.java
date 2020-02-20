@@ -94,7 +94,7 @@ public class ServerSession extends Thread {
 	 * @param passwd
 	 * @return
 	 */
-	private boolean CreateAccount(String email, char[] passwd, Currency curr) throws IOException {
+	private boolean CreateAccount(String email, char[] passwd, CurrencyType curr) throws IOException {
 		File newAccountFolder = new File(Main.AccountsFolder.getAbsolutePath() + Main.FileSystemSeparator + email);
 		if ( newAccountFolder.mkdir() ) {
 			File infoFile = new File(newAccountFolder.getAbsolutePath() + Main.FileSystemSeparator + ".info");
@@ -104,7 +104,7 @@ public class ServerSession extends Thread {
 			return false;
 		}
 	}
-	private boolean CreateAccountInfoFile(File infoFile, String email, char[] passwd, Currency curr) throws IOException {
+	private boolean CreateAccountInfoFile(File infoFile, String email, char[] passwd, CurrencyType curr) throws IOException {
 		if (infoFile.createNewFile()){
 			try (BufferedWriter bw = new BufferedWriter(new FileWriter(infoFile))){
 				//hash of email will be accountID
