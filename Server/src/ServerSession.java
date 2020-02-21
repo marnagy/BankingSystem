@@ -7,6 +7,7 @@ import java.util.Set;
 public class ServerSession extends Thread {
 	Socket socket;
 	long sessionID;
+	// null if not logged in, otherwise accountID (hash of email)
 	Integer userID = null;
 	// on account number get active thread or null
 	Map<Long, ServerSession> threadMap;
@@ -59,6 +60,19 @@ public class ServerSession extends Thread {
 					case Login:
 						// read args
 						req = LoginRequest.ReadArgs(oi);
+						if (req != null) {
+							LoginRequest LoginReq = (LoginRequest) req;
+							if (AccountCheck(LoginReq)){
+								resp = new AccountInfoResponse();
+							}
+							else{
+								resp = new IncorrectLoginResponse();
+							}
+						}
+						else{
+							resp = new ArgumentMissingResponse();
+						}
+						resp.Send(oo);
 						break;
 					case Payment:
 						break;
@@ -75,6 +89,24 @@ public class ServerSession extends Thread {
 			}
 		}
 
+	}
+
+	private boolean AccountCheck(LoginRequest loginReq) {
+		File accountDir = new File(Main.AccountsFolder.getAbsolutePath() + Main.FileSystemSeparator + loginReq.email.hashCode());
+		File infoFile = new File(accountDir.getAbsolutePath() + Main.FileSystemSeparator + ".info");
+		try (BufferedReader br = new BufferedReader(new FileReader(infoFile))){
+			String email = br.readLine();
+			// for safety, check if email is same
+			if (!email.equals(loginReq.email)){
+				return false;
+			}
+			int salt = Integer.parseInt(br.readLine());
+			int checkHashReq = email.hashCode() + salt + loginReq.passwd.hashCode();
+			int checkHashSaved = Integer.parseInt(br.readLine());
+			return checkHashReq == checkHashSaved;
+		} catch (IOException e) {
+			return false;
+		}
 	}
 
 	private void deleteUserIDFromSet() {
@@ -95,7 +127,7 @@ public class ServerSession extends Thread {
 	 * @return
 	 */
 	private boolean CreateAccount(String email, char[] passwd, CurrencyType curr) throws IOException {
-		File newAccountFolder = new File(Main.AccountsFolder.getAbsolutePath() + Main.FileSystemSeparator + email);
+		File newAccountFolder = new File(Main.AccountsFolder.getAbsolutePath() + Main.FileSystemSeparator + email.hashCode());
 		if ( newAccountFolder.mkdir() ) {
 			File infoFile = new File(newAccountFolder.getAbsolutePath() + Main.FileSystemSeparator + ".info");
 			return CreateAccountInfoFile(infoFile, email, passwd, curr);
@@ -108,7 +140,7 @@ public class ServerSession extends Thread {
 		if (infoFile.createNewFile()){
 			try (BufferedWriter bw = new BufferedWriter(new FileWriter(infoFile))){
 				//hash of email will be accountID
-				bw.write(email.hashCode() + "\n");
+				bw.write(email + "\n");
 				int salt = Main.rand.nextInt();
 				bw.write(salt + "\n");
 				int checkHash = email.hashCode() + salt + passwd.hashCode();

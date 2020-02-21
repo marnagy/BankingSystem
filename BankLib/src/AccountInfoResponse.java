@@ -6,7 +6,6 @@ import java.util.Map;
 public class AccountInfoResponse extends Response {
 	public AccountInfoResponse(Object... objects){
 		super(ResponseType.AccountInfo);
-		// add user objects (map for currencies, last login, ...)
 	}
 	@Override
 	void Send(ObjectOutput oo) throws IOException {
