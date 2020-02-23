@@ -5,5 +5,7 @@ public enum ResponseType {
     InternalError,
     ArgumentMissingError,
     NotLoggedInError,
-    IncorrectLoginError
+    IncorrectLoginError,
+    //used only by client
+    IllegalResponse
 }
