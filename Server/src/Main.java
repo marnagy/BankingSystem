@@ -28,6 +28,10 @@ public class Main {
     // insert account ID, get ServerSession or null if the user is logged in currently
     static final Dictionary<Long, ServerSession> threads = new Hashtable<Long, ServerSession>();
 
+    // for unique ID for each thread/session
+    // used for authentication
+    static final Set<Long> threadIDs = new HashSet<Long>();
+
     // all valid account IDs, loaded from appropriate folder
     // new are added
     static final Set<Long> accountIDs = new HashSet<Long>();
@@ -69,7 +73,7 @@ public class Main {
                 Socket s = ss.accept();
                 outWriter.println("Connection accepted");
                 outWriter.flush();
-                ServerSession session = new ServerSession(s, loggedUsers, accountIDs);
+                ServerSession session = new ServerSession(s, loggedUsers, accountIDs, rand.nextLong());
 //                do {
 //                    l = rand.nextLong();
 //                } while (threadIDs.contains(l));

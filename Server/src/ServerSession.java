@@ -1,12 +1,14 @@
 import java.io.*;
 import java.net.Socket;
+import java.time.LocalDateTime;
 import java.util.Currency;
+import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
 public class ServerSession extends Thread {
 	Socket socket;
-	long sessionID;
+	public final long sessionID;
 	// null if not logged in, otherwise accountID (hash of email)
 	Integer userID = null;
 	// on account number get active thread or null
@@ -15,10 +17,10 @@ public class ServerSession extends Thread {
 	ObjectInput oi;
 	ObjectOutput oo;
 
-	public ServerSession(Socket socket, Set<Long> loggedUsers, Set<Long> accountIDs) throws IOException {
+	public ServerSession(Socket socket, Set<Long> loggedUsers, Set<Long> accountIDs, long sessionID) throws IOException {
 		this.socket = socket;
 		this.accountIDs = accountIDs;
-
+		this.sessionID = sessionID;
 	}
 
 	@Override
@@ -63,7 +65,9 @@ public class ServerSession extends Thread {
 						if (req != null) {
 							LoginRequest LoginReq = (LoginRequest) req;
 							if (AccountCheck(LoginReq)){
-								resp = new AccountInfoResponse();
+								// accountDir has to exist (AccountCheck checks it)
+								resp = new AccountInfoResponse(LoginReq.email, new File(Main.AccountsFolder.getCanonicalPath() +
+										Main.FileSystemSeparator + LoginReq.email.hashCode()));
 							}
 							else{
 								resp = new IncorrectLoginResponse();
@@ -79,6 +83,7 @@ public class ServerSession extends Thread {
 					default:
 						throw new UnknownTypeException("Unknown type received " + reqType);
 				}
+				resp = null;
 				if (accountCreated || loggedIn){
 					break;
 				}
@@ -117,10 +122,6 @@ public class ServerSession extends Thread {
 	public synchronized void start() {
 		this.run();
 	}
-	public void setID(long id){
-		this.sessionID = id;
-	}
-
 	/**
 	 * @param email
 	 * @param passwd
@@ -129,24 +130,34 @@ public class ServerSession extends Thread {
 	private boolean CreateAccount(String email, char[] passwd, CurrencyType curr) throws IOException {
 		File newAccountFolder = new File(Main.AccountsFolder.getAbsolutePath() + Main.FileSystemSeparator + email.hashCode());
 		if ( newAccountFolder.mkdir() ) {
-			File infoFile = new File(newAccountFolder.getAbsolutePath() + Main.FileSystemSeparator + ".info");
-			return CreateAccountInfoFile(infoFile, email, passwd, curr);
+			return CreateAccountInfoFile( newAccountFolder, email, passwd, curr);
 		}
 		else{
 			return false;
 		}
 	}
-	private boolean CreateAccountInfoFile(File infoFile, String email, char[] passwd, CurrencyType curr) throws IOException {
-		if (infoFile.createNewFile()){
-			try (BufferedWriter bw = new BufferedWriter(new FileWriter(infoFile))){
+	private boolean CreateAccountInfoFile(File accountFolderFile, String email, char[] passwd, CurrencyType curr) throws IOException {
+		File infoFile = new File(accountFolderFile.getAbsolutePath() + Main.FileSystemSeparator + ".info");
+		File currenciesFile = new File(accountFolderFile.getAbsolutePath() + Main.FileSystemSeparator + ".curr");
+		if (infoFile.createNewFile() && currenciesFile.createNewFile()){
+			try (BufferedWriter bwInfoFile = new BufferedWriter(new FileWriter(infoFile));
+					BufferedWriter bwCurrenciesFile = new BufferedWriter(new FileWriter(currenciesFile))){
 				//hash of email will be accountID
-				bw.write(email + "\n");
+				bwInfoFile.write(email + "\n");
 				int salt = Main.rand.nextInt();
-				bw.write(salt + "\n");
+				bwInfoFile.write(salt + "\n");
 				int checkHash = email.hashCode() + salt + passwd.hashCode();
-				bw.write(checkHash + "\n");
-				bw.write(curr.toString() + "\n");
-				bw.flush();
+				bwInfoFile.write(checkHash + "\n");
+				bwInfoFile.write(curr.toString() + "\n");
+				LocalDateTime creationDateTime = LocalDateTime.now();
+				bwInfoFile.write(creationDateTime.getYear() + "_" + creationDateTime.getMonthValue() + "_" +
+						creationDateTime.getDayOfMonth() + "-" +
+						creationDateTime.getHour() + ":" + creationDateTime.getMinute() + "\n");
+				bwInfoFile.close();
+
+				//currencies File
+				bwCurrenciesFile.write(curr.name() + ":" + 0);
+				bwCurrenciesFile.close();
 				return true;
 			}
 
