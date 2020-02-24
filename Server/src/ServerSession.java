@@ -33,13 +33,15 @@ public class ServerSession extends Thread {
 	public void run() {
 		Integer accountCreated;
 		boolean loggedIn;
-		while (true){
-			accountCreated = null;
-			loggedIn = false;
-			try{
-                oi = new ObjectInputStream(socket.getInputStream());
-                oo = new ObjectOutputStream(socket.getOutputStream());
+		try{
+			while (true){
+				accountCreated = null;
+				loggedIn = false;
+
+				SetInputOutput(socket);
+				SendSessionID(socket);
 				System.out.println("Thread running");
+
 				RequestType reqType = RequestType.values()[oi.readInt()];
 				Request req;
 				Response resp = null;
@@ -51,7 +53,7 @@ public class ServerSession extends Thread {
 						if (req != null){
 							AccountCreateRequest acr = (AccountCreateRequest)req;
 							//check if email is already registered
-							if (!accountIDs.contains(acr.email) && CreateAccount(acr.email, acr.passwd, acr.currency) ) {
+							if (!accountIDs.contains(acr.email.hashCode()) && CreateAccount(acr.email, acr.passwd, acr.currency) ) {
 								resp = new SuccessResponse();
 								accountCreated = acr.email.hashCode();
 								accountIDs.add(accountCreated);
@@ -95,11 +97,26 @@ public class ServerSession extends Thread {
 					outPrinter.println("Thread " + this.getName() + " has created account number " + accountCreated + ".");
 					accountCreated = null;
 				}
-			} catch (IOException e){
-
+				if (loggedIn){
+					break;
+				}
 			}
+		} catch (IOException e){
+			errPrinter.println("IOException occurred");
+			e.printStackTrace(errPrinter);
+			errPrinter.flush();
 		}
 
+	}
+
+	private void SetInputOutput(Socket s) throws IOException {
+		oi = new ObjectInputStream(socket.getInputStream());
+		oo = new ObjectOutputStream(socket.getOutputStream());
+	}
+	private void SendSessionID(Socket socket) throws IOException {
+		long l = Long.parseLong(this.getName());
+		oo.writeLong(l);
+		oo.flush();
 	}
 
 	private boolean AccountCheck(LoginRequest loginReq) {

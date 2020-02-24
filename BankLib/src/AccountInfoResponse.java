@@ -5,25 +5,26 @@ import java.util.Map;
 
 public class AccountInfoResponse extends Response {
 
-	public final Map<CurrencyType, Long> Values;
+	public final Map<CurrencyType, Long> Values = new HashMap<CurrencyType, Long>();
 
 	//public final String email;
+	public final int accountID;
 
 	public AccountInfoResponse(String email){
 		super(ResponseType.AccountInfo);
 		//this.email = email;
-		Values = new HashMap<CurrencyType, Long>();
+		accountID = email.hashCode();
 	}
 	public AccountInfoResponse(){
 		super(ResponseType.AccountInfo);
 		//this.email = email;
-		Values = new HashMap<CurrencyType, Long>();
+		accountID = 0;
 	}
 
 	public AccountInfoResponse(String email, File accountDir){
 		super(ResponseType.AccountInfo);
 		//this.email = email;
-		Values = new HashMap<CurrencyType, Long>();
+		accountID = email.hashCode();
 		File currFile = new File(accountDir.getAbsolutePath() + FileSystems.getDefault().getSeparator() + ".curr");
 		try(BufferedReader br = new BufferedReader(new FileReader(currFile))) {
 			String line;
@@ -45,6 +46,7 @@ public class AccountInfoResponse extends Response {
 	void Send(ObjectOutput oo) throws IOException {
 		oo.writeInt(super.type.ordinal());
 		//oo.writeUTF(email);
+		oo.writeInt(accountID);
 		int size = Values.size();
 		CurrencyType[] currs = new CurrencyType[size];
 		Values.keySet().toArray(currs);

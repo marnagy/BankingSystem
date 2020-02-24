@@ -10,6 +10,7 @@ public class ClientCLI {
         ObjectOutput oo;
         ObjectInput oi;
         Account account = null;
+        Long sessionID;
 
         boolean loggedIn = false;
 
@@ -21,6 +22,7 @@ public class ClientCLI {
                 oo = new ObjectOutputStream(session.getOutputStream());
                 oi = new ObjectInputStream(session.getInputStream());
                 pw.println("Connected");
+                sessionID = ReadSessionID(oi);
                 pw.println("Do you want to create an account? [yes / (default) no]");
                 pw.flush();
                 String respStr;
@@ -104,5 +106,9 @@ public class ClientCLI {
         } catch (UnknownTypeException e){
 
         }
+    }
+
+    private static long ReadSessionID(ObjectInput oi) throws IOException {
+        return oi.readLong();
     }
 }
