@@ -21,10 +21,10 @@ public class Main {
     static final File PaymentsFolder = Paths.get(RootFolderName + FileSystemSeparator + PaymentsFolderName).toFile();
     static final File ConfFile = Paths.get(RootFolderName + FileSystemSeparator + ServerConfFileName).toFile();
 
-    static final Set<Long> loggedUsers = new HashSet<Long>();
+    static final Set<Integer> loggedUsers = new HashSet<Integer>();
 
     // insert account ID, get ServerSession or null if the user is logged in currently
-    static final Dictionary<Long, ServerSession> threads = new Hashtable<Long, ServerSession>();
+    static final Dictionary<Integer, ServerSession> threads = new Hashtable<Integer, ServerSession>();
 
     // for unique ID for each thread/session
     // used for authentication
@@ -32,7 +32,7 @@ public class Main {
 
     // all valid account IDs, loaded from appropriate folder
     // new are added
-    static final Set<Long> accountIDs = new HashSet<Long>();
+    static final Set<Integer> accountIDs = new HashSet<Integer>();
 
     // random variable
     static final Random rand = new Random(System.nanoTime());
@@ -61,29 +61,37 @@ public class Main {
         }
 
         //start server
+	    ServerSocket ss;
         try {
-            //ServerSocket ss = SSLServerSocketFactory.getDefault().createServerSocket(5000);
-            ServerSocket ss = new ServerSocket(5000);
-            long l;
-            while (true){
-                outWriter.println("Waiting for connection");
-                outWriter.flush();
-                Socket s = ss.accept();
-                outWriter.println("Connection accepted");
-                outWriter.flush();
-                ServerSession session = new ServerSession(s, loggedUsers, accountIDs, rand.nextLong());
-                do {
-                    l = rand.nextLong();
-                } while (threadIDs.contains(l));
-                session.setName(l + "");
-                threadIDs.add(l);
-                session.setPrinters(outWriter, errWriter);
-                session.start();
-            }
-
+	        //ServerSocket ss = SSLServerSocketFactory.getDefault().createServerSocket(5000);
+	        ss = new ServerSocket(5000);
         } catch (IOException e) {
-            errWriter.println("IOException while starting or running ServerSocket");
-            e.printStackTrace(errWriter);
+	        errWriter.println("IOException while starting ServerSocket");
+	        errWriter.flush();
+	        e.printStackTrace(errWriter);
+	        return;
+        }
+        long l;
+        while (true){
+            try {
+	            outWriter.println("Waiting for connection");
+	            outWriter.flush();
+	            Socket s = ss.accept();
+	            outWriter.println("Connection accepted");
+	            outWriter.flush();
+	            ServerSession session = new ServerSession(s, loggedUsers, accountIDs, rand.nextLong());
+	            do {
+		            l = rand.nextLong();
+	            } while (threadIDs.contains(l));
+	            session.setName(l + "");
+	            threadIDs.add(l);
+	            session.setPrinters(outWriter, errWriter);
+	            session.start();
+            }
+            catch (IOException e) {
+	            errWriter.println("IOException while running ServerSocket");
+	            e.printStackTrace(errWriter);
+            }
         }
     }
     private static boolean ContainsFileWithName(File[] fileNames, File fileToFind) {

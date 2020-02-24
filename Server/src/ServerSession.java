@@ -13,8 +13,8 @@ public class ServerSession extends Thread {
 
 	// on account number get active thread or null
 	Map<Long, ServerSession> threadMap;
-	Set<Long> accountIDs;
-	Set<Long> loggedUsers;
+	Set<Integer> accountIDs;
+	Set<Integer> loggedUsers;
 
 	PrintWriter outPrinter;
 	PrintWriter errPrinter;
@@ -22,7 +22,7 @@ public class ServerSession extends Thread {
 	ObjectInput oi;
 	ObjectOutput oo;
 
-	public ServerSession(Socket socket, Set<Long> loggedUsers, Set<Long> accountIDs, long sessionID) throws IOException {
+	public ServerSession(Socket socket, Set<Integer> loggedUsers, Set<Integer> accountIDs, long sessionID) throws IOException {
 		this.socket = socket;
 		this.accountIDs = accountIDs;
 		this.sessionID = sessionID;
@@ -31,7 +31,7 @@ public class ServerSession extends Thread {
 
 	@Override
 	public void run() {
-		Long accountCreated;
+		Integer accountCreated;
 		boolean loggedIn;
 		while (true){
 			accountCreated = null;
@@ -53,7 +53,7 @@ public class ServerSession extends Thread {
 							//check if email is already registered
 							if (!accountIDs.contains(acr.email) && CreateAccount(acr.email, acr.passwd, acr.currency) ) {
 								resp = new SuccessResponse();
-								accountCreated = (long) acr.email.hashCode();
+								accountCreated = acr.email.hashCode();
 								accountIDs.add(accountCreated);
 							}
 							else{
@@ -73,7 +73,7 @@ public class ServerSession extends Thread {
 								// accountDir has to exist (AccountCheck checks it)
 								resp = new AccountInfoResponse(LoginReq.email, new File(Main.AccountsFolder.getCanonicalPath() +
 										Main.FileSystemSeparator + LoginReq.email.hashCode()));
-								loggedUsers.add((long) LoginReq.email.hashCode());
+								loggedUsers.add(LoginReq.email.hashCode());
 								this.userID = LoginReq.email.hashCode();
 							}
 							else{
