@@ -1,17 +1,10 @@
 import java.io.*;
 import java.nio.file.FileSystems;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class AccountInfoResponse extends Response {
 
-	// change to one hashMap?
-//	public final List<CurrencyType> currencies;
-//	public final List<Long> currenciesValues;
-
-	// CONTINUE HERE
 	public final Map<CurrencyType, Long> Values;
 
 	public final String email;
@@ -19,16 +12,12 @@ public class AccountInfoResponse extends Response {
 	public AccountInfoResponse(String email){
 		super(ResponseType.AccountInfo);
 		this.email = email;
-//		currencies = new ArrayList<CurrencyType>();
-//		currenciesValues = new ArrayList<Long>();
 		Values = new HashMap<CurrencyType, Long>();
 	}
 
 	public AccountInfoResponse(String email, File accountDir){
 		super(ResponseType.AccountInfo);
 		this.email = email;
-//		currencies = new ArrayList<CurrencyType>();
-//		currenciesValues = new ArrayList<Long>();
 		Values = new HashMap<CurrencyType, Long>();
 		File currFile = new File(accountDir.getAbsolutePath() + FileSystems.getDefault().getSeparator() + ".curr");
 		try(BufferedReader br = new BufferedReader(new FileReader(currFile))) {
@@ -41,12 +30,7 @@ public class AccountInfoResponse extends Response {
 				lineParts = line.split(":");
 				currType = CurrencyType.valueOf(lineParts[0]);
 				l = Long.parseLong(lineParts[1]);
-//				currencies.add(currType);
-//				currenciesValues.add(l);
 				Values.put(currType, l);
-			}
-			if (currencies.size() != currenciesValues.size()){
-				throw new IOException();
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -56,11 +40,13 @@ public class AccountInfoResponse extends Response {
 	void Send(ObjectOutput oo) throws IOException {
 		oo.writeInt(super.type.ordinal());
 		oo.writeUTF(email);
-		int size = currencies.size();
+		int size = Values.size();
+		CurrencyType[] currs = new CurrencyType[size];
+		Values.keySet().toArray(currs);
 		oo.writeInt(size);
-		for (int i = 0; i < size; i++) {
-			oo.writeInt(currencies.get(i).ordinal());
-			oo.writeLong(currenciesValues.get(i));
+		for ( CurrencyType curr: currs) {
+			oo.writeInt(curr.ordinal());
+			oo.writeLong(Values.get(curr));
 		}
 
 		oo.flush();
@@ -75,8 +61,7 @@ public class AccountInfoResponse extends Response {
 			for (int i = 0; i < currenciesSize; i++) {
 				currType = CurrencyType.values()[oi.readInt()];
 				Value = oi.readLong();
-				air.currencies.add(currType);
-				air.currenciesValues.add(Value);
+				air.Values.put(currType, Value);
 			}
 			return air;
 		} catch (IOException e) {

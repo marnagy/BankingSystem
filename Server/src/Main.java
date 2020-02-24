@@ -1,5 +1,3 @@
-import javax.net.ssl.SSLServerSocket;
-import javax.net.ssl.SSLServerSocketFactory;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -74,11 +72,11 @@ public class Main {
                 outWriter.println("Connection accepted");
                 outWriter.flush();
                 ServerSession session = new ServerSession(s, loggedUsers, accountIDs, rand.nextLong());
-//                do {
-//                    l = rand.nextLong();
-//                } while (threadIDs.contains(l));
-//                session.setName(l + "");
-//                threadIDs.add(l);
+                do {
+                    l = rand.nextLong();
+                } while (threadIDs.contains(l));
+                session.setName(l + "");
+                threadIDs.add(l);
                 session.start();
             }
 

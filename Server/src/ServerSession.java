@@ -1,8 +1,6 @@
 import java.io.*;
 import java.net.Socket;
 import java.time.LocalDateTime;
-import java.util.Currency;
-import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
@@ -14,6 +12,7 @@ public class ServerSession extends Thread {
 	// on account number get active thread or null
 	Map<Long, ServerSession> threadMap;
 	Set<Long> accountIDs;
+
 	ObjectInput oi;
 	ObjectOutput oo;
 
@@ -33,7 +32,6 @@ public class ServerSession extends Thread {
 			try{
                 oi = new ObjectInputStream(socket.getInputStream());
                 oo = new ObjectOutputStream(socket.getOutputStream());
-				//BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 				System.out.println("Thread running");
 				RequestType reqType = RequestType.values()[oi.readInt()];
 				Request req;
