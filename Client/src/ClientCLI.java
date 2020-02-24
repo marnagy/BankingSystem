@@ -67,7 +67,9 @@ public class ClientCLI {
                         }
                         pw.println("Do you want to sign in now?");
                         pw.flush();
-                        if ((respStr = br.readLine()) == "yes") {
+                        respStr = "yes";
+//                        if ((respStr = br.readLine()) == "yes") {
+                        if (respStr  == "yes") {
                             break;
                         }
 //                    req.ReadArgs(oi);
@@ -75,9 +77,13 @@ public class ClientCLI {
                 }
 
                 pw.println("Enter your email:");
-                String email = br.readLine();
+                pw.flush();
+//                String email = br.readLine();
+                String email = "test@test.cz";
                 pw.println("Enter your password:");
-                char[] passwd = br.readLine().toCharArray();
+                pw.flush();
+//                char[] passwd = br.readLine().toCharArray();
+                char[] passwd = "test".toCharArray();
                 Request req = new LoginRequest(email, passwd);
                 req.Send(oo);
                 // if success, client receives AccountInfo

@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.Socket;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 
@@ -34,13 +35,12 @@ public class ServerSession extends Thread {
 		Integer accountCreated;
 		boolean loggedIn;
 		try{
+			SetInputOutput(socket);
+			SendSessionID(socket);
+			System.out.println("Thread running");
+			loggedIn = false;
 			while (true){
 				accountCreated = null;
-				loggedIn = false;
-
-				SetInputOutput(socket);
-				SendSessionID(socket);
-				System.out.println("Thread running");
 
 				RequestType reqType = RequestType.values()[oi.readInt()];
 				Request req;
@@ -77,6 +77,7 @@ public class ServerSession extends Thread {
 										Main.FileSystemSeparator + LoginReq.email.hashCode()));
 								loggedUsers.add(LoginReq.email.hashCode());
 								this.userID = LoginReq.email.hashCode();
+								loggedIn = true;
 							}
 							else{
 								resp = new IncorrectLoginResponse();
@@ -95,6 +96,7 @@ public class ServerSession extends Thread {
 				resp = null;
 				if (accountCreated != null){
 					outPrinter.println("Thread " + this.getName() + " has created account number " + accountCreated + ".");
+					outPrinter.flush();
 					accountCreated = null;
 				}
 				if (loggedIn){
@@ -129,7 +131,9 @@ public class ServerSession extends Thread {
 				return false;
 			}
 			int salt = Integer.parseInt(br.readLine());
-			int checkHashReq = email.hashCode() + salt + loginReq.passwd.hashCode();
+			int emailHash = loginReq.email.hashCode();
+			int passwdHash = Arrays.hashCode(loginReq.passwd);
+			int checkHashReq = emailHash + salt + passwdHash;
 			int checkHashSaved = Integer.parseInt(br.readLine());
 			return checkHashReq == checkHashSaved;
 		} catch (IOException e) {
@@ -143,7 +147,7 @@ public class ServerSession extends Thread {
 
 	@Override
 	public synchronized void start() {
-		this.run();
+		super.start();
 	}
 	/**
 	 * @param email
@@ -169,7 +173,8 @@ public class ServerSession extends Thread {
 				bwInfoFile.write(email + "\n");
 				int salt = Main.rand.nextInt();
 				bwInfoFile.write(salt + "\n");
-				int checkHash = email.hashCode() + salt + passwd.hashCode();
+				int passwdHash = Arrays.hashCode(passwd);
+				int checkHash = email.hashCode() + salt + passwdHash;
 				bwInfoFile.write(checkHash + "\n");
 				LocalDateTime creationDateTime = LocalDateTime.now();
 				bwInfoFile.write(creationDateTime.getYear() + "_" + creationDateTime.getMonthValue() + "_" +
