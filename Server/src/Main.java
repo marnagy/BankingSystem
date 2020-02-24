@@ -77,6 +77,7 @@ public class Main {
                 } while (threadIDs.contains(l));
                 session.setName(l + "");
                 threadIDs.add(l);
+                session.setPrinters(outWriter, errWriter);
                 session.start();
             }
 

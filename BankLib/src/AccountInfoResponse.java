@@ -7,17 +7,22 @@ public class AccountInfoResponse extends Response {
 
 	public final Map<CurrencyType, Long> Values;
 
-	public final String email;
+	//public final String email;
 
 	public AccountInfoResponse(String email){
 		super(ResponseType.AccountInfo);
-		this.email = email;
+		//this.email = email;
+		Values = new HashMap<CurrencyType, Long>();
+	}
+	public AccountInfoResponse(){
+		super(ResponseType.AccountInfo);
+		//this.email = email;
 		Values = new HashMap<CurrencyType, Long>();
 	}
 
 	public AccountInfoResponse(String email, File accountDir){
 		super(ResponseType.AccountInfo);
-		this.email = email;
+		//this.email = email;
 		Values = new HashMap<CurrencyType, Long>();
 		File currFile = new File(accountDir.getAbsolutePath() + FileSystems.getDefault().getSeparator() + ".curr");
 		try(BufferedReader br = new BufferedReader(new FileReader(currFile))) {
@@ -39,7 +44,7 @@ public class AccountInfoResponse extends Response {
 	@Override
 	void Send(ObjectOutput oo) throws IOException {
 		oo.writeInt(super.type.ordinal());
-		oo.writeUTF(email);
+		//oo.writeUTF(email);
 		int size = Values.size();
 		CurrencyType[] currs = new CurrencyType[size];
 		Values.keySet().toArray(currs);
@@ -53,8 +58,8 @@ public class AccountInfoResponse extends Response {
 	}
 	public static Response ReadArgs(ObjectInput oi) {
 		try {
-			String email = oi.readUTF();
-			AccountInfoResponse air = new AccountInfoResponse(email);
+			//String email = oi.readUTF();
+			AccountInfoResponse air = new AccountInfoResponse();
 			int currenciesSize = oi.readInt();
 			CurrencyType currType;
 			long Value;

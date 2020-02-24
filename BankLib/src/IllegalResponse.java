@@ -3,7 +3,7 @@ import java.io.ObjectOutput;
 
 public class IllegalResponse extends Response {
 	public IllegalResponse(){
-		super(ResponseType.IllegalResponse);
+		super(ResponseType.IllegalServerResponse);
 	}
 	@Override
 	void Send(ObjectOutput oo) throws IOException {

@@ -6,6 +6,8 @@ public enum ResponseType {
     ArgumentMissingError,
     NotLoggedInError,
     IncorrectLoginError,
-    //used only by client
-    IllegalResponse
+    // used only by server
+    IllegalRequestResponse,
+    // used only by client
+    IllegalServerResponse
 }

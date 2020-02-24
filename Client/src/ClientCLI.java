@@ -9,6 +9,7 @@ public class ClientCLI {
 
         ObjectOutput oo;
         ObjectInput oi;
+        Account account = null;
 
         boolean loggedIn = false;
 
@@ -84,11 +85,16 @@ public class ClientCLI {
                     case AccountInfo:
                         resp = AccountInfoResponse.ReadArgs(oi);
                         if (resp.getClass() == IllegalResponse.class) {
-                            // CONTINUE HERE
+                            continue;
+                        }
+                        if (resp.getClass() == AccountInfoResponse.class){
+                            account = new Account((AccountInfoResponse)resp);
                         }
                         break;
                 }
             } while (!loggedIn);
+            int i = 5;
+            // TEST PAYMENT HERE
         } catch (IOException e) {
             System.err.println("IOException occurred");
             e.printStackTrace(System.err);

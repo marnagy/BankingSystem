@@ -7,11 +7,17 @@ import java.util.Set;
 public class ServerSession extends Thread {
 	Socket socket;
 	public final long sessionID;
+
 	// null if not logged in, otherwise accountID (hash of email)
 	Integer userID = null;
+
 	// on account number get active thread or null
 	Map<Long, ServerSession> threadMap;
 	Set<Long> accountIDs;
+	Set<Long> loggedUsers;
+
+	PrintWriter outPrinter;
+	PrintWriter errPrinter;
 
 	ObjectInput oi;
 	ObjectOutput oo;
@@ -20,14 +26,15 @@ public class ServerSession extends Thread {
 		this.socket = socket;
 		this.accountIDs = accountIDs;
 		this.sessionID = sessionID;
+		this.loggedUsers = loggedUsers;
 	}
 
 	@Override
 	public void run() {
-		boolean accountCreated;
+		Long accountCreated;
 		boolean loggedIn;
 		while (true){
-			accountCreated = false;
+			accountCreated = null;
 			loggedIn = false;
 			try{
                 oi = new ObjectInputStream(socket.getInputStream());
@@ -35,17 +42,19 @@ public class ServerSession extends Thread {
 				System.out.println("Thread running");
 				RequestType reqType = RequestType.values()[oi.readInt()];
 				Request req;
-				Response resp;
+				Response resp = null;
 				switch (reqType){
 					case CreateAccount:
 						// read args
 						req = AccountCreateRequest.ReadArgs(oi);
-						AccountCreateRequest acr = null;
+
 						if (req != null){
-							acr = (AccountCreateRequest)req;
+							AccountCreateRequest acr = (AccountCreateRequest)req;
 							//check if email is already registered
 							if (!accountIDs.contains(acr.email) && CreateAccount(acr.email, acr.passwd, acr.currency) ) {
 								resp = new SuccessResponse();
+								accountCreated = (long) acr.email.hashCode();
+								accountIDs.add(accountCreated);
 							}
 							else{
 								resp = new EmailAlreadySignedUpResponse();
@@ -54,8 +63,6 @@ public class ServerSession extends Thread {
 						else{
 							resp = new ArgumentMissingResponse();
 						}
-						resp.Send(oo);
-						accountCreated = true;
 						break;
 					case Login:
 						// read args
@@ -66,6 +73,8 @@ public class ServerSession extends Thread {
 								// accountDir has to exist (AccountCheck checks it)
 								resp = new AccountInfoResponse(LoginReq.email, new File(Main.AccountsFolder.getCanonicalPath() +
 										Main.FileSystemSeparator + LoginReq.email.hashCode()));
+								loggedUsers.add((long) LoginReq.email.hashCode());
+								this.userID = LoginReq.email.hashCode();
 							}
 							else{
 								resp = new IncorrectLoginResponse();
@@ -74,21 +83,20 @@ public class ServerSession extends Thread {
 						else{
 							resp = new ArgumentMissingResponse();
 						}
-						resp.Send(oo);
 						break;
 					case Payment:
 						break;
 					default:
-						throw new UnknownTypeException("Unknown type received " + reqType);
+						resp = new IllegalRequestResponse();
 				}
+				resp.Send(oo);
 				resp = null;
-				if (accountCreated || loggedIn){
-					break;
+				if (accountCreated != null){
+					outPrinter.println("Thread " + this.getName() + " has created account number " + accountCreated + ".");
+					accountCreated = null;
 				}
 			} catch (IOException e){
 
-			} catch (UnknownTypeException e) {
-				e.printStackTrace();
 			}
 		}
 
@@ -146,7 +154,6 @@ public class ServerSession extends Thread {
 				bwInfoFile.write(salt + "\n");
 				int checkHash = email.hashCode() + salt + passwd.hashCode();
 				bwInfoFile.write(checkHash + "\n");
-				bwInfoFile.write(curr.toString() + "\n");
 				LocalDateTime creationDateTime = LocalDateTime.now();
 				bwInfoFile.write(creationDateTime.getYear() + "_" + creationDateTime.getMonthValue() + "_" +
 						creationDateTime.getDayOfMonth() + "-" +
@@ -154,7 +161,7 @@ public class ServerSession extends Thread {
 				bwInfoFile.close();
 
 				//currencies File
-				bwCurrenciesFile.write(curr.name() + ":" + 0);
+				bwCurrenciesFile.write(curr.name() + ":" + 0L);
 				bwCurrenciesFile.close();
 				return true;
 			}
@@ -163,5 +170,9 @@ public class ServerSession extends Thread {
 		else{
 			return false;
 		}
+	}
+	public void setPrinters(PrintWriter out, PrintWriter err){
+		this.outPrinter = out;
+		this.errPrinter = err;
 	}
 }
