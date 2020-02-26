@@ -21,6 +21,8 @@ public class Main {
     static final File PaymentsFolder = Paths.get(RootFolderName + FileSystemSeparator + PaymentsFolderName).toFile();
     static final File ConfFile = Paths.get(RootFolderName + FileSystemSeparator + ServerConfFileName).toFile();
 
+    // change naming of subdirectories to email instead of email hashcode
+
     static final Set<Integer> loggedUsers = new HashSet<Integer>();
 
     // insert account ID, get ServerSession or null if the user is logged in currently
