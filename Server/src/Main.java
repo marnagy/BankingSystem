@@ -5,6 +5,13 @@ import java.nio.file.FileSystems;
 import java.nio.file.Paths;
 import java.util.*;
 
+
+// TO-DO:
+// Change naming of subdirectories
+// Add checking for session ID
+// Continue with payments
+
+
 public class Main {
     static final String FileSystemSeparator = FileSystems.getDefault().getSeparator();
     static final String RootFolderName = "ServerFiles";
@@ -20,8 +27,6 @@ public class Main {
     static final File AccountsFolder = Paths.get(RootFolderName + FileSystemSeparator + AccountsFolderName).toFile();
     static final File PaymentsFolder = Paths.get(RootFolderName + FileSystemSeparator + PaymentsFolderName).toFile();
     static final File ConfFile = Paths.get(RootFolderName + FileSystemSeparator + ServerConfFileName).toFile();
-
-    // change naming of subdirectories to email instead of email hashcode
 
     static final Set<Integer> loggedUsers = new HashSet<Integer>();
 
