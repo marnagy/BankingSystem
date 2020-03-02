@@ -5,6 +5,13 @@ import java.nio.file.FileSystems;
 import java.nio.file.Paths;
 import java.util.*;
 
+
+// TO-DO:
+// Change naming of subdirectories
+// Add checking for session ID
+// Continue with payments
+
+
 public class Main {
     static final String FileSystemSeparator = FileSystems.getDefault().getSeparator();
     static final String RootFolderName = "ServerFiles";
