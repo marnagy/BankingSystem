@@ -1,5 +1,6 @@
 public enum RequestType {
     CreateAccount,
     Login,
-    Payment
+    Payment,
+    AccountHistory
 }
