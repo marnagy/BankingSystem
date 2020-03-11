@@ -24,7 +24,7 @@ public class AccountCreateRequest extends Request {
         oo.flush();
     }
 
-    public static Request ReadArgs(ObjectInput oi){
+    public static AccountCreateRequest ReadArgs(ObjectInput oi){
         String email = null;
         char[] passwd = null;
         CurrencyType cur;
