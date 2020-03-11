@@ -4,9 +4,11 @@ import java.io.ObjectOutput;
 import java.io.Writer;
 
 public abstract class Request {
-    RequestType type;
-    protected Request(RequestType type){
+    public final RequestType type;
+    public final long sessionID;
+    protected Request(RequestType type, long sessionID){
         this.type = type;
+        this.sessionID = sessionID;
     }
     // used by client
     public abstract void Send(ObjectOutput oo) throws IOException;

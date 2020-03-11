@@ -10,7 +10,7 @@ public class ClientCLI {
         ObjectOutput oo;
         ObjectInput oi;
         Account account = null;
-        Long sessionID;
+        long sessionID;
 
         boolean loggedIn = false;
 
@@ -49,7 +49,7 @@ public class ClientCLI {
                         pw.flush();
                         //char[] passwd = br.readLine().toCharArray();
                         char[] passwd = "test".toCharArray();
-                        Request req = new AccountCreateRequest(email, passwd, CurrencyType.EUR);
+                        Request req = new AccountCreateRequest(email, passwd, CurrencyType.EUR, sessionID);
                         // sending
                         req.Send(oo);
                         // receiving
@@ -84,7 +84,7 @@ public class ClientCLI {
                 pw.flush();
 //                char[] passwd = br.readLine().toCharArray();
                 char[] passwd = "test".toCharArray();
-                Request req = new LoginRequest(email, passwd);
+                Request req = new LoginRequest(email, passwd, sessionID);
                 req.Send(oo);
                 // if success, client receives AccountInfo
                 ResponseType respType = ResponseType.values()[oi.readInt()];

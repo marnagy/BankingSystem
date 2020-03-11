@@ -6,8 +6,8 @@ import java.util.Arrays;
 public class LoginRequest extends Request {
 	public final String email;
 	public final char[] passwd;
-	public LoginRequest(String email, char[] passwd){
-		super(RequestType.Login);
+	public LoginRequest(String email, char[] passwd, long sessionID){
+		super(RequestType.Login, sessionID);
 		this.email = email;
 		// make copy
 		this.passwd = passwd;
@@ -15,16 +15,19 @@ public class LoginRequest extends Request {
 	}
 	@Override
 	public void Send(ObjectOutput oo) throws IOException {
-		oo.writeInt(RequestType.Login.ordinal());
+		oo.writeInt(super.type.ordinal());
+		oo.writeLong(sessionID);
+
 		oo.writeUTF(email);
 		oo.writeObject(passwd);
 		oo.flush();
 	}
 	public static Request ReadArgs(ObjectInput oi){
 		try {
+			long sessionID = oi.readLong();
 			String email = oi.readUTF();
 			char[] passwd = (char[])oi.readObject();
-			return new LoginRequest(email, passwd);
+			return new LoginRequest(email, passwd, sessionID);
 		} catch (IOException | ClassNotFoundException e) {
 			return null;
 		}

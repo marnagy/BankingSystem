@@ -4,12 +4,12 @@ import java.io.ObjectOutput;
 import java.io.Writer;
 
 public class AccountCreateRequest extends Request {
-    final RequestType rType = RequestType.CreateAccount;
     public final String email;
     public final char[] passwd;
     public final CurrencyType currency;
-    public AccountCreateRequest(String email, char[] passwd, CurrencyType currency){
-        super(RequestType.CreateAccount);
+    public AccountCreateRequest(String email, char[] passwd, CurrencyType currency,
+                                long sessionID){
+        super(RequestType.CreateAccount, sessionID);
         this.email = email;
         this.passwd = passwd;
         this.currency = currency;
@@ -17,7 +17,8 @@ public class AccountCreateRequest extends Request {
 
     @Override
     public void Send(ObjectOutput oo) throws IOException {
-        oo.writeInt(rType.ordinal());
+        oo.writeInt(super.type.ordinal());
+        oo.writeLong(super.sessionID);
         oo.writeUTF(email);
         oo.writeObject(passwd);
         oo.writeInt(currency.ordinal());
@@ -27,12 +28,14 @@ public class AccountCreateRequest extends Request {
     public static AccountCreateRequest ReadArgs(ObjectInput oi){
         String email = null;
         char[] passwd = null;
+        long sessionID;
         CurrencyType cur;
         try {
+            sessionID = oi.readLong();
             email = oi.readUTF();
             passwd = (char[])oi.readObject();
             cur = CurrencyType.values()[oi.readInt()];
-            return new AccountCreateRequest(email, passwd, cur);
+            return new AccountCreateRequest(email, passwd, cur, sessionID);
         } catch (IOException | ClassNotFoundException e) {
             return null;
         }

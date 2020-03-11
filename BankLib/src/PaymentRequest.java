@@ -11,8 +11,9 @@ public class PaymentRequest extends Request {
 	public final ZonedDateTime sendingDateTime;
 
 	// used by client
-	public PaymentRequest(int senderAccountID, int receiverAccountID, long amount, CurrencyType curr){
-		super(RequestType.Payment);
+	public PaymentRequest(int senderAccountID, int receiverAccountID, long amount, CurrencyType curr,
+	                      long sessionID){
+		super(RequestType.Payment, sessionID);
 		if (amount <= 0){
 			throw new IllegalArgumentException("Minimum amount of money to send: 0.01");
 		}
@@ -25,8 +26,8 @@ public class PaymentRequest extends Request {
 	}
 	// used when reading request on server
 	private PaymentRequest(int senderAccountID, int receiverAccountID, long amount,
-	                       CurrencyType curr, ZonedDateTime dateTime){
-		super(RequestType.Payment);
+	                       CurrencyType curr, ZonedDateTime dateTime, long sessionID){
+		super(RequestType.Payment, sessionID);
 		if (amount <= 0){
 			throw new IllegalArgumentException("Minimum amount of money to send: 0.01");
 		}
@@ -41,6 +42,8 @@ public class PaymentRequest extends Request {
 	@Override
 	public void Send(ObjectOutput oo) throws IOException {
 		oo.writeInt(super.type.ordinal());
+		oo.writeLong(super.sessionID);
+
 		oo.writeInt(senderAccountID);
 		oo.writeInt(receiverAccountID);
 		oo.writeLong(amount);
@@ -52,12 +55,13 @@ public class PaymentRequest extends Request {
 
 	public static PaymentRequest ReadArgs(ObjectInput oi) throws IOException, ClassNotFoundException {
 		// ADD reading
+		long sessionID = oi.readLong();
 		int senderAccountID = oi.readInt();
 		int receiverAccountID = oi.readInt();
 		// amount already check in client, no need to test here
 		long amount = oi.readLong();
 		CurrencyType curr = CurrencyType.values()[ oi.readInt() ];
 		ZonedDateTime dateTime = (ZonedDateTime) oi.readObject();
-		return new PaymentRequest(senderAccountID, receiverAccountID, amount, curr);
+		return new PaymentRequest(senderAccountID, receiverAccountID, amount, curr, sessionID);
 	}
 }
