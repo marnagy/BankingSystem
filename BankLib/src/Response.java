@@ -3,9 +3,11 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 public abstract class Response {
-	ResponseType type;
-	protected Response(ResponseType type) {
+	public final ResponseType type;
+	public final long sessionID;
+	protected Response(ResponseType type, long sessionID) {
 		this.type = type;
+		this.sessionID = sessionID;
 	}
 	// used for sending object
 	// used by server

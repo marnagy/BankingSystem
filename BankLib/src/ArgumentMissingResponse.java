@@ -3,16 +3,13 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 public class ArgumentMissingResponse extends Response {
-	public ArgumentMissingResponse(){
-		super(ResponseType.ArgumentMissingError);
+	public ArgumentMissingResponse(long sessionID){
+		super(ResponseType.ArgumentMissingError, sessionID);
 	}
 	@Override
 	void Send(ObjectOutput oo) throws IOException {
-		oo.writeInt(ResponseType.ArgumentMissingError.ordinal());
+		oo.writeInt(super.type.ordinal());
+		oo.writeLong(super.sessionID);
 		oo.flush();
-	}
-
-	public static Response ReadArgs(ObjectInput oi) {
-		return new ArgumentMissingResponse();
 	}
 }

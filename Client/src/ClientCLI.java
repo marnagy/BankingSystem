@@ -90,17 +90,20 @@ public class ClientCLI {
                 ResponseType respType = ResponseType.values()[oi.readInt()];
                 Response resp;
                 switch (respType) {
+                    case IllegalRequestResponse:
                     case AccountInfo:
                         resp = AccountInfoResponse.ReadArgs(oi);
-                        if (resp.getClass() == IllegalResponse.class) {
+                        if (resp.getClass() == IllegalRequestResponse.class) {
                             continue;
                         }
                         if (resp.getClass() == AccountInfoResponse.class){
                             account = new Account((AccountInfoResponse)resp);
+                            loggedIn = true;
                         }
                         break;
                 }
             } while (!loggedIn);
+            // statement only for breakpoint
             int i = 5;
             // TEST PAYMENT HERE
         } catch (IOException e) {

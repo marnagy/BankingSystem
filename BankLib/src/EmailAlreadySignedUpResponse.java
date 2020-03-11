@@ -3,13 +3,14 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 public class EmailAlreadySignedUpResponse extends Response {
-	public EmailAlreadySignedUpResponse(){
-		super(ResponseType.EmailAlreadySignedUp);
+	public EmailAlreadySignedUpResponse(long sessionID){
+		super(ResponseType.EmailAlreadySignedUp, sessionID);
 	}
 
 	@Override
 	void Send(ObjectOutput oo) throws IOException {
 		oo.writeInt(super.type.ordinal());
+		oo.writeLong(sessionID);
 		oo.flush();
 	}
 

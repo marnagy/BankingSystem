@@ -1,6 +1,5 @@
 import java.io.*;
 import java.net.Socket;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
@@ -17,17 +16,20 @@ public class ServerSession extends Thread {
 	final Set<Integer> accountIDs;
 	final Set<Integer> loggedUsers;
 
-	PrintWriter outPrinter;
-	PrintWriter errPrinter;
+	final PrintWriter outPrinter;
+	final PrintWriter errPrinter;
 
 	ObjectInput oi;
 	ObjectOutput oo;
 
-	public ServerSession(Socket socket, Set<Integer> loggedUsers, Set<Integer> accountIDs, long sessionID) throws IOException {
+	public ServerSession(Socket socket, Set<Integer> loggedUsers, Set<Integer> accountIDs, long sessionID,
+	                     PrintWriter outWriter, PrintWriter errWriter) throws IOException {
 		this.socket = socket;
 		this.accountIDs = accountIDs;
 		this.sessionID = sessionID;
 		this.loggedUsers = loggedUsers;
+		this.outPrinter = outWriter;
+		this.errPrinter = errWriter;
 	}
 
 	@Override
@@ -37,7 +39,8 @@ public class ServerSession extends Thread {
 		try{
 			SetInputOutput(socket);
 			SendSessionID(socket);
-			System.out.println("Thread running");
+			outPrinter.println("Thread " + sessionID + " running");
+			outPrinter.flush();
 			loggedIn = false;
 			while (true){
 				accountCreated = null;
@@ -48,7 +51,7 @@ public class ServerSession extends Thread {
 				switch (reqType){
 					case CreateAccount:
 						// read args
-						resp = CreateAccountHandler.Run(oi, accountIDs);
+						resp = CreateAccountHandler.Run(oi, accountIDs, sessionID);
 						break;
 					case Login:
 						// read args
@@ -58,24 +61,28 @@ public class ServerSession extends Thread {
 							if (AccountCheck(LoginReq)){
 								// accountDir has to exist (AccountCheck checks it)
 								resp = new AccountInfoResponse(LoginReq.email, new File(MasterServerSession.AccountsFolder.getCanonicalPath() +
-										MasterServerSession.FileSystemSeparator + LoginReq.email.hashCode()));
+										MasterServerSession.FileSystemSeparator + LoginReq.email.hashCode()), sessionID);
 								loggedUsers.add(LoginReq.email.hashCode());
 								this.userID = LoginReq.email.hashCode();
 								loggedIn = true;
 							}
 							else{
-								resp = new IncorrectLoginResponse();
+								resp = new IncorrectLoginResponse(sessionID);
 							}
 						}
 						else{
-							resp = new ArgumentMissingResponse();
+							resp = new ArgumentMissingResponse(sessionID);
 						}
 						break;
 					case Payment:
 						break;
+					case End:
+
+						break;
 					default:
-						resp = new IllegalRequestResponse();
+						resp = new IllegalRequestResponse(sessionID);
 				}
+
 				resp.Send(oo);
 				resp = null;
 				if (accountCreated != null){
@@ -128,11 +135,5 @@ public class ServerSession extends Thread {
 	@Override
 	public synchronized void start() {
 		super.start();
-	}
-
-
-	public void setPrinters(PrintWriter out, PrintWriter err){
-		this.outPrinter = out;
-		this.errPrinter = err;
 	}
 }

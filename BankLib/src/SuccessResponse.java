@@ -3,17 +3,19 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 public class SuccessResponse extends Response {
-	public SuccessResponse() {
-		super(ResponseType.Success);
+	public SuccessResponse(long  sessionID) {
+		super(ResponseType.Success, sessionID);
 	}
 
 	@Override
 	void Send(ObjectOutput oo) throws IOException {
-		oo.writeInt(ResponseType.Success.ordinal());
+		oo.writeInt(super.type.ordinal());
+		oo.writeLong(super.sessionID);
 		oo.flush();
 	}
 
-	public static Response ReadArgs(ObjectInput oi) throws IOException, ArgsException {
-		throw new RuntimeException("Method not yet implemented");
+	public static SuccessResponse ReadArgs(ObjectInput oi) throws IOException {
+		long sessionID = oi.readLong();
+		return new SuccessResponse(sessionID);
 	}
 }

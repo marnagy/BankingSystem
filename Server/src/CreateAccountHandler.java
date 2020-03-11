@@ -4,27 +4,30 @@ import java.util.Arrays;
 import java.util.Set;
 
 public class CreateAccountHandler {
-	static Request req;
+	static AccountCreateRequest req;
 	static Response resp;
-	public static final Response Run(final ObjectInput oi, final Set<Integer> accountIDs) throws IOException {
+	public static Response Run(final ObjectInput oi, final Set<Integer> accountIDs, long sessionID) {
 		req = AccountCreateRequest.ReadArgs(oi);
 
-		if (req != null){
-			AccountCreateRequest acr = (AccountCreateRequest)req;
-			//check if email is already registered
-			if (!accountIDs.contains(acr.email.hashCode()) && CreateAccount(acr.email, acr.passwd, acr.currency) ) {
-				resp = new SuccessResponse();
-				int accountCreated = acr.email.hashCode();
-				accountIDs.add(accountCreated);
+		try {
+			if (req != null) {
+				AccountCreateRequest acr = req;
+				//check if email is already registered
+				if (!accountIDs.contains(acr.email.hashCode()) && CreateAccount(acr.email, acr.passwd, acr.currency)) {
+					resp = new SuccessResponse(sessionID);
+					int accountCreated = acr.email.hashCode();
+					accountIDs.add(accountCreated);
+				} else {
+					resp = new EmailAlreadySignedUpResponse(sessionID);
+				}
+			} else {
+				resp = new ArgumentMissingResponse(sessionID);
 			}
-			else{
-				resp = new EmailAlreadySignedUpResponse();
-			}
+			return resp;
 		}
-		else{
-			resp = new ArgumentMissingResponse();
+		catch (IOException e){
+			return new IllegalRequestResponse(sessionID);
 		}
-		return resp;
 	}
 	private static boolean CreateAccount(String email, char[] passwd, CurrencyType curr) throws IOException {
 		File newAccountFolder = new File(MasterServerSession.AccountsFolder.getAbsolutePath() + MasterServerSession.FileSystemSeparator + email.hashCode());

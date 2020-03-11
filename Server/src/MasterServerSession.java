@@ -93,10 +93,10 @@ public class MasterServerSession {
 				do {
 					sessionID = rand.nextLong();
 				} while (threadIDs.contains(sessionID));
-				ServerSession session = new ServerSession(s, loggedUsers, accountIDs, sessionID);
+				ServerSession session = new ServerSession(s, loggedUsers, accountIDs, sessionID,
+						outWriter, errWriter);
 				session.setName(sessionID + "");
 				threadIDs.add(sessionID);
-				session.setPrinters(outWriter, errWriter);
 				session.start();
 			}
 			catch (IOException e) {

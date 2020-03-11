@@ -10,19 +10,19 @@ public class AccountInfoResponse extends Response {
 	//public final String email;
 	public final int accountID;
 
-	public AccountInfoResponse(String email){
-		super(ResponseType.AccountInfo);
-		//this.email = email;
-		accountID = email.hashCode();
-	}
-	public AccountInfoResponse(){
-		super(ResponseType.AccountInfo);
+//	public AccountInfoResponse(String email){
+//		super(ResponseType.AccountInfo);
+//		//this.email = email;
+//		accountID = email.hashCode();
+//	}
+	private AccountInfoResponse(long sessionID){
+		super(ResponseType.AccountInfo, sessionID);
 		//this.email = email;
 		accountID = 0;
 	}
 
-	public AccountInfoResponse(String email, File accountDir){
-		super(ResponseType.AccountInfo);
+	public AccountInfoResponse(String email, File accountDir, long sessionID){
+		super(ResponseType.AccountInfo, sessionID);
 		//this.email = email;
 		accountID = email.hashCode();
 		File currFile = new File(accountDir.getAbsolutePath() + FileSystems.getDefault().getSeparator() + ".curr");
@@ -45,6 +45,7 @@ public class AccountInfoResponse extends Response {
 	@Override
 	void Send(ObjectOutput oo) throws IOException {
 		oo.writeInt(super.type.ordinal());
+		oo.writeLong(super.sessionID);
 		//oo.writeUTF(email);
 		oo.writeInt(accountID);
 		int size = Values.size();
@@ -58,21 +59,18 @@ public class AccountInfoResponse extends Response {
 
 		oo.flush();
 	}
-	public static Response ReadArgs(ObjectInput oi) {
-		try {
-			//String email = oi.readUTF();
-			AccountInfoResponse air = new AccountInfoResponse();
-			int currenciesSize = oi.readInt();
-			CurrencyType currType;
-			long Value;
-			for (int i = 0; i < currenciesSize; i++) {
-				currType = CurrencyType.values()[oi.readInt()];
-				Value = oi.readLong();
-				air.Values.put(currType, Value);
-			}
-			return air;
-		} catch (IOException e) {
-			return new IllegalResponse();
+	public static AccountInfoResponse ReadArgs(ObjectInput oi) throws IOException {
+		//String email = oi.readUTF();
+		long sessionID = oi.readLong();
+		AccountInfoResponse air = new AccountInfoResponse(sessionID);
+		int currenciesSize = oi.readInt();
+		CurrencyType currType;
+		long Value;
+		for (int i = 0; i < currenciesSize; i++) {
+			currType = CurrencyType.values()[oi.readInt()];
+			Value = oi.readLong();
+			air.Values.put(currType, Value);
 		}
+		return air;
 	}
 }
