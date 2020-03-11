@@ -93,8 +93,8 @@ public class MasterServerSession {
 				do {
 					sessionID = rand.nextLong();
 				} while (threadIDs.contains(sessionID));
-				ServerSession session = new ServerSession(s, loggedUsers, accountIDs, sessionID,
-						outWriter, errWriter);
+				ServerSession session = new ServerSession(s, loggedUsers, accountIDs, threads,
+						sessionID, outWriter, errWriter);
 				session.setName(sessionID + "");
 				threadIDs.add(sessionID);
 				session.start();
@@ -120,10 +120,6 @@ public class MasterServerSession {
 		boolean accountsRes = AccountsFolder.mkdir();
 		boolean paymentsRes = PaymentsFolder.mkdir();
 		boolean confRes = ConfFile.createNewFile();
-
-//        if (confRes){
-//
-//        }
 
 		if ( !(RootFolder.exists() && AccountsFolder.exists() && PaymentsFolder.exists() && ConfFile.exists())){
 			throw new InitException();

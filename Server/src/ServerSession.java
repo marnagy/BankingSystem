@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.Socket;
 import java.util.Arrays;
+import java.util.Dictionary;
 import java.util.Map;
 import java.util.Set;
 
@@ -12,7 +13,7 @@ public class ServerSession extends Thread {
 	Integer userID = null;
 
 	// on account number get active thread or null
-	Map<Long, ServerSession> threadMap;
+	Dictionary<Integer, ServerSession> threadMap;
 	final Set<Integer> accountIDs;
 	final Set<Integer> loggedUsers;
 
@@ -22,26 +23,27 @@ public class ServerSession extends Thread {
 	ObjectInput oi;
 	ObjectOutput oo;
 
-	public ServerSession(Socket socket, Set<Integer> loggedUsers, Set<Integer> accountIDs, long sessionID,
-	                     PrintWriter outWriter, PrintWriter errWriter) throws IOException {
+	public ServerSession(Socket socket, Set<Integer> loggedUsers, Set<Integer> accountIDs, Dictionary<Integer, ServerSession> threadMap,
+	                     long sessionID, PrintWriter outWriter, PrintWriter errWriter) throws IOException {
 		this.socket = socket;
 		this.accountIDs = accountIDs;
 		this.sessionID = sessionID;
 		this.loggedUsers = loggedUsers;
 		this.outPrinter = outWriter;
 		this.errPrinter = errWriter;
+		this.threadMap = threadMap;
 	}
 
 	@Override
 	public void run() {
 		Integer accountCreated;
-		boolean loggedIn;
+		boolean loggedIn = false, endSession = false, logout = false;
 		try{
 			SetInputOutput(socket);
 			SendSessionID(socket);
 			outPrinter.println("Thread " + sessionID + " running");
 			outPrinter.flush();
-			loggedIn = false;
+			//loggedIn = false;
 			while (true){
 				accountCreated = null;
 
@@ -77,7 +79,13 @@ public class ServerSession extends Thread {
 					case Payment:
 						break;
 					case End:
-
+						endSession = true;
+					case Logout:
+						if (!loggedIn){
+							resp = new IllegalRequestResponse(sessionID);
+							break;
+						}
+						logout = true;
 						break;
 					default:
 						resp = new IllegalRequestResponse(sessionID);
@@ -90,7 +98,11 @@ public class ServerSession extends Thread {
 					outPrinter.flush();
 					accountCreated = null;
 				}
-				if (loggedIn){
+				if (logout){
+					userID = null;
+					loggedIn = false;
+				}
+				if (endSession){
 					break;
 				}
 			}
@@ -99,7 +111,8 @@ public class ServerSession extends Thread {
 			e.printStackTrace(errPrinter);
 			errPrinter.flush();
 		}
-
+		outPrinter.println("Thread " + sessionID + " ended.");
+		outPrinter.flush();
 	}
 
 	private void SetInputOutput(Socket s) throws IOException {
