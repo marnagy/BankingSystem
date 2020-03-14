@@ -23,6 +23,7 @@ public class ClientCLI {
 				oi = new ObjectInputStream(session.getInputStream());
 				pw.println("Connected");
 				sessionID = ReadSessionID(oi);
+				
 				pw.println("Do you want to create an account? [yes / (default) no]");
 				pw.flush();
 				String respStr;
@@ -103,9 +104,39 @@ public class ClientCLI {
 						break;
 				}
 			} while (!loggedIn);
-			// statement only for breakpoint
-			int i = 5;
+
+			pw.println("You are logged in.");
 			// TEST PAYMENT HERE
+			pw.println("What do you want to do next?");
+			pw.flush();
+			int iResp = Integer.parseInt(br.readLine());
+			switch (iResp){
+				case 1: //Payment
+					pw.println("Enter receiverID:");
+					pw.flush();
+					int receiverID = Integer.parseInt(br.readLine());
+					String varSymbol = "";
+					String specSymbol = "";
+					pw.println("Enter receiverID:");
+					pw.flush();
+					String recvInfo = br.readLine();
+					boolean isValid;
+					do {
+						isValid = false;
+						pw.println("Enter amount");
+						pw.flush();
+						String amountS = br.readLine();
+						if ( CheckAmountFormat(amountS) ){
+							long amount = Long.parseLong(br.readLine());
+							isValid = true;
+						}
+					} while (!isValid);
+//					CurrencyType curr = CurrencyType.valueOf(br.readLine());
+					CurrencyType curr = CurrencyType.EUR;
+					break;
+				default:
+					throw new UnsupportedOperationException();
+			}
 		} catch (IOException e) {
 			System.err.println("IOException occurred");
 			e.printStackTrace(System.err);
@@ -115,6 +146,11 @@ public class ClientCLI {
 		} catch (UnknownTypeException e){
 
 		}
+	}
+
+	private static boolean CheckAmountFormat(String amountS) {
+		return Pattern.compile("(([1-9][0-9]*)|(0))(\\.[0-9]{2})?").matcher(amountS).matches();
+
 	}
 
 	private static long ReadSessionID(ObjectInput oi) throws IOException {
