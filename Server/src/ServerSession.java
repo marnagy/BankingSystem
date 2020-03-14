@@ -13,9 +13,10 @@ public class ServerSession extends Thread {
 	Integer userID = null;
 
 	// on account number get active thread or null
-	Dictionary<Integer, ServerSession> threadMap;
+	Map<Integer, ServerSession> threadMap;
 	final Set<Integer> accountIDs;
 	final Set<Integer> loggedUsers;
+	final Set<Long> threadIDs;
 
 	final PrintWriter outPrinter;
 	final PrintWriter errPrinter;
@@ -23,15 +24,16 @@ public class ServerSession extends Thread {
 	ObjectInput oi;
 	ObjectOutput oo;
 
-	public ServerSession(Socket socket, Set<Integer> loggedUsers, Set<Integer> accountIDs, Dictionary<Integer, ServerSession> threadMap,
-	                     long sessionID, PrintWriter outWriter, PrintWriter errWriter) throws IOException {
+	public ServerSession(Socket socket, Set<Integer> loggedUsers, Set<Integer> accountIDs, Map<Integer, ServerSession> accountToThread,
+	                     long sessionID, PrintWriter outWriter, PrintWriter errWriter, Set<Long> threadIDs) throws IOException {
 		this.socket = socket;
 		this.accountIDs = accountIDs;
 		this.sessionID = sessionID;
 		this.loggedUsers = loggedUsers;
 		this.outPrinter = outWriter;
 		this.errPrinter = errWriter;
-		this.threadMap = threadMap;
+		this.threadMap = accountToThread;
+		this.threadIDs = threadIDs;
 	}
 
 	@Override
@@ -53,7 +55,9 @@ public class ServerSession extends Thread {
 				switch (reqType){
 					case CreateAccount:
 						// read args
-						resp = CreateAccountHandler.Run(oi, accountIDs, sessionID);
+						synchronized (accountIDs) {
+							resp = CreateAccountHandler.Run(oi, accountIDs, sessionID);
+						}
 						break;
 					case Login:
 						// read args
@@ -77,6 +81,7 @@ public class ServerSession extends Thread {
 						}
 						break;
 					case Payment:
+						PaymentHandler.Run(outPrinter, errPrinter, oi, oo, sessionID);
 						break;
 					case End:
 						endSession = true;
@@ -110,6 +115,9 @@ public class ServerSession extends Thread {
 			errPrinter.println("IOException occurred");
 			e.printStackTrace(errPrinter);
 			errPrinter.flush();
+		}
+		synchronized (threadIDs){
+			threadIDs.remove(sessionID);
 		}
 		outPrinter.println("Thread " + sessionID + " ended.");
 		outPrinter.flush();

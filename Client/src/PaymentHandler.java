@@ -43,13 +43,15 @@ public class PaymentHandler {
 		switch (respType){
 			case InvalidReceiverIDResponse:
 				pw.println("Invalid receiver ID.");
-				pw.flush();
 				break;
 			case Success:
 				pw.println("Payment sent and processed.");
-				pw.flush();
+				break;
+			default:
+				pw.println("Unknown response.");
 				break;
 		}
+		pw.flush();
 	}
 
 	private static boolean CheckAmountFormat(String amountS) {

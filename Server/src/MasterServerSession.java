@@ -26,18 +26,19 @@ public class MasterServerSession {
 	static final File PaymentsFolder = Paths.get(RootFolderName + FileSystemSeparator + PaymentsFolderName).toFile();
 	static final File ConfFile = Paths.get(RootFolderName + FileSystemSeparator + ServerConfFileName).toFile();
 
-	static final Set<Integer> loggedUsers = new HashSet<Integer>();
+	static final Set<Integer> loggedUsers = Collections.synchronizedSet(new HashSet<Integer>());
 
 	// insert account ID, get ServerSession or null if the user is logged in currently
-	static final Dictionary<Integer, ServerSession> threads = new Hashtable<Integer, ServerSession>();
+	static final Map<Integer, ServerSession> threads = new Hashtable<Integer, ServerSession>();
 
 	// for unique ID for each thread/session
 	// used for authentication
-	static final Set<Long> threadIDs = new HashSet<Long>();
+	static final Set<Long> threadIDs = Collections.synchronizedSet(new HashSet<Long>());
 
 	// all valid account IDs, loaded from appropriate folder
 	// new are added
-	static final Set<Integer> accountIDs = new HashSet<Integer>();
+	static final Set<Integer> accountIDs = Collections.synchronizedSet(new HashSet<Integer>());
+	static final Map<Integer, Account> accounts = new Hashtable<Integer, Account>();
 
 	// random variable
 	static final Random rand = new Random(System.nanoTime());
@@ -94,7 +95,7 @@ public class MasterServerSession {
 					sessionID = rand.nextLong();
 				} while (threadIDs.contains(sessionID));
 				ServerSession session = new ServerSession(s, loggedUsers, accountIDs, threads,
-						sessionID, outWriter, errWriter);
+						sessionID, outWriter, errWriter, threadIDs);
 				session.setName(sessionID + "");
 				threadIDs.add(sessionID);
 				session.start();
