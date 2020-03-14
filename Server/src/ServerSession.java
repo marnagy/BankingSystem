@@ -14,7 +14,7 @@ public class ServerSession extends Thread {
 
 	// on account number get active thread or null
 	Map<Integer, ServerSession> threadMap;
-	final Set<Integer> accountIDs;
+	final Map<Integer, Account> accounts;
 	final Set<Integer> loggedUsers;
 	final Set<Long> threadIDs;
 
@@ -24,10 +24,11 @@ public class ServerSession extends Thread {
 	ObjectInput oi;
 	ObjectOutput oo;
 
-	public ServerSession(Socket socket, Set<Integer> loggedUsers, Set<Integer> accountIDs, Map<Integer, ServerSession> accountToThread,
-	                     long sessionID, PrintWriter outWriter, PrintWriter errWriter, Set<Long> threadIDs) throws IOException {
+	public ServerSession(Socket socket, Set<Integer> loggedUsers, Map<Integer, Account> accounts,
+	                     Map<Integer, ServerSession> accountToThread,long sessionID,
+	                     PrintWriter outWriter, PrintWriter errWriter, Set<Long> threadIDs) throws IOException {
 		this.socket = socket;
-		this.accountIDs = accountIDs;
+		this.accounts = accounts;
 		this.sessionID = sessionID;
 		this.loggedUsers = loggedUsers;
 		this.outPrinter = outWriter;
@@ -50,13 +51,15 @@ public class ServerSession extends Thread {
 				accountCreated = null;
 
 				RequestType reqType = RequestType.values()[oi.readInt()];
+				long retSessionID = oi.readLong();
+				// check if sessionIDs match
 				Request req;
 				Response resp = null;
 				switch (reqType){
 					case CreateAccount:
 						// read args
-						synchronized (accountIDs) {
-							resp = CreateAccountHandler.Run(oi, accountIDs, sessionID);
+						synchronized (accounts) {
+							resp = CreateAccountHandler.Run(oi, accounts, sessionID);
 						}
 						break;
 					case Login:
@@ -81,7 +84,7 @@ public class ServerSession extends Thread {
 						}
 						break;
 					case Payment:
-						PaymentHandler.Run(outPrinter, errPrinter, oi, oo, sessionID);
+						PaymentHandler.Run(outPrinter, errPrinter, oi, oo, accounts, sessionID);
 						break;
 					case End:
 						endSession = true;

@@ -1,22 +1,23 @@
 import java.io.*;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Set;
 
 public class CreateAccountHandler {
 	static AccountCreateRequest req;
 	static Response resp;
-	public static Response Run(final ObjectInput oi, final Set<Integer> accountIDs, long sessionID) {
+	public static Response Run(final ObjectInput oi, final Map<Integer, Account> accounts, long sessionID) {
 		req = AccountCreateRequest.ReadArgs(oi);
 
 		try {
 			if (req != null) {
 				AccountCreateRequest acr = req;
 				//check if email is already registered
-				if (!accountIDs.contains(acr.email.hashCode()) && CreateAccount(acr.email, acr.passwd, acr.currency)) {
+				if (!(accounts.get(acr.email.hashCode()) != null) && CreateAccount(acr.email, acr.passwd, acr.currency)) {
 					resp = new SuccessResponse(sessionID);
 					int accountCreated = acr.email.hashCode();
-					accountIDs.add(accountCreated);
+					accounts.put(accountCreated, new Account(acr.email) );
 				} else {
 					resp = new EmailAlreadySignedUpResponse(sessionID);
 				}

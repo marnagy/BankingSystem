@@ -94,7 +94,7 @@ public class MasterServerSession {
 				do {
 					sessionID = rand.nextLong();
 				} while (threadIDs.contains(sessionID));
-				ServerSession session = new ServerSession(s, loggedUsers, accountIDs, threads,
+				ServerSession session = new ServerSession(s, loggedUsers, accounts, threads,
 						sessionID, outWriter, errWriter, threadIDs);
 				session.setName(sessionID + "");
 				threadIDs.add(sessionID);
