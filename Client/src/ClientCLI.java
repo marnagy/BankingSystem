@@ -130,6 +130,7 @@ public class ClientCLI {
 							long amount = Long.parseLong(br.readLine());
 							isValid = true;
 						}
+						// Continue Here
 					} while (!isValid);
 //					CurrencyType curr = CurrencyType.valueOf(br.readLine());
 					CurrencyType curr = CurrencyType.EUR;
@@ -150,7 +151,6 @@ public class ClientCLI {
 
 	private static boolean CheckAmountFormat(String amountS) {
 		return Pattern.compile("(([1-9][0-9]*)|(0))(\\.[0-9]{2})?").matcher(amountS).matches();
-
 	}
 
 	private static long ReadSessionID(ObjectInput oi) throws IOException {
