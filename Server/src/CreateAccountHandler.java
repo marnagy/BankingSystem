@@ -21,12 +21,12 @@ public class CreateAccountHandler {
 					resp = new EmailAlreadySignedUpResponse(sessionID);
 				}
 			} else {
-				resp = new ArgumentMissingResponse(sessionID);
+				resp = new AccountCreateFailResponse("Invalid request format.", sessionID);
 			}
 			return resp;
 		}
-		catch (IOException e){
-			return new IllegalRequestResponse(sessionID);
+		catch (IOException | NullPointerException e){
+			return new AccountCreateFailResponse("Account already exists.", sessionID);
 		}
 	}
 	private static boolean CreateAccount(String email, char[] passwd, CurrencyType curr) throws IOException {

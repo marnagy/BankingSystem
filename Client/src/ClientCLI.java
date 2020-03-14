@@ -16,6 +16,8 @@ public class ClientCLI {
 
 		Pattern emailPattern = Pattern.compile("^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$");
 		try {
+			Request req;
+			Response resp;
 			do {
 				ClientSession session = new ClientSession();
 				session.connect();
@@ -29,6 +31,7 @@ public class ClientCLI {
 				String respStr;
 				RequestType rType;
 //            resp = br.readLine();
+
 				respStr = "yes";
 				if (respStr.equals("yes")) {
 					rType = RequestType.CreateAccount;
@@ -50,7 +53,7 @@ public class ClientCLI {
 						pw.flush();
 						//char[] passwd = br.readLine().toCharArray();
 						char[] passwd = "test".toCharArray();
-						Request req = new AccountCreateRequest(email, passwd, CurrencyType.EUR, sessionID);
+						req = new AccountCreateRequest(email, passwd, CurrencyType.EUR, sessionID);
 						// sending
 						req.Send(oo);
 						// receiving
@@ -85,13 +88,16 @@ public class ClientCLI {
 				pw.flush();
 //                char[] passwd = br.readLine().toCharArray();
 				char[] passwd = "test".toCharArray();
-				Request req = new LoginRequest(email, passwd, sessionID);
+				req = new LoginRequest(email, passwd, sessionID);
 				req.Send(oo);
 				// if success, client receives AccountInfo
 				ResponseType respType = ResponseType.values()[oi.readInt()];
-				Response resp;
+
 				switch (respType) {
-					case IllegalRequestResponse:
+					case AccountCreateFailResponse:
+						pw.println("Account already exists.\nTry again, please.s");
+						pw.flush();
+						continue;
 					case AccountInfo:
 						resp = AccountInfoResponse.ReadArgs(oi);
 						if (resp.getClass() == IllegalRequestResponse.class) {
@@ -102,56 +108,35 @@ public class ClientCLI {
 							loggedIn = true;
 						}
 						break;
+					default:
+						break;
 				}
 			} while (!loggedIn);
 
 			pw.println("You are logged in.");
 			// TEST PAYMENT HERE
-			pw.println("What do you want to do next?");
-			pw.flush();
-			int iResp = Integer.parseInt(br.readLine());
-			switch (iResp){
-				case 1: //Payment
-					pw.println("Enter receiverID:");
-					pw.flush();
-					int receiverID = Integer.parseInt(br.readLine());
-					String varSymbol = "";
-					String specSymbol = "";
-					pw.println("Enter receiverID:");
-					pw.flush();
-					String recvInfo = br.readLine();
-					boolean isValid;
-					do {
-						isValid = false;
-						pw.println("Enter amount");
-						pw.flush();
-						String amountS = br.readLine();
-						if ( CheckAmountFormat(amountS) ){
-							long amount = Long.parseLong(br.readLine());
-							isValid = true;
-						}
-						// Continue Here
-					} while (!isValid);
-//					CurrencyType curr = CurrencyType.valueOf(br.readLine());
-					CurrencyType curr = CurrencyType.EUR;
-					break;
-				default:
-					throw new UnsupportedOperationException();
-			}
+			do {
+				pw.println("What do you want to do next?");
+				pw.flush();
+				int iResp = Integer.parseInt(br.readLine());
+				switch (iResp) {
+					case 1: //Payment
+						PaymentHandler.Run(pw, br, oi, oo, account, sessionID);
+
+					default:
+						throw new UnsupportedOperationException();
+				}
+
+			} while (loggedIn);
 		} catch (IOException e) {
 			System.err.println("IOException occurred");
 			e.printStackTrace(System.err);
-//        } catch (ArgsException e) {
-//            System.err.println("ArgsException occurred");
-//            e.printStackTrace();
 		} catch (UnknownTypeException e){
 
 		}
 	}
 
-	private static boolean CheckAmountFormat(String amountS) {
-		return Pattern.compile("(([1-9][0-9]*)|(0))(\\.[0-9]{2})?").matcher(amountS).matches();
-	}
+
 
 	private static long ReadSessionID(ObjectInput oi) throws IOException {
 		return oi.readLong();

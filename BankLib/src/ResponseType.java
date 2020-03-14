@@ -8,6 +8,8 @@ public enum ResponseType {
     IncorrectLoginError,
     // used only by server
     IllegalRequestResponse,
+    AccountCreateFailResponse,
+    InvalidReceiverIDResponse,
     // used only by client
     IllegalServerResponse
 }
