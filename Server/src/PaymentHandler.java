@@ -1,4 +1,5 @@
 import java.io.*;
+import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Set;
 
@@ -8,6 +9,8 @@ public class PaymentHandler {
 	public static synchronized Response Run(PrintWriter outPrinter, PrintWriter errPrinter,
 	                                        ObjectInput oi, ObjectOutput oo, Map<Integer, Account> accounts,
 	                                        long sessionID) throws IOException {
+		String paymentFilePath = null; // just init
+		File paymentFile = null;
 		try {
 			PaymentRequest pr = PaymentRequest.ReadArgs(oi);
 			Payment payment = MakePayment(pr, accounts, errPrinter);
@@ -18,24 +21,53 @@ public class PaymentHandler {
 			else{
 				outPrinter.println("Payment made.");
 				outPrinter.println("Creating file for payment...");
-				CreatePaymentFile(payment, errPrinter);
+				paymentFile = CreatePaymentFile(payment, errPrinter);
+				SavePaymentToAccounts(payment, paymentFile.getAbsolutePath(), MasterServerSession.AccountsFolder.getAbsolutePath());
 			}
 		} catch (IOException e) {
 			e.printStackTrace(errPrinter);
-			return new UnknownErrorResponse("Unknown I/O error", sessionID);
+			return new UnknownErrorResponse("I/O error", sessionID);
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace(errPrinter);
-			return new UnknownErrorResponse("Unknown server error", sessionID);
+			return new UnknownErrorResponse("Server error", sessionID);
 		}
-		return new SuccessResponse(sessionID);
+		return new SuccessPaymentResponse( paymentFile.getName(), sessionID);
 	}
 
-	private static void CreatePaymentFile(Payment payment, PrintWriter errPrinter) throws IOException {
-		File paymentFile = new File(MasterServerSession.PaymentsFolder.getAbsolutePath() + MasterServerSession.FileSystemSeparator
-				+ payment.senderAccountID + "_" + payment.receiverAccountID + "_" + System.nanoTime());
-		if (paymentFile.createNewFile()){
+	private static void SavePaymentToAccounts(Payment payment, String paymentFilePath, String accountsFolderPath) throws IOException {
+		int senderAccountID = payment.senderAccountID;
+		int receiverAccountID = payment.receiverAccountID;
+		ZonedDateTime dateTime = ZonedDateTime.now();
+		int year = dateTime.getYear();
+		int month = dateTime.getMonthValue();
 
+		File currMonthPaymentsSenderFile = new File(accountsFolderPath + MasterServerSession.FileSystemSeparator
+				+ senderAccountID + MasterServerSession.FileSystemSeparator + year + "_" + month);
+		File currMonthPaymentsReceiverFile = new File(accountsFolderPath + MasterServerSession.FileSystemSeparator
+				+ receiverAccountID + MasterServerSession.FileSystemSeparator + year + "_" + month);
+		currMonthPaymentsSenderFile.createNewFile(); // if not created, create new empty file
+		try (FileWriter fw = new FileWriter(currMonthPaymentsSenderFile.getAbsolutePath(), true)){
+			fw.write( paymentFilePath + ":" + "Unknown" + "\n");
 		}
+		currMonthPaymentsReceiverFile.createNewFile(); // if not created, create new empty file
+		try (FileWriter fw = new FileWriter(currMonthPaymentsReceiverFile.getAbsolutePath(), true)){
+			fw.write( paymentFilePath + ":" + "Unknown" + "\n");
+		}
+	}
+
+	private static File CreatePaymentFile(Payment payment, PrintWriter errPrinter) throws IOException {
+		String paymentFileName = MasterServerSession.PaymentsFolder.getAbsolutePath() + MasterServerSession.FileSystemSeparator
+				+ payment.senderAccountID + "_" + payment.receiverAccountID + "_"
+				+ payment.sendingDateTime + "_" + payment.receivedDateTime + ".payment";
+		File paymentFile = new File(paymentFileName);
+		String paymentFilePath = paymentFile.getAbsolutePath();
+		if (paymentFile.createNewFile()){
+			try(PrintWriter pw = new PrintWriter(paymentFile)){
+				pw.println(payment.amount);
+				pw.println(payment.curr.name());
+			}
+		}
+		return paymentFile;
 	}
 
 	private static Payment MakePayment(PaymentRequest pr, Map<Integer, Account> accounts, PrintWriter errPrinter) throws IOException {
@@ -68,7 +100,7 @@ public class PaymentHandler {
 				// because wrapper types are immutable
 				senderAccount.Values.put(pr.curr, senderAmount - pr.amount);
 				receiverAccount.Values.put(pr.curr, receiverAmount + pr.amount);
-				ModifyValueFiles(senderAccount, errPrinter);
+				ModifyValueFiles(senderAccount,errPrinter);
 				ModifyValueFiles(receiverAccount, errPrinter);
 			}
 		}
@@ -85,5 +117,6 @@ public class PaymentHandler {
 				bw.write( curr.name() + ":" + Values.get(curr));
 			}
 		}
+
 	}
 }

@@ -81,6 +81,7 @@ public class MasterServerSession {
 		ServerSocket ss;
 		outWriter.println("Starting server socket");
 		outWriter.flush();
+
 		try {
 			//ServerSocket ss = SSLServerSocketFactory.getDefault().createServerSocket(5000);
 			ss = new ServerSocket(5000);

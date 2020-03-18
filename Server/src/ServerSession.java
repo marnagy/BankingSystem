@@ -155,9 +155,4 @@ public class ServerSession extends Thread {
 			return false;
 		}
 	}
-
-	@Override
-	public synchronized void start() {
-		super.start();
-	}
 }

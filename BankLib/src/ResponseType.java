@@ -11,6 +11,7 @@ public enum ResponseType {
     AccountCreateFailResponse,
     InvalidReceiverIDResponse,
     UnknownErrorResponse,
+    SuccessPaymentResponse,
     // used only by client
     IllegalServerResponse
 }
