@@ -39,8 +39,9 @@ public class PaymentHandler {
 	private static Payment MakePayment(PaymentRequest pr, Map<Integer, Account> accounts) {
 		int senderID = pr.senderAccountID;
 		int receiverID = pr.receiverAccountID;
+
 		// wrong IDs
-		if ( !(accounts.get(senderID) != null &&  accounts.get(receiverID) != null)){
+		if ( accounts.get(senderID) == null || accounts.get(receiverID) == null){
 			return null;
 		}
 

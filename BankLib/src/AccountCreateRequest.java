@@ -26,15 +26,11 @@ public class AccountCreateRequest extends Request {
     }
 
     public static AccountCreateRequest ReadArgs(ObjectInput oi){
-        String email = null;
-        char[] passwd = null;
-        long sessionID;
-        CurrencyType cur;
         try {
-            sessionID = oi.readLong();
-            email = oi.readUTF();
-            passwd = (char[])oi.readObject();
-            cur = CurrencyType.values()[oi.readInt()];
+            long sessionID = oi.readLong();
+            String email = oi.readUTF();
+            char[] passwd = (char[])oi.readObject();
+            CurrencyType cur = CurrencyType.values()[oi.readInt()];
             return new AccountCreateRequest(email, passwd, cur, sessionID);
         } catch (IOException | ClassNotFoundException e) {
             return null;

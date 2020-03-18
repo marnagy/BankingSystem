@@ -18,7 +18,6 @@ public class ClientCLI {
 		try {
 			Request req;
 			Response resp;
-			do {
 				ClientSession session = new ClientSession();
 				session.connect();
 				oo = new ObjectOutputStream(session.getOutputStream());
@@ -30,9 +29,9 @@ public class ClientCLI {
 				pw.flush();
 				String respStr;
 				RequestType rType;
-//            resp = br.readLine();
+	            respStr = br.readLine();
 
-				respStr = "yes";
+				//respStr = "yes";
 				if (respStr.equals("yes")) {
 					rType = RequestType.CreateAccount;
 					String email;
@@ -42,8 +41,8 @@ public class ClientCLI {
 						do {
 							pw.println("Enter your email:");
 							pw.flush();
-							//email = br.readLine();
-							email = "test@test.cz";
+							email = br.readLine();
+							//email = "test@test.cz";
 							emailValidation = emailPattern.matcher(email).matches();
 						} while (!emailValidation);
 
@@ -60,7 +59,8 @@ public class ClientCLI {
 						ResponseType respType = ResponseType.values()[oi.readInt()];
 						switch (respType) {
 							case Success:
-								success = true;
+								SuccessResponse sr = SuccessResponse.ReadArgs(oi);
+								success = sr != null;
 								break;
 							case EmailAlreadySignedUp:
 								pw.println("Email you entered is already signed up.");
@@ -80,10 +80,11 @@ public class ClientCLI {
 					} while (!success);
 				}
 
+			do {
 				pw.println("Enter your email:");
 				pw.flush();
-//                String email = br.readLine();
-				String email = "test@test.cz";
+                String email = br.readLine();
+//				String email = "test@test.cz";
 				pw.println("Enter your password:");
 				pw.flush();
 //                char[] passwd = br.readLine().toCharArray();
@@ -120,9 +121,12 @@ public class ClientCLI {
 				pw.flush();
 				int iResp = Integer.parseInt(br.readLine());
 				switch (iResp) {
-					case 1: //Payment
-						PaymentHandler.Run(pw, br, oi, oo, account, sessionID);
+					case 1: // Payment
+						PaymentHandlerClient.Run(pw, br, oi, oo, account, sessionID);
+						break;
+					case 2: // receive Payment
 
+						break;
 					default:
 						throw new UnsupportedOperationException();
 				}

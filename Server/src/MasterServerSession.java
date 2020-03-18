@@ -37,14 +37,14 @@ public class MasterServerSession {
 
 	// all valid account IDs, loaded from appropriate folder
 	// new are added
-	static final Set<Integer> accountIDs = Collections.synchronizedSet(new HashSet<Integer>());
+	//static final Set<Integer> accountIDs = Collections.synchronizedSet(new HashSet<Integer>());
 	static final Map<Integer, Account> accounts = new Hashtable<Integer, Account>();
 
 	// random variable
 	static final Random rand = new Random(System.nanoTime());
 
 	// used for testing
-	static final boolean IsTest = true;
+	static final boolean IsTest = false;
 	public static void Run(){
 		if (IsTest && RootFolder.exists()){
 			deleteDirectory(RootFolder);
@@ -68,6 +68,14 @@ public class MasterServerSession {
 			e.printStackTrace(errWriter);
 			return;
 		}
+
+		//load accounts from dirictories
+		File[] accountsDirs = AccountsFolder.listFiles();
+		for (int i = 0; i < accountsDirs.length; i++){
+			LoadAccountFromDir(accountsDirs[i], accounts);
+		}
+		outWriter.println("Accounts loaded");
+		outWriter.flush();
 
 		//start server
 		ServerSocket ss;
@@ -106,6 +114,35 @@ public class MasterServerSession {
 			}
 		}
 	}
+
+	private static void LoadAccountFromDir(File accountsDir, Map<Integer,Account> accounts) {
+		int accountID = Integer.parseInt(accountsDir.getName());
+		File infoFile = new File(accountsDir.getAbsolutePath() + FileSystemSeparator
+		+ ".info");
+		File currFile = new File(accountsDir.getAbsolutePath() + FileSystemSeparator
+				+ ".curr");
+		try {
+			final Map<CurrencyType, Long> Values = new Hashtable<CurrencyType, Long>();
+			String email;
+			try (BufferedReader br = new BufferedReader(new FileReader(infoFile))) {
+				email = br.readLine();
+			}
+			Account account = new Account(email);
+			try (BufferedReader br = new BufferedReader(new FileReader(currFile))) {
+				String line;
+				String[] lineParts;
+				while ( (line = br.readLine()) != null ) {
+					lineParts = line.split(":");
+					account.Values.put( CurrencyType.valueOf(lineParts[0]) , Long.parseLong(lineParts[1]));
+				}
+			}
+			accounts.put(email.hashCode(), account);
+		}
+		catch (IOException e) {
+			throw new Error("Invalid Account " + accountID + " state");
+		}
+	}
+
 	private static boolean ContainsFileWithName(File[] fileNames, File fileToFind) {
 		boolean result = false;
 		for ( File file : fileNames) {
@@ -117,7 +154,9 @@ public class MasterServerSession {
 		return result;
 	}
 	private static void InitFolders() throws InitException, IOException {
-		boolean rootRes = RootFolder.mkdir();
+		if(!RootFolder.mkdir()){
+			return;
+		}
 		boolean accountsRes = AccountsFolder.mkdir();
 		boolean paymentsRes = PaymentsFolder.mkdir();
 		boolean confRes = ConfFile.createNewFile();

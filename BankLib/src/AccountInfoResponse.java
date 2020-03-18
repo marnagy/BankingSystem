@@ -7,7 +7,6 @@ public class AccountInfoResponse extends Response {
 
 	public final Map<CurrencyType, Long> Values = new HashMap<CurrencyType, Long>();
 
-	//public final String email;
 	public final int accountID;
 
 //	public AccountInfoResponse(String email){
@@ -15,10 +14,13 @@ public class AccountInfoResponse extends Response {
 //		//this.email = email;
 //		accountID = email.hashCode();
 //	}
-	private AccountInfoResponse(long sessionID){
+	private AccountInfoResponse(String email, long sessionID){
 		super(ResponseType.AccountInfo, sessionID);
-		//this.email = email;
-		accountID = 0;
+		this.accountID = email.hashCode();
+	}
+	private AccountInfoResponse(int accountID, long sessionID){
+		super(ResponseType.AccountInfo, sessionID);
+		this.accountID = accountID;
 	}
 
 	public AccountInfoResponse(String email, File accountDir, long sessionID){
@@ -46,7 +48,6 @@ public class AccountInfoResponse extends Response {
 	void Send(ObjectOutput oo) throws IOException {
 		oo.writeInt(super.type.ordinal());
 		oo.writeLong(super.sessionID);
-		//oo.writeUTF(email);
 		oo.writeInt(accountID);
 		int size = Values.size();
 		CurrencyType[] currs = new CurrencyType[size];
@@ -62,7 +63,8 @@ public class AccountInfoResponse extends Response {
 	public static AccountInfoResponse ReadArgs(ObjectInput oi) throws IOException {
 		//String email = oi.readUTF();
 		long sessionID = oi.readLong();
-		AccountInfoResponse air = new AccountInfoResponse(sessionID);
+		int accountID = oi.readInt();
+		AccountInfoResponse air = new AccountInfoResponse(accountID, sessionID);
 		int currenciesSize = oi.readInt();
 		CurrencyType currType;
 		long Value;

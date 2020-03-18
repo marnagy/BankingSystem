@@ -59,7 +59,7 @@ public class CreateAccountHandler {
 				bwInfoFile.close();
 
 				//currencies File
-				bwCurrenciesFile.write(curr.name() + ":" + 0L);
+				bwCurrenciesFile.write(curr.name() + ":" + 3000L);
 				bwCurrenciesFile.close();
 				return true;
 			}

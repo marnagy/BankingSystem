@@ -25,7 +25,7 @@ public class ServerSession extends Thread {
 	ObjectOutput oo;
 
 	public ServerSession(Socket socket, Set<Integer> loggedUsers, Map<Integer, Account> accounts,
-	                     Map<Integer, ServerSession> accountToThread,long sessionID,
+	                     Map<Integer, ServerSession> accountToThread, long sessionID,
 	                     PrintWriter outWriter, PrintWriter errWriter, Set<Long> threadIDs) throws IOException {
 		this.socket = socket;
 		this.accounts = accounts;
@@ -51,7 +51,7 @@ public class ServerSession extends Thread {
 				accountCreated = null;
 
 				RequestType reqType = RequestType.values()[oi.readInt()];
-				long retSessionID = oi.readLong();
+				//long retSessionID = oi.readLong();
 				// check if sessionIDs match
 				Request req;
 				Response resp = null;
@@ -115,7 +115,7 @@ public class ServerSession extends Thread {
 				}
 			}
 		} catch (IOException e){
-			errPrinter.println("IOException occurred");
+			errPrinter.println("IOException occurred (mostly client disconnected)");
 			e.printStackTrace(errPrinter);
 			errPrinter.flush();
 		}

@@ -1,19 +1,20 @@
 import java.io.*;
 import java.util.regex.Pattern;
 
-public class PaymentHandler {
+public class PaymentHandlerClient {
 	private static final Pattern amountPattern = Pattern.compile("(([1-9][0-9]*)|0)(\\.[0-9]{2})?");
 	public static void Run(PrintWriter pw, BufferedReader br, ObjectInput oiSocket,
 	                       ObjectOutput ooSocket, Account account, long sessionID) throws IOException {
 		Request req;
 		pw.println("Enter receiverID:");
 		pw.flush();
-		int receiverID = Integer.parseInt(br.readLine());
+//		int receiverID = Integer.parseInt(br.readLine());
+		int receiverID = Integer.parseInt("-902095451");
 		String varSymbol = "";
 		String specSymbol = "";
 		pw.println("Enter receiverID:");
 		pw.flush();
-		String recvInfo = br.readLine();
+		//String recvInfo = br.readLine();
 		boolean isValid; // valid format
 		boolean canSend; // sender has enough money in account
 		long amount = 0;
@@ -22,12 +23,14 @@ public class PaymentHandler {
 
 			isValid = false;
 			canSend = false;
-			pw.println("Enter amount");
+			pw.println("Enter amount:");
 			pw.flush();
-			String amountS = br.readLine();
+//			String amountS = br.readLine();
+			String amountS = "2";
 
 			if (CheckAmountFormat(amountS)) {
-				amount = Long.parseLong(br.readLine());
+//				amount = Long.parseLong(br.readLine());
+				amount = Long.parseLong("200");
 				isValid = true;
 			}
 			if (account.Values.get(curr) >= amount){
