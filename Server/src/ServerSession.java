@@ -84,7 +84,7 @@ public class ServerSession extends Thread {
 						}
 						break;
 					case Payment:
-						PaymentHandler.Run(outPrinter, errPrinter, oi, oo, accounts, sessionID);
+						resp = PaymentHandler.Run(outPrinter, errPrinter, oi, oo, accounts, sessionID);
 						break;
 					case End:
 						endSession = true;

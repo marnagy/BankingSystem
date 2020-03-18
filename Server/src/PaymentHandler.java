@@ -1,14 +1,13 @@
 import java.io.*;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 
 public class PaymentHandler {
 	static Set<Integer> accountIDs;
 	static long sessionID;
-	public static synchronized void Run(PrintWriter outPrinter, PrintWriter errPrinter,
-	                       ObjectInput oi, ObjectOutput oo, Map<Integer, Account> accounts,
-	                       long sessionID) throws IOException {
+	public static synchronized Response Run(PrintWriter outPrinter, PrintWriter errPrinter,
+	                                        ObjectInput oi, ObjectOutput oo, Map<Integer, Account> accounts,
+	                                        long sessionID) throws IOException {
 		try {
 			PaymentRequest pr = PaymentRequest.ReadArgs(oi);
 			Payment payment = MakePayment(pr, accounts, errPrinter);
@@ -23,11 +22,12 @@ public class PaymentHandler {
 			}
 		} catch (IOException e) {
 			e.printStackTrace(errPrinter);
-			new UnknownErrorResponse("Unknown I/O error", sessionID).Send(oo);
+			return new UnknownErrorResponse("Unknown I/O error", sessionID);
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace(errPrinter);
-			new UnknownErrorResponse("Unknown server error", sessionID).Send(oo);
+			return new UnknownErrorResponse("Unknown server error", sessionID);
 		}
+		return new SuccessResponse(sessionID);
 	}
 
 	private static void CreatePaymentFile(Payment payment, PrintWriter errPrinter) throws IOException {

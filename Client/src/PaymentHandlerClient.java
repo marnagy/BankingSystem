@@ -48,6 +48,8 @@ public class PaymentHandlerClient {
 				pw.println("Invalid receiver ID.");
 				break;
 			case Success:
+				long valBefore = account.Values.get(curr);
+				account.Values.put(curr, valBefore - amount);
 				pw.println("Payment sent and processed.");
 				break;
 			default:
