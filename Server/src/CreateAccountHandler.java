@@ -14,7 +14,7 @@ public class CreateAccountHandler {
 			if (req != null) {
 				AccountCreateRequest acr = req;
 				//check if email is already registered
-				if (!(accounts.get(acr.email.hashCode()) != null) && CreateAccount(acr.email, acr.passwd, acr.currency)) {
+				if (!(accounts.get(acr.email.hashCode()) != null) && CreateAccount(acr.email, acr.passwd)) {
 					resp = new SuccessResponse(sessionID);
 					int accountCreated = acr.email.hashCode();
 					accounts.put(accountCreated, new Account(acr.email) );
@@ -30,16 +30,16 @@ public class CreateAccountHandler {
 			return new AccountCreateFailResponse("Account already exists.", sessionID);
 		}
 	}
-	private static boolean CreateAccount(String email, char[] passwd, CurrencyType curr) throws IOException {
+	private static boolean CreateAccount(String email, char[] passwd) throws IOException {
 		File newAccountFolder = new File(MasterServerSession.AccountsFolder.getAbsolutePath() + MasterServerSession.FileSystemSeparator + email.hashCode());
 		if ( newAccountFolder.mkdir() ) {
-			return CreateAccountInfoFile( newAccountFolder, email, passwd, curr);
+			return CreateAccountInfoFile( newAccountFolder, email, passwd);
 		}
 		else{
 			return false;
 		}
 	}
-	private static boolean CreateAccountInfoFile(File accountFolderFile, String email, char[] passwd, CurrencyType curr) throws IOException {
+	private static boolean CreateAccountInfoFile(File accountFolderFile, String email, char[] passwd) throws IOException {
 		File infoFile = new File(accountFolderFile.getAbsolutePath() + MasterServerSession.FileSystemSeparator + ".info");
 		File currenciesFile = new File(accountFolderFile.getAbsolutePath() + MasterServerSession.FileSystemSeparator + ".curr");
 		if (infoFile.createNewFile() && currenciesFile.createNewFile()){
@@ -56,10 +56,13 @@ public class CreateAccountHandler {
 				bwInfoFile.write(creationDateTime.getYear() + "_" + creationDateTime.getMonthValue() + "_" +
 						creationDateTime.getDayOfMonth() + "-" +
 						creationDateTime.getHour() + ":" + creationDateTime.getMinute() + "\n");
-				bwInfoFile.close();
+				//bwInfoFile.close();
 
 				//currencies File
-				bwCurrenciesFile.write(curr.name() + ":" + 3000L);
+				CurrencyType[] currs = CurrencyType.values();
+				for ( CurrencyType curr: currs ) {
+					bwCurrenciesFile.write(curr.name() + ":" + 3000L + "\n");
+				}
 				bwCurrenciesFile.close();
 				return true;
 			}

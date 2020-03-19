@@ -6,13 +6,10 @@ import java.io.Writer;
 public class AccountCreateRequest extends Request {
     public final String email;
     public final char[] passwd;
-    public final CurrencyType currency;
-    public AccountCreateRequest(String email, char[] passwd, CurrencyType currency,
-                                long sessionID){
+    public AccountCreateRequest(String email, char[] passwd, long sessionID){
         super(RequestType.CreateAccount, sessionID);
         this.email = email;
         this.passwd = passwd;
-        this.currency = currency;
     }
 
     @Override
@@ -21,7 +18,6 @@ public class AccountCreateRequest extends Request {
         oo.writeLong(super.sessionID);
         oo.writeUTF(email);
         oo.writeObject(passwd);
-        oo.writeInt(currency.ordinal());
         oo.flush();
     }
 
@@ -30,8 +26,7 @@ public class AccountCreateRequest extends Request {
             long sessionID = oi.readLong();
             String email = oi.readUTF();
             char[] passwd = (char[])oi.readObject();
-            CurrencyType cur = CurrencyType.values()[oi.readInt()];
-            return new AccountCreateRequest(email, passwd, cur, sessionID);
+            return new AccountCreateRequest(email, passwd, sessionID);
         } catch (IOException | ClassNotFoundException e) {
             return null;
         }

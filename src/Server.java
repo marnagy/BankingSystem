@@ -1,8 +1,8 @@
 public class Server {
 
 
-    public static void main(String[] args) {
-        // dummy main
+	public static void main(String[] args) {
+		// dummy main
 
-    }
+	}
 }

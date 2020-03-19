@@ -1,0 +1,12 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Server">
+    <output-path>$PROJECT_DIR$/out/artifacts/Server</output-path>
+    <root id="archive" name="BankingSystem.jar">
+      <element id="module-output" name="MavenBankSys" />
+      <element id="module-output" name="BankingSystem" />
+      <element id="module-output" name="BankLib" />
+      <element id="module-output" name="Server" />
+      <element id="module-output" name="Client" />
+    </root>
+  </artifact>
+</component>
