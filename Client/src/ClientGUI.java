@@ -16,6 +16,7 @@ public class ClientGUI {
 	private ObjectOutput oo;
 	private long sessionID;
 	private Account account;
+	private JFrame frame;
 
 	public ClientGUI() {
 		try {
@@ -69,7 +70,6 @@ public class ClientGUI {
 					Request req = new LoginRequest(emailTextField.getText(), passwordPasswordField.getPassword(), sessionID);
 					req.Send(oo);
 					ResponseType respType = ResponseType.values()[oi.readInt()];
-					boolean success;
 					switch (respType) {
 						case AccountInfo:
 							resp = AccountInfoResponse.ReadArgs(oi);
@@ -78,7 +78,6 @@ public class ClientGUI {
 							}
 							if (resp.getClass() == AccountInfoResponse.class) {
 								account = new Account((AccountInfoResponse) resp);
-								msg = "Login successful";
 							}
 							break;
 						default:
@@ -88,10 +87,10 @@ public class ClientGUI {
 				} catch (IOException e) {
 					msg = "Network error occured.";
 				}
-				if (msg != null) {
+				if (msg != null) { // error
 					MessageForm.Show(msg);
-				} else {
-					// open new
+				} else { // successful login
+					CloseActionListener closeActionListener = new CloseActionListener(frame);
 				}
 			}
 		});

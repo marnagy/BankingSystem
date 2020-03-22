@@ -1,7 +1,16 @@
+import javafx.collections.ObservableArray;
+import javafx.collections.ObservableList;
+import javafx.scene.control.ComboBox;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 public class LoggedInForm {
 	private JPanel panel1;
@@ -22,15 +31,130 @@ public class LoggedInForm {
 	private JButton sendPaymentButton;
 	private JList list1;
 	private JComboBox comboBox1;
+	private JPanel parentPanel;
+	private JPanel accountBalancePanel;
+	private JPanel homePanel;
+	private JButton logOutButton;
+	private JComboBox accountBalanceComboBox;
+	private final Pattern amountPattern = Pattern.compile("(([1-9][0-9]*)|0)(\\.[0-9]{2})?");
 
-	public static void main(String[] args) {
+	private ObjectInput oi;
+	private ObjectOutput oo;
+	private Account account;
+	private JFrame frame;
+
+	private LoggedInForm() {
+		makePaymentButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent actionEvent) {
+				//ClearTextBoxes();
+				parentPanel.removeAll();
+				parentPanel.add(paymentPanel);
+				parentPanel.repaint();
+				parentPanel.revalidate();
+			}
+		});
+		paymentHistoryButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent actionEvent) {
+				parentPanel.removeAll();
+				parentPanel.add(historyPanel);
+				parentPanel.repaint();
+				parentPanel.revalidate();
+			}
+		});
+		exitButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent actionEvent) {
+				// close connection
+				try {
+					oi.close();
+					oo.close();
+				}
+				catch (IOException e){
+				}
+
+				// close window
+
+			}
+		});
+	}
+	private LoggedInForm(Account account, ObjectInput oi, ObjectOutput oo){
+		this();
+		this.account = account;
+		this.oi = oi;
+		this.oo = oo;
+	}
+
+	private long HasEnoughMoney(Account account, String text, CurrencyType curr) {
+		long money = account.Values.get(curr);
+		long toSend = 0;
+		if (text.contains(".")) {
+			StringBuilder send = new StringBuilder();
+			for (int i = 0; i < text.length(); i++) {
+				if (text.charAt(i) != '.') {
+					send.append(text.charAt(i));
+				}
+			}
+			toSend = Long.parseLong(send.toString());
+		} else {
+			toSend = 100 * Long.parseLong(text);
+		}
+		if (money - toSend >= 0) {
+			return toSend;
+		} else {
+			return 0;
+		}
+	}
+
+	private boolean CheckAmount(String text) {
+		return amountPattern.matcher(text).matches();
+	}
+
+	public static void Open(Account account, ObjectInput oi, ObjectOutput oo){
 		JFrame frame = new JFrame("LoggedInForm");
-		LoggedInForm loggedInForm = new LoggedInForm();
-		loggedInForm.leftPanel.setBackground(new Color(0.0f, 0.0f, 0.0f, 0.5f));
-		frame.setContentPane(new LoggedInForm().panel1);
+		LoggedInForm loggedInForm = new LoggedInForm(account);
+		JPanel parent = loggedInForm.parentPanel;
+		parent.removeAll();
+		parent.add(loggedInForm.homePanel);
+		parent.repaint();
+		parent.revalidate();
+		//set combo boxes
+		loggedInForm.accountBalanceComboBox.setModel(new DefaultComboBoxModel(CurrencyType.values()));
+		loggedInForm.fromCurrencyComboBox.setModel(new DefaultComboBoxModel(CurrencyType.values()));
+		loggedInForm.toCurrencyComboBox.setModel(new DefaultComboBoxModel(CurrencyType.values()));
+
+		frame.setContentPane(loggedInForm.panel1);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.pack();
 		frame.setVisible(true);
+	}
+
+	public static void main(String[] args) {
+		Open(null, null, null);
+//		JFrame frame = new JFrame("LoggedInForm");
+//		LoggedInForm loggedInForm = new LoggedInForm();
+//		JPanel parent = loggedInForm.parentPanel;
+//		parent.removeAll();
+//		parent.add(loggedInForm.homePanel);
+//		parent.repaint();
+//		parent.revalidate();
+//		//set combo boxes
+//		loggedInForm.accountBalanceComboBox.setModel(new DefaultComboBoxModel(CurrencyType.values()));
+//		loggedInForm.fromCurrencyComboBox.setModel(new DefaultComboBoxModel(CurrencyType.values()));
+//		loggedInForm.toCurrencyComboBox.setModel(new DefaultComboBoxModel(CurrencyType.values()));
+//
+//		frame.setContentPane(loggedInForm.panel1);
+//		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//		frame.pack();
+//		frame.setVisible(true);
+	}
+
+	private void ShowOnTop(JPanel parent, JPanel child) {
+		parent.removeAll();
+		parent.add(child);
+		parent.repaint();
+		parent.revalidate();
 	}
 
 	{
@@ -54,36 +178,44 @@ public class LoggedInForm {
 		final JSplitPane splitPane1 = new JSplitPane();
 		panel1.add(splitPane1, new com.intellij.uiDesigner.core.GridConstraints(1, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, null, new Dimension(200, 200), null, 0, false));
 		leftPanel = new JPanel();
-		leftPanel.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(3, 1, new Insets(0, 0, 0, 0), -1, -1));
+		leftPanel.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(3, 2, new Insets(0, 0, 0, 0), -1, -1));
 		leftPanel.setBackground(new Color(-8882056));
 		splitPane1.setLeftComponent(leftPanel);
 		paymentHistoryButton = new JButton();
 		paymentHistoryButton.setBorderPainted(false);
-		paymentHistoryButton.setContentAreaFilled(true);
+		paymentHistoryButton.setContentAreaFilled(false);
+		paymentHistoryButton.setFocusPainted(false);
 		paymentHistoryButton.setText("Payment History");
-		leftPanel.add(paymentHistoryButton, new com.intellij.uiDesigner.core.GridConstraints(1, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		leftPanel.add(paymentHistoryButton, new com.intellij.uiDesigner.core.GridConstraints(1, 0, 1, 2, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		exitButton = new JButton();
 		exitButton.setBorderPainted(false);
-		exitButton.setContentAreaFilled(true);
+		exitButton.setContentAreaFilled(false);
+		exitButton.setFocusPainted(false);
 		exitButton.setText("Exit");
 		leftPanel.add(exitButton, new com.intellij.uiDesigner.core.GridConstraints(2, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		makePaymentButton = new JButton();
 		makePaymentButton.setBorderPainted(false);
-		makePaymentButton.setContentAreaFilled(true);
-		makePaymentButton.setFocusPainted(true);
+		makePaymentButton.setContentAreaFilled(false);
+		makePaymentButton.setFocusPainted(false);
 		makePaymentButton.setFocusTraversalPolicyProvider(false);
 		makePaymentButton.setHideActionText(false);
 		makePaymentButton.setInheritsPopupMenu(false);
-		makePaymentButton.setOpaque(true);
+		makePaymentButton.setOpaque(false);
 		makePaymentButton.setText("Make Payment");
-		leftPanel.add(makePaymentButton, new com.intellij.uiDesigner.core.GridConstraints(0, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-		final JPanel panel2 = new JPanel();
-		panel2.setLayout(new CardLayout(0, 0));
-		splitPane1.setRightComponent(panel2);
+		leftPanel.add(makePaymentButton, new com.intellij.uiDesigner.core.GridConstraints(0, 0, 1, 2, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		logOutButton = new JButton();
+		logOutButton.setBorderPainted(false);
+		logOutButton.setContentAreaFilled(false);
+		logOutButton.setFocusPainted(false);
+		logOutButton.setText("Log out");
+		leftPanel.add(logOutButton, new com.intellij.uiDesigner.core.GridConstraints(2, 1, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		parentPanel = new JPanel();
+		parentPanel.setLayout(new CardLayout(0, 0));
+		splitPane1.setRightComponent(parentPanel);
 		paymentPanel = new JPanel();
 		paymentPanel.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(7, 4, new Insets(10, 10, 10, 10), -1, -1));
 		paymentPanel.setVisible(true);
-		panel2.add(paymentPanel, "Card1");
+		parentPanel.add(paymentPanel, "Card1");
 		final JLabel label1 = new JLabel();
 		label1.setText("Receiver's ID");
 		paymentPanel.add(label1, new com.intellij.uiDesigner.core.GridConstraints(0, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -101,8 +233,16 @@ public class LoggedInForm {
 		label4.setText("To Currency");
 		paymentPanel.add(label4, new com.intellij.uiDesigner.core.GridConstraints(2, 2, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		fromCurrencyComboBox = new JComboBox();
+		fromCurrencyComboBox.setEditable(true);
+		fromCurrencyComboBox.setInheritsPopupMenu(true);
+		fromCurrencyComboBox.setLightWeightPopupEnabled(true);
+		final DefaultComboBoxModel defaultComboBoxModel1 = new DefaultComboBoxModel();
+		fromCurrencyComboBox.setModel(defaultComboBoxModel1);
 		paymentPanel.add(fromCurrencyComboBox, new com.intellij.uiDesigner.core.GridConstraints(1, 3, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		toCurrencyComboBox = new JComboBox();
+		toCurrencyComboBox.setEditable(true);
+		final DefaultComboBoxModel defaultComboBoxModel2 = new DefaultComboBoxModel();
+		toCurrencyComboBox.setModel(defaultComboBoxModel2);
 		paymentPanel.add(toCurrencyComboBox, new com.intellij.uiDesigner.core.GridConstraints(2, 3, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		final JLabel label5 = new JLabel();
 		label5.setText("Variable Symbol");
@@ -125,19 +265,39 @@ public class LoggedInForm {
 		sendPaymentButton.setText("Send Payment");
 		paymentPanel.add(sendPaymentButton, new com.intellij.uiDesigner.core.GridConstraints(6, 3, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		historyPanel = new JPanel();
-		historyPanel.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+		historyPanel.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(3, 2, new Insets(0, 0, 0, 0), -1, -1));
 		historyPanel.setVisible(false);
-		panel2.add(historyPanel, "Card2");
-		final JPanel panel3 = new JPanel();
-		panel3.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(2, 2, new Insets(0, 0, 0, 0), -1, -1));
-		panel1.add(panel3, new com.intellij.uiDesigner.core.GridConstraints(0, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		parentPanel.add(historyPanel, "Card2");
+		final JLabel label8 = new JLabel();
+		label8.setText("Month");
+		historyPanel.add(label8, new com.intellij.uiDesigner.core.GridConstraints(0, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		list1 = new JList();
+		historyPanel.add(list1, new com.intellij.uiDesigner.core.GridConstraints(2, 0, 1, 2, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(150, 50), null, 0, false));
+		comboBox1 = new JComboBox();
+		historyPanel.add(comboBox1, new com.intellij.uiDesigner.core.GridConstraints(0, 1, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		final com.intellij.uiDesigner.core.Spacer spacer1 = new com.intellij.uiDesigner.core.Spacer();
-		panel3.add(spacer1, new com.intellij.uiDesigner.core.GridConstraints(0, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_VERTICAL, 1, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(-1, 50), null, 0, false));
-		AccountHeader = new JLabel();
-		AccountHeader.setText("Label");
-		panel3.add(AccountHeader, new com.intellij.uiDesigner.core.GridConstraints(0, 1, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		historyPanel.add(spacer1, new com.intellij.uiDesigner.core.GridConstraints(1, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
 		final com.intellij.uiDesigner.core.Spacer spacer2 = new com.intellij.uiDesigner.core.Spacer();
-		panel3.add(spacer2, new com.intellij.uiDesigner.core.GridConstraints(1, 1, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, new Dimension(300, -1), null, 0, false));
+		historyPanel.add(spacer2, new com.intellij.uiDesigner.core.GridConstraints(1, 1, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+		homePanel = new JPanel();
+		homePanel.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+		homePanel.setBackground(new Color(-16645934));
+		parentPanel.add(homePanel, "Card3");
+		accountBalancePanel = new JPanel();
+		accountBalancePanel.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(2, 4, new Insets(0, 0, 0, 0), -1, -1));
+		panel1.add(accountBalancePanel, new com.intellij.uiDesigner.core.GridConstraints(0, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		final com.intellij.uiDesigner.core.Spacer spacer3 = new com.intellij.uiDesigner.core.Spacer();
+		accountBalancePanel.add(spacer3, new com.intellij.uiDesigner.core.GridConstraints(0, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_VERTICAL, 1, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(-1, 50), null, 0, false));
+		AccountHeader = new JLabel();
+		AccountHeader.setText("Account Balance ->");
+		accountBalancePanel.add(AccountHeader, new com.intellij.uiDesigner.core.GridConstraints(0, 1, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		final com.intellij.uiDesigner.core.Spacer spacer4 = new com.intellij.uiDesigner.core.Spacer();
+		accountBalancePanel.add(spacer4, new com.intellij.uiDesigner.core.GridConstraints(1, 1, 1, 3, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, 1, new Dimension(700, -1), new Dimension(550, -1), null, 0, false));
+		final JLabel label9 = new JLabel();
+		label9.setText("balance");
+		accountBalancePanel.add(label9, new com.intellij.uiDesigner.core.GridConstraints(0, 2, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(64, 16), null, 0, false));
+		accountBalanceComboBox = new JComboBox();
+		accountBalancePanel.add(accountBalanceComboBox, new com.intellij.uiDesigner.core.GridConstraints(0, 3, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		label1.setLabelFor(receiverSIDTextField);
 		label2.setLabelFor(amountTextField);
 		label3.setLabelFor(fromCurrencyComboBox);
