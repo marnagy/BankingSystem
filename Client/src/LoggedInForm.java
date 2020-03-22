@@ -8,6 +8,9 @@ import java.io.ObjectOutput;
 import java.util.regex.Pattern;
 
 public class LoggedInForm {
+	private static final Pattern amountPattern = Pattern.compile("(([1-9][0-9]*)|0)(\\.[0-9]{2})?");
+
+	// generated
 	private JPanel panel1;
 	private JPanel paymentPanel;
 	private JPanel historyPanel;
@@ -20,7 +23,7 @@ public class LoggedInForm {
 	private JComboBox fromCurrencyComboBox;
 	private JComboBox toCurrencyComboBox;
 	private JTextField variableSymbolTextField;
-	private JTextField textField1;
+	private JTextField specificSymbolTextField;
 	private JTextField typeHereTextField;
 	private JButton makePaymentButton;
 	private JButton sendPaymentButton;
@@ -31,8 +34,8 @@ public class LoggedInForm {
 	private JPanel homePanel;
 	private JButton logOutButton;
 	private JComboBox accountBalanceComboBox;
-	private final Pattern amountPattern = Pattern.compile("(([1-9][0-9]*)|0)(\\.[0-9]{2})?");
 
+	// custom-added
 	private final ObjectInput oi;
 	private final ObjectOutput oo;
 	private final Account account;
@@ -40,6 +43,11 @@ public class LoggedInForm {
 	private final long sessionID;
 
 	private LoggedInForm(JFrame frame, Account account, ObjectInput oi, ObjectOutput oo, long sessionID) {
+		this.account = account;
+		this.oi = oi;
+		this.oo = oo;
+		this.frame = frame;
+		this.sessionID = sessionID;
 		makePaymentButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent actionEvent) {
@@ -62,7 +70,7 @@ public class LoggedInForm {
 		exitButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent actionEvent) {
-				System.out.println("Log Out");
+				System.out.println("Exit in progress");
 
 				// close connection
 				try {
@@ -72,19 +80,50 @@ public class LoggedInForm {
 				}
 
 				// close window
-				System.out.println("Close window");
+				System.out.println("Closing window");
+				frame.dispose();
 			}
 		});
-		this.account = account;
-		this.oi = oi;
-		this.oo = oo;
-		this.frame = frame;
-		this.sessionID = sessionID;
+		sendPaymentButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent actionEvent) {
+				String msg = null;
+				String amountText = amountTextField.getText();
+				if (CheckAmount(amountText)) {
+					long amount = amountToLong(amountText);
+					if (isValidID(receiverSIDTextField.getText())) {
+						int receiverID = Integer.parseInt(receiverSIDTextField.getText());
+
+						CurrencyType fromCurr = (CurrencyType) fromCurrencyComboBox.getSelectedItem();
+						CurrencyType toCurr = (CurrencyType) toCurrencyComboBox.getSelectedItem();
+
+						if (HasEnoughMoney(account, amount, fromCurr)) {
+							try {
+								String[] symbols = {variableSymbolTextField.getText(), specificSymbolTextField.getText()};
+								Request req = new PaymentRequest(account.accountID, receiverID, amount,
+										fromCurr, toCurr, symbols, typeHereTextField.getText(), sessionID);
+								req.Send(oo);
+								CurrencyType type = CurrencyType.values()[oi.readInt()];
+
+							} catch (IOException e) {
+								msg = "Network error occurred.";
+							}
+						} else {
+							msg = "Not enough money in account.";
+						}
+					} else {
+						msg = "Incorrect format of receiver's ID.";
+					}
+				} else {
+					msg = "Incorrect format of number.";
+				}
+				MessageForm.Show(msg);
+			}
+		});
 	}
 
-	private long HasEnoughMoney(Account account, String text, CurrencyType curr) {
-		long money = account.Values.get(curr);
-		long toSend = 0;
+	private long amountToLong(String text) {
+		long res;
 		if (text.contains(".")) {
 			StringBuilder send = new StringBuilder();
 			for (int i = 0; i < text.length(); i++) {
@@ -92,15 +131,26 @@ public class LoggedInForm {
 					send.append(text.charAt(i));
 				}
 			}
-			toSend = Long.parseLong(send.toString());
+			res = Long.parseLong(send.toString());
 		} else {
-			toSend = 100 * Long.parseLong(text);
+			res = 100 * Long.parseLong(text);
 		}
-		if (money - toSend >= 0) {
-			return toSend;
-		} else {
-			return 0;
+		return res;
+	}
+
+	private boolean isValidID(String text) {
+		try {
+			int temp = Integer.parseInt(text);
+			return true;
+		} catch (NumberFormatException e) {
+			return false;
 		}
+	}
+
+	private boolean HasEnoughMoney(Account account, long amount, CurrencyType curr) {
+		long money = account.Values.get(curr);
+		boolean res = false;
+		return money - amount > 0;
 	}
 
 	private boolean CheckAmount(String text) {
@@ -109,6 +159,11 @@ public class LoggedInForm {
 
 	public static void Open(Account account, ObjectInput oi, ObjectOutput oo, long sessionID) {
 		JFrame frame = new JFrame("LoggedInForm");
+
+		// center frame
+		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+		frame.setLocation(dim.width / 2 - frame.getSize().width / 2, dim.height / 2 - frame.getSize().height / 2);
+
 		LoggedInForm loggedInForm = new LoggedInForm(frame, account, oi, oo, sessionID);
 		JPanel parent = loggedInForm.parentPanel;
 		parent.removeAll();
@@ -116,10 +171,16 @@ public class LoggedInForm {
 		parent.repaint();
 		parent.revalidate();
 
-		//set combo boxes
+		//set combo boxes values
 		loggedInForm.accountBalanceComboBox.setModel(new DefaultComboBoxModel(CurrencyType.values()));
+		loggedInForm.accountBalanceComboBox.setSelectedItem(null);
+
 		loggedInForm.fromCurrencyComboBox.setModel(new DefaultComboBoxModel(CurrencyType.values()));
+		loggedInForm.fromCurrencyComboBox.setSelectedItem(null);
+
 		loggedInForm.toCurrencyComboBox.setModel(new DefaultComboBoxModel(CurrencyType.values()));
+		loggedInForm.toCurrencyComboBox.setSelectedItem(null);
+
 
 		frame.setContentPane(loggedInForm.panel1);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -129,22 +190,6 @@ public class LoggedInForm {
 
 	public static void main(String[] args) {
 		Open(null, null, null, -1);
-//		JFrame frame = new JFrame("LoggedInForm");
-//		LoggedInForm loggedInForm = new LoggedInForm();
-//		JPanel parent = loggedInForm.parentPanel;
-//		parent.removeAll();
-//		parent.add(loggedInForm.homePanel);
-//		parent.repaint();
-//		parent.revalidate();
-//		//set combo boxes
-//		loggedInForm.accountBalanceComboBox.setModel(new DefaultComboBoxModel(CurrencyType.values()));
-//		loggedInForm.fromCurrencyComboBox.setModel(new DefaultComboBoxModel(CurrencyType.values()));
-//		loggedInForm.toCurrencyComboBox.setModel(new DefaultComboBoxModel(CurrencyType.values()));
-//
-//		frame.setContentPane(loggedInForm.panel1);
-//		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//		frame.pack();
-//		frame.setVisible(true);
 	}
 
 	private void ShowOnTop(JPanel parent, JPanel child) {
@@ -249,14 +294,14 @@ public class LoggedInForm {
 		final JLabel label6 = new JLabel();
 		label6.setText("Specific Symbol");
 		paymentPanel.add(label6, new com.intellij.uiDesigner.core.GridConstraints(4, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-		textField1 = new JTextField();
-		paymentPanel.add(textField1, new com.intellij.uiDesigner.core.GridConstraints(4, 1, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+		specificSymbolTextField = new JTextField();
+		paymentPanel.add(specificSymbolTextField, new com.intellij.uiDesigner.core.GridConstraints(4, 1, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
 		final JLabel label7 = new JLabel();
 		label7.setText("Information for receiver");
 		paymentPanel.add(label7, new com.intellij.uiDesigner.core.GridConstraints(5, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		typeHereTextField = new JTextField();
 		typeHereTextField.setText("");
-		typeHereTextField.setToolTipText("Type Here");
+		typeHereTextField.setToolTipText("Optional");
 		paymentPanel.add(typeHereTextField, new com.intellij.uiDesigner.core.GridConstraints(5, 1, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
 		sendPaymentButton = new JButton();
 		sendPaymentButton.setText("Send Payment");
@@ -300,6 +345,7 @@ public class LoggedInForm {
 		label3.setLabelFor(fromCurrencyComboBox);
 		label4.setLabelFor(toCurrencyComboBox);
 		label5.setLabelFor(variableSymbolTextField);
+		label6.setLabelFor(specificSymbolTextField);
 	}
 
 	/**

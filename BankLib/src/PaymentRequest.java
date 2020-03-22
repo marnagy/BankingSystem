@@ -7,11 +7,15 @@ import java.util.Set;
 public class PaymentRequest extends Request {
 	public final int senderAccountID, receiverAccountID;
 	public final long amount;
-	public final CurrencyType curr;
+	public final String[] symbols;
+	public final String information;
+	public final CurrencyType fromCurr, toCurr;
 	public final ZonedDateTime sendingDateTime;
 
 	// used by client
-	public PaymentRequest(int senderAccountID, int receiverAccountID, long amount, CurrencyType curr,
+	public PaymentRequest(int senderAccountID, int receiverAccountID, long amount,
+	                      CurrencyType fromCurr, CurrencyType toCurr,
+	                      String[] symbols, String information,
 	                      long sessionID){
 		super(RequestType.Payment, sessionID);
 		if (amount <= 0){
@@ -21,34 +25,46 @@ public class PaymentRequest extends Request {
 		this.receiverAccountID = receiverAccountID;
 
 		this.amount = amount;
-		this.curr = curr;
+		this.fromCurr = fromCurr;
+		this.toCurr = toCurr;
+		this.symbols = symbols;
+		this.information = information;
 		this.sendingDateTime = ZonedDateTime.now();
 	}
 	// used when reading request on server
 	private PaymentRequest(int senderAccountID, int receiverAccountID, long amount,
-	                       CurrencyType curr, ZonedDateTime dateTime, long sessionID){
+	                       CurrencyType fromCurr, CurrencyType toCurr, ZonedDateTime dateTime,
+	                       String[] symbols, String information, long sessionID){
 		super(RequestType.Payment, sessionID);
 		if (amount <= 0){
 			throw new IllegalArgumentException("Minimum amount of money to send: 0.01");
 		}
 		this.senderAccountID = senderAccountID;
 		this.receiverAccountID = receiverAccountID;
-
 		this.amount = amount;
-		this.curr = curr;
+		this.fromCurr = fromCurr;
+		this.toCurr = toCurr;
+		this.symbols = symbols;
+		this.information = information;
 		this.sendingDateTime = dateTime;
-		// ADD sendingDate
 	}
 	@Override
 	public void Send(ObjectOutput oo) throws IOException {
 		oo.writeInt(super.type.ordinal());
 		oo.writeLong(super.sessionID);
-
+		// numbers
 		oo.writeInt(senderAccountID);
 		oo.writeInt(receiverAccountID);
 		oo.writeLong(amount);
-		oo.writeInt(curr.ordinal());
+		// enum
+		oo.writeInt(fromCurr.ordinal());
+		oo.writeInt(toCurr.ordinal());
+		// ZonedDateTime
 		oo.writeObject(sendingDateTime);
+		// String
+		oo.writeUTF(symbols[0]);
+		oo.writeUTF(symbols[1]);
+		oo.writeUTF(information);
 
 		oo.flush();
 	}
@@ -60,8 +76,14 @@ public class PaymentRequest extends Request {
 		int receiverAccountID = oi.readInt();
 		// amount already check in client, no need to test here
 		long amount = oi.readLong();
-		CurrencyType curr = CurrencyType.values()[ oi.readInt() ];
+		CurrencyType fromCurr = CurrencyType.values()[ oi.readInt() ];
+		CurrencyType toCurr = CurrencyType.values()[ oi.readInt() ];
 		ZonedDateTime dateTime = (ZonedDateTime) oi.readObject();
-		return new PaymentRequest(senderAccountID, receiverAccountID, amount, curr, sessionID);
+		String variableSymbol = oi.readUTF();
+		String specificSymbol = oi.readUTF();
+		String[] symbols = {variableSymbol, specificSymbol};
+		String information = oi.readUTF();
+		return new PaymentRequest(senderAccountID, receiverAccountID, amount, fromCurr, toCurr,
+				dateTime, symbols, information, sessionID);
 	}
 }

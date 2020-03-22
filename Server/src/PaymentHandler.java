@@ -1,7 +1,12 @@
 import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 public class PaymentHandler {
 	static Set<Integer> accountIDs;
@@ -15,6 +20,7 @@ public class PaymentHandler {
 			PaymentRequest pr = PaymentRequest.ReadArgs(oi);
 			Payment payment = MakePayment(pr, accounts, errPrinter);
 			if ( payment == null ){
+				// TO-DO
 				outPrinter.println("Check receiver's ID and amount.");
 				outPrinter.flush();
 			}
@@ -34,7 +40,7 @@ public class PaymentHandler {
 		return new SuccessPaymentResponse( paymentFile.getName(), sessionID);
 	}
 
-	private static void SavePaymentToAccounts(Payment payment, String paymentFilePath, String accountsFolderPath) throws IOException {
+	private static synchronized void SavePaymentToAccounts(Payment payment, String paymentFilePath, String accountsFolderPath) throws IOException {
 		int senderAccountID = payment.senderAccountID;
 		int receiverAccountID = payment.receiverAccountID;
 		ZonedDateTime dateTime = ZonedDateTime.now();
@@ -64,13 +70,14 @@ public class PaymentHandler {
 		if (paymentFile.createNewFile()){
 			try(PrintWriter pw = new PrintWriter(paymentFile)){
 				pw.println(payment.amount);
-				pw.println(payment.curr.name());
+				pw.println("from:" + payment.fromCurr.name());
+				pw.println("to:" + payment.toCurr.name());
 			}
 		}
 		return paymentFile;
 	}
 
-	private static Payment MakePayment(PaymentRequest pr, Map<Integer, Account> accounts, PrintWriter errPrinter) throws IOException {
+	private static synchronized Payment MakePayment(PaymentRequest pr, Map<Integer, Account> accounts, PrintWriter errPrinter) throws IOException {
 		int senderID = pr.senderAccountID;
 		int receiverID = pr.receiverAccountID;
 
@@ -84,27 +91,48 @@ public class PaymentHandler {
 
 		synchronized (senderAccount){
 			synchronized (receiverAccount){
-				if (senderAccount.Values.get(pr.curr) == null){
-					senderAccount.Values.put(pr.curr, 0L);
-				}
-				Long senderAmount = senderAccount.Values.get(pr.curr);
+//				if (senderAccount.Values.get(pr.curr) == null){
+//					senderAccount.Values.put(pr.curr, 0L);
+//				}
+				Long senderAmount = senderAccount.Values.get(pr.fromCurr);
 				if (senderAmount <= pr.amount){
 					return null;
 				}
 
-				if (receiverAccount.Values.get(pr.curr) == null){
-					receiverAccount.Values.put(pr.curr, 0L);
+//				if (receiverAccount.Values.get(pr.curr) == null){
+//					receiverAccount.Values.put(pr.curr, 0L);
+//				}
+				Long receiverAmount = senderAccount.Values.get(pr.toCurr);
+				long amount = pr.amount;
+				if (pr.fromCurr != pr.toCurr){
+					amount = Convert(amount, pr.fromCurr, pr.toCurr);
 				}
-				Long receiverAmount = senderAccount.Values.get(pr.curr);
-
 				// because wrapper types are immutable
-				senderAccount.Values.put(pr.curr, senderAmount - pr.amount);
-				receiverAccount.Values.put(pr.curr, receiverAmount + pr.amount);
+				senderAccount.Values.put(pr.fromCurr, senderAmount - pr.amount);
+				receiverAccount.Values.put(pr.toCurr, receiverAmount + amount);
 				ModifyValueFiles(senderAccount,errPrinter);
 				ModifyValueFiles(receiverAccount, errPrinter);
 			}
 		}
 		return new Payment(pr);
+	}
+
+	private static synchronized long Convert(long amount, CurrencyType from, CurrencyType to){
+		try {
+			String addr = "https://api.exchangeratesapi.io/latest?symbols=" + from.name() + "," + "to";
+			URL url = new URL(addr);
+			StringBuffer sb = new StringBuffer();
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader( url.openStream() )) ){
+				reader.lines().forEach(x -> sb.append(x + "\n"));
+				System.out.println(sb);
+				return -1;
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+		return -1;
 	}
 
 	private static synchronized void ModifyValueFiles(Account Account, PrintWriter errPrinter) throws IOException {
