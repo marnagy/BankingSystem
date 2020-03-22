@@ -18,7 +18,8 @@ public class ClientGUI {
 	private Account account;
 	private JFrame frame;
 
-	public ClientGUI() {
+	public ClientGUI(JFrame frame) {
+		this.frame = frame;
 		try {
 			session = new ClientSession();
 			session.connect();
@@ -28,6 +29,7 @@ public class ClientGUI {
 			sessionID = GetSessionID(oi);
 		} catch (IOException e) {
 			MessageForm.Show("Network error.");
+			frame.dispose();
 		}
 		createAccountButton.addActionListener(new ActionListener() {
 
@@ -69,16 +71,15 @@ public class ClientGUI {
 					Response resp;
 					Request req = new LoginRequest(emailTextField.getText(), passwordPasswordField.getPassword(), sessionID);
 					req.Send(oo);
-					ResponseType respType = ResponseType.values()[oi.readInt()];
+					int val = oi.readInt();
+					ResponseType respType = ResponseType.values()[val];
 					switch (respType) {
 						case AccountInfo:
 							resp = AccountInfoResponse.ReadArgs(oi);
-							if (resp.getClass() == IllegalRequestResponse.class) {
-								msg = "Email or password are not correct. Try again.";
-							}
-							if (resp.getClass() == AccountInfoResponse.class) {
-								account = new Account((AccountInfoResponse) resp);
-							}
+							account = new Account((AccountInfoResponse) resp);
+							break;
+						case IncorrectLoginError:
+							msg = "Email or password are not correct. Try again.";
 							break;
 						default:
 							msg = "Unexpected response from server.";
@@ -90,7 +91,8 @@ public class ClientGUI {
 				if (msg != null) { // error
 					MessageForm.Show(msg);
 				} else { // successful login
-					CloseActionListener closeActionListener = new CloseActionListener(frame);
+					frame.dispose();
+					LoggedInForm.Open(account, oi, oo, sessionID);
 				}
 			}
 		});
@@ -102,7 +104,7 @@ public class ClientGUI {
 
 	public static void main(String[] args) {
 		JFrame frame = new JFrame("ClientGUI");
-		frame.setContentPane(new ClientGUI().MyPanel);
+		frame.setContentPane(new ClientGUI(frame).MyPanel);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.pack();
 		frame.setVisible(true);

@@ -1,7 +1,3 @@
-import javafx.collections.ObservableArray;
-import javafx.collections.ObservableList;
-import javafx.scene.control.ComboBox;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -9,7 +5,6 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 public class LoggedInForm {
@@ -38,12 +33,13 @@ public class LoggedInForm {
 	private JComboBox accountBalanceComboBox;
 	private final Pattern amountPattern = Pattern.compile("(([1-9][0-9]*)|0)(\\.[0-9]{2})?");
 
-	private ObjectInput oi;
-	private ObjectOutput oo;
-	private Account account;
-	private JFrame frame;
+	private final ObjectInput oi;
+	private final ObjectOutput oo;
+	private final Account account;
+	private final JFrame frame;
+	private final long sessionID;
 
-	private LoggedInForm() {
+	private LoggedInForm(JFrame frame, Account account, ObjectInput oi, ObjectOutput oo, long sessionID) {
 		makePaymentButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent actionEvent) {
@@ -66,24 +62,24 @@ public class LoggedInForm {
 		exitButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent actionEvent) {
+				System.out.println("Log Out");
+
 				// close connection
 				try {
 					oi.close();
 					oo.close();
-				}
-				catch (IOException e){
+				} catch (IOException e) {
 				}
 
 				// close window
-
+				System.out.println("Close window");
 			}
 		});
-	}
-	private LoggedInForm(Account account, ObjectInput oi, ObjectOutput oo){
-		this();
 		this.account = account;
 		this.oi = oi;
 		this.oo = oo;
+		this.frame = frame;
+		this.sessionID = sessionID;
 	}
 
 	private long HasEnoughMoney(Account account, String text, CurrencyType curr) {
@@ -111,14 +107,15 @@ public class LoggedInForm {
 		return amountPattern.matcher(text).matches();
 	}
 
-	public static void Open(Account account, ObjectInput oi, ObjectOutput oo){
+	public static void Open(Account account, ObjectInput oi, ObjectOutput oo, long sessionID) {
 		JFrame frame = new JFrame("LoggedInForm");
-		LoggedInForm loggedInForm = new LoggedInForm(account);
+		LoggedInForm loggedInForm = new LoggedInForm(frame, account, oi, oo, sessionID);
 		JPanel parent = loggedInForm.parentPanel;
 		parent.removeAll();
 		parent.add(loggedInForm.homePanel);
 		parent.repaint();
 		parent.revalidate();
+
 		//set combo boxes
 		loggedInForm.accountBalanceComboBox.setModel(new DefaultComboBoxModel(CurrencyType.values()));
 		loggedInForm.fromCurrencyComboBox.setModel(new DefaultComboBoxModel(CurrencyType.values()));
@@ -131,7 +128,7 @@ public class LoggedInForm {
 	}
 
 	public static void main(String[] args) {
-		Open(null, null, null);
+		Open(null, null, null, -1);
 //		JFrame frame = new JFrame("LoggedInForm");
 //		LoggedInForm loggedInForm = new LoggedInForm();
 //		JPanel parent = loggedInForm.parentPanel;
