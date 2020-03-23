@@ -138,16 +138,15 @@ public class LoggedInForm {
 		accountBalanceComboBox.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent actionEvent) {
-				long val = account.Values.get(accountBalanceComboBox.getSelectedItem());
-				double temp = val / 100D;
-				balanceLabel.setText(temp + "");
+				double val = account.Values.get(accountBalanceComboBox.getSelectedItem()) / 100D;
+				balanceLabel.setText(String.format("%.2f", val));
 			}
 		});
 	}
 
 	private void UpdateBalance(Account account, JLabel balanceLabel, JComboBox accountBalanceComboBox) {
 		double val = account.Values.get(accountBalanceComboBox.getSelectedItem()) / 100D;
-		balanceLabel.setText(val + "");
+		balanceLabel.setText( String.format("%.2f", val));
 	}
 
 	private long amountToLong(String text) {
