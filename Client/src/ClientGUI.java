@@ -78,7 +78,7 @@ public class ClientGUI {
 					switch (respType) {
 						case AccountInfo:
 							resp = AccountInfoResponse.ReadArgs(oi);
-							account = new Account((AccountInfoResponse) resp);
+							account = Account.fromAccountInfoResponse((AccountInfoResponse) resp);
 							break;
 						case IncorrectLoginError:
 							msg = "Email or password are not correct. Try again.";

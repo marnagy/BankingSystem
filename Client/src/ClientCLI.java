@@ -105,7 +105,7 @@ public class ClientCLI {
 							continue;
 						}
 						if (resp.getClass() == AccountInfoResponse.class){
-							account = new Account((AccountInfoResponse)resp);
+							account = Account.fromAccountInfoResponse((AccountInfoResponse)resp);
 							loggedIn = true;
 						}
 						break;

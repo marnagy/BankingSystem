@@ -13,11 +13,14 @@ public class CreateAccountHandler {
 		try {
 			if (req != null) {
 				AccountCreateRequest acr = req;
+				Account account = null;
 				//check if email is already registered
-				if (!(accounts.get(acr.email.hashCode()) != null) && CreateAccount(acr.email, acr.passwd)) {
-					resp = new SuccessResponse(sessionID);
+				if (accounts.get(acr.email.hashCode()) == null &&
+						(account = CreateAccount(acr.email, acr.passwd)) != null) {
 					int accountCreated = acr.email.hashCode();
-					accounts.put(accountCreated, new Account(acr.email) );
+					assert accountCreated == account.accountID;
+					accounts.put(accountCreated, account );
+					resp = new SuccessResponse(sessionID);
 				} else {
 					resp = new EmailAlreadySignedUpResponse(sessionID);
 				}
@@ -30,16 +33,22 @@ public class CreateAccountHandler {
 			return new AccountCreateFailResponse("Account already exists.", sessionID);
 		}
 	}
-	private static boolean CreateAccount(String email, char[] passwd) throws IOException {
+	private static Account CreateAccount(String email, char[] passwd) throws IOException {
 		File newAccountFolder = new File(MasterServerSession.AccountsFolder.getAbsolutePath() + MasterServerSession.FileSystemSeparator + email.hashCode());
+		Account account = new Account(email);
 		if ( newAccountFolder.mkdir() ) {
-			return CreateAccountInfoFile( newAccountFolder, email, passwd);
+			if (CreateAccountInfoFile( newAccountFolder, account, email, passwd)){
+				return account;
+			}
+			else {
+				return null;
+			}
 		}
 		else{
-			return false;
+			return null;
 		}
 	}
-	private static boolean CreateAccountInfoFile(File accountFolderFile, String email, char[] passwd) throws IOException {
+	private static boolean CreateAccountInfoFile(File accountFolderFile, Account account, String email, char[] passwd) throws IOException {
 		File infoFile = new File(accountFolderFile.getAbsolutePath() + MasterServerSession.FileSystemSeparator + ".info");
 		File currenciesFile = new File(accountFolderFile.getAbsolutePath() + MasterServerSession.FileSystemSeparator + ".curr");
 		if (infoFile.createNewFile() && currenciesFile.createNewFile()){
@@ -61,7 +70,7 @@ public class CreateAccountHandler {
 				//currencies File
 				CurrencyType[] currs = CurrencyType.values();
 				for ( CurrencyType curr: currs ) {
-					bwCurrenciesFile.write(curr.name() + ":" + 3000L + "\n");
+					bwCurrenciesFile.write(curr.name() + ":" + account.Values.get(curr) + "\n");
 				}
 				bwCurrenciesFile.close();
 				return true;

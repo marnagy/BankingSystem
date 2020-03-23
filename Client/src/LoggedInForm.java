@@ -138,13 +138,16 @@ public class LoggedInForm {
 		accountBalanceComboBox.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent actionEvent) {
-				balanceLabel.setText(account.Values.get(accountBalanceComboBox.getSelectedItem()).toString());
+				long val = account.Values.get(accountBalanceComboBox.getSelectedItem());
+				double temp = val / 100D;
+				balanceLabel.setText(temp + "");
 			}
 		});
 	}
 
 	private void UpdateBalance(Account account, JLabel balanceLabel, JComboBox accountBalanceComboBox) {
-		balanceLabel.setText(account.Values.get(accountBalanceComboBox.getSelectedItem()).toString());
+		double val = account.Values.get(accountBalanceComboBox.getSelectedItem()) / 100D;
+		balanceLabel.setText(val + "");
 	}
 
 	private long amountToLong(String text) {
@@ -361,11 +364,11 @@ public class LoggedInForm {
 		final com.intellij.uiDesigner.core.Spacer spacer3 = new com.intellij.uiDesigner.core.Spacer();
 		accountBalancePanel.add(spacer3, new com.intellij.uiDesigner.core.GridConstraints(1, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_VERTICAL, 1, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(-1, 50), null, 0, false));
 		AccountHeader = new JLabel();
-		AccountHeader.setText("Account Balance ->");
+		AccountHeader.setText("Account Balance");
 		accountBalancePanel.add(AccountHeader, new com.intellij.uiDesigner.core.GridConstraints(1, 1, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_EAST, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		balanceLabel = new JLabel();
 		balanceLabel.setText("current balance");
-		accountBalancePanel.add(balanceLabel, new com.intellij.uiDesigner.core.GridConstraints(1, 2, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(64, 16), null, 0, false));
+		accountBalancePanel.add(balanceLabel, new com.intellij.uiDesigner.core.GridConstraints(1, 2, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(64, 16), null, 0, false));
 		accountBalanceComboBox = new JComboBox();
 		accountBalancePanel.add(accountBalanceComboBox, new com.intellij.uiDesigner.core.GridConstraints(1, 3, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		final com.intellij.uiDesigner.core.Spacer spacer4 = new com.intellij.uiDesigner.core.Spacer();

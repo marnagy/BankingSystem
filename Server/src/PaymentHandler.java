@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 public class PaymentHandler {
 	static Set<Integer> accountIDs;
 	static long sessionID;
-	public static synchronized Response Run(PrintWriter outPrinter, PrintWriter errPrinter,
+	public static Response Run(PrintWriter outPrinter, PrintWriter errPrinter,
 	                                        ObjectInput oi, ObjectOutput oo, Map<Integer, Account> accounts,
 	                                        long sessionID) throws IOException {
 		String paymentFilePath = null; // just init
@@ -61,12 +61,14 @@ public class PaymentHandler {
 		}
 	}
 
-	private static File CreatePaymentFile(Payment payment, PrintWriter errPrinter) throws IOException {
+	private static synchronized File CreatePaymentFile(Payment payment, PrintWriter errPrinter) throws IOException {
+//		String sendingDate = DateTimeToString(payment.sendingDateTime);
+//		String receivedDate = DateTimeToString(payment.receivedDateTime);
+
 		String paymentFileName = MasterServerSession.PaymentsFolder.getAbsolutePath() + MasterServerSession.FileSystemSeparator
 				+ payment.senderAccountID + "_" + payment.receiverAccountID + "_"
-				+ payment.sendingDateTime + "_" + payment.receivedDateTime + ".payment";
+				+ payment.sendingDateTime.getNano() + "_" + payment.receivedDateTime.getNano() + ".payment";
 		File paymentFile = new File(paymentFileName);
-		String paymentFilePath = paymentFile.getAbsolutePath();
 		if (paymentFile.createNewFile()){
 			try(PrintWriter pw = new PrintWriter(paymentFile)){
 				pw.println(payment.amount);
@@ -75,6 +77,24 @@ public class PaymentHandler {
 			}
 		}
 		return paymentFile;
+	}
+
+	private static String DateTimeToString(ZonedDateTime dateTime) {
+		StringBuilder sb = new StringBuilder();
+
+		sb.append(dateTime.getYear());
+		sb.append('_');
+		sb.append(dateTime.getMonthValue());
+		sb.append('_');
+		sb.append(dateTime.getDayOfMonth());
+		sb.append('-');
+		sb.append(dateTime.getHour());
+		sb.append(':');
+		sb.append(dateTime.getMinute());
+		sb.append('_');
+		sb.append(dateTime.getSecond());
+
+		return sb.toString();
 	}
 
 	private static synchronized Payment MakePayment(PaymentRequest pr, Map<Integer, Account> accounts, PrintWriter errPrinter) throws IOException {
@@ -91,17 +111,10 @@ public class PaymentHandler {
 
 		synchronized (senderAccount){
 			synchronized (receiverAccount){
-//				if (senderAccount.Values.get(pr.curr) == null){
-//					senderAccount.Values.put(pr.curr, 0L);
-//				}
 				Long senderAmount = senderAccount.Values.get(pr.fromCurr);
 				if (senderAmount <= pr.amount){
 					return null;
 				}
-
-//				if (receiverAccount.Values.get(pr.curr) == null){
-//					receiverAccount.Values.put(pr.curr, 0L);
-//				}
 				Long receiverAmount = senderAccount.Values.get(pr.toCurr);
 				long amount = pr.amount;
 				if (pr.fromCurr != pr.toCurr){
@@ -117,7 +130,7 @@ public class PaymentHandler {
 		return new Payment(pr);
 	}
 
-	private static synchronized long Convert(long amount, CurrencyType from, CurrencyType to){
+	private static long Convert(long amount, CurrencyType from, CurrencyType to){
 		try {
 			String addr = "https://api.exchangeratesapi.io/latest?symbols=" + from.name() + "," + "to";
 			URL url = new URL(addr);

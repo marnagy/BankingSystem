@@ -7,8 +7,11 @@ public class Account {
 	public Account(String email){
 		this.accountID = email.hashCode();
 		Values = new Hashtable<CurrencyType, Long>();
+		for ( CurrencyType curr: CurrencyType.values() ) {
+			Values.put(curr, 3000L);
+		}
 	}
-	public Account(AccountInfoResponse air){
+	private Account(AccountInfoResponse air){
 		accountID = air.accountID;
 		this.Values = air.Values;
 	}
@@ -22,5 +25,8 @@ public class Account {
 			payments = new ArrayList<Payment>();
 			return res;
 		}
+	}
+	public static Account fromAccountInfoResponse(AccountInfoResponse air){
+		return new Account(air);
 	}
 }
