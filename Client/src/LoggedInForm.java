@@ -34,6 +34,7 @@ public class LoggedInForm {
 	private JPanel homePanel;
 	private JButton logOutButton;
 	private JComboBox accountBalanceComboBox;
+	private JLabel balanceLabel;
 
 	// custom-added
 	private final ObjectInput oi;
@@ -103,7 +104,21 @@ public class LoggedInForm {
 								Request req = new PaymentRequest(account.accountID, receiverID, amount,
 										fromCurr, toCurr, symbols, typeHereTextField.getText(), sessionID);
 								req.Send(oo);
-								CurrencyType type = CurrencyType.values()[oi.readInt()];
+								ResponseType respType = ResponseType.values()[oi.readInt()];
+								switch (respType) {
+									case InvalidReceiverIDResponse:
+										msg = "Invalid receiver ID.";
+										break;
+									case SuccessPaymentResponse:
+										long valBefore = account.Values.get(fromCurr);
+										account.Values.put(fromCurr, valBefore - amount);
+										msg = "Payment sent and processed.";
+										UpdateBalance(account, balanceLabel, accountBalanceComboBox);
+										break;
+									default:
+										msg = "Unknown response error occurred.";
+										break;
+								}
 
 							} catch (IOException e) {
 								msg = "Network error occurred.";
@@ -120,6 +135,16 @@ public class LoggedInForm {
 				MessageForm.Show(msg);
 			}
 		});
+		accountBalanceComboBox.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent actionEvent) {
+				balanceLabel.setText(account.Values.get(accountBalanceComboBox.getSelectedItem()).toString());
+			}
+		});
+	}
+
+	private void UpdateBalance(Account account, JLabel balanceLabel, JComboBox accountBalanceComboBox) {
+		balanceLabel.setText(account.Values.get(accountBalanceComboBox.getSelectedItem()).toString());
 	}
 
 	private long amountToLong(String text) {
@@ -173,14 +198,13 @@ public class LoggedInForm {
 
 		//set combo boxes values
 		loggedInForm.accountBalanceComboBox.setModel(new DefaultComboBoxModel(CurrencyType.values()));
-		loggedInForm.accountBalanceComboBox.setSelectedItem(null);
+		//loggedInForm.accountBalanceComboBox.setSelectedItem(null);
 
 		loggedInForm.fromCurrencyComboBox.setModel(new DefaultComboBoxModel(CurrencyType.values()));
-		loggedInForm.fromCurrencyComboBox.setSelectedItem(null);
+		//loggedInForm.fromCurrencyComboBox.setSelectedItem(null);
 
 		loggedInForm.toCurrencyComboBox.setModel(new DefaultComboBoxModel(CurrencyType.values()));
-		loggedInForm.toCurrencyComboBox.setSelectedItem(null);
-
+		//loggedInForm.toCurrencyComboBox.setSelectedItem(null);
 
 		frame.setContentPane(loggedInForm.panel1);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -323,29 +347,54 @@ public class LoggedInForm {
 		historyPanel.add(spacer2, new com.intellij.uiDesigner.core.GridConstraints(1, 1, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
 		homePanel = new JPanel();
 		homePanel.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
-		homePanel.setBackground(new Color(-16645934));
+		homePanel.setBackground(new Color(-11775918));
+		homePanel.setEnabled(false);
 		parentPanel.add(homePanel, "Card3");
+		final JLabel label9 = new JLabel();
+		Font label9Font = this.$$$getFont$$$("Comic Sans MS", Font.BOLD | Font.ITALIC, 48, label9.getFont());
+		if (label9Font != null) label9.setFont(label9Font);
+		label9.setText("Home Screen");
+		homePanel.add(label9, new com.intellij.uiDesigner.core.GridConstraints(0, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		accountBalancePanel = new JPanel();
 		accountBalancePanel.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(2, 4, new Insets(0, 0, 0, 0), -1, -1));
 		panel1.add(accountBalancePanel, new com.intellij.uiDesigner.core.GridConstraints(0, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		final com.intellij.uiDesigner.core.Spacer spacer3 = new com.intellij.uiDesigner.core.Spacer();
-		accountBalancePanel.add(spacer3, new com.intellij.uiDesigner.core.GridConstraints(0, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_VERTICAL, 1, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(-1, 50), null, 0, false));
+		accountBalancePanel.add(spacer3, new com.intellij.uiDesigner.core.GridConstraints(1, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_VERTICAL, 1, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(-1, 50), null, 0, false));
 		AccountHeader = new JLabel();
 		AccountHeader.setText("Account Balance ->");
-		accountBalancePanel.add(AccountHeader, new com.intellij.uiDesigner.core.GridConstraints(0, 1, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-		final com.intellij.uiDesigner.core.Spacer spacer4 = new com.intellij.uiDesigner.core.Spacer();
-		accountBalancePanel.add(spacer4, new com.intellij.uiDesigner.core.GridConstraints(1, 1, 1, 3, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, 1, new Dimension(700, -1), new Dimension(550, -1), null, 0, false));
-		final JLabel label9 = new JLabel();
-		label9.setText("balance");
-		accountBalancePanel.add(label9, new com.intellij.uiDesigner.core.GridConstraints(0, 2, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(64, 16), null, 0, false));
+		accountBalancePanel.add(AccountHeader, new com.intellij.uiDesigner.core.GridConstraints(1, 1, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_EAST, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		balanceLabel = new JLabel();
+		balanceLabel.setText("current balance");
+		accountBalancePanel.add(balanceLabel, new com.intellij.uiDesigner.core.GridConstraints(1, 2, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(64, 16), null, 0, false));
 		accountBalanceComboBox = new JComboBox();
-		accountBalancePanel.add(accountBalanceComboBox, new com.intellij.uiDesigner.core.GridConstraints(0, 3, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		accountBalancePanel.add(accountBalanceComboBox, new com.intellij.uiDesigner.core.GridConstraints(1, 3, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		final com.intellij.uiDesigner.core.Spacer spacer4 = new com.intellij.uiDesigner.core.Spacer();
+		accountBalancePanel.add(spacer4, new com.intellij.uiDesigner.core.GridConstraints(0, 1, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
 		label1.setLabelFor(receiverSIDTextField);
 		label2.setLabelFor(amountTextField);
 		label3.setLabelFor(fromCurrencyComboBox);
 		label4.setLabelFor(toCurrencyComboBox);
 		label5.setLabelFor(variableSymbolTextField);
 		label6.setLabelFor(specificSymbolTextField);
+	}
+
+	/**
+	 * @noinspection ALL
+	 */
+	private Font $$$getFont$$$(String fontName, int style, int size, Font currentFont) {
+		if (currentFont == null) return null;
+		String resultName;
+		if (fontName == null) {
+			resultName = currentFont.getName();
+		} else {
+			Font testFont = new Font(fontName, Font.PLAIN, 10);
+			if (testFont.canDisplay('a') && testFont.canDisplay('1')) {
+				resultName = fontName;
+			} else {
+				resultName = currentFont.getName();
+			}
+		}
+		return new Font(resultName, style >= 0 ? style : currentFont.getStyle(), size >= 0 ? size : currentFont.getSize());
 	}
 
 	/**

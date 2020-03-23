@@ -281,10 +281,21 @@
                   <card name="Card3"/>
                 </constraints>
                 <properties>
-                  <background color="-16645934"/>
+                  <background color="-11775918"/>
+                  <enabled value="false"/>
                 </properties>
                 <border type="none"/>
-                <children/>
+                <children>
+                  <component id="cf60a" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <font name="Comic Sans MS" size="48" style="3"/>
+                      <text value="Home Screen"/>
+                    </properties>
+                  </component>
+                </children>
               </grid>
             </children>
           </grid>
@@ -300,43 +311,40 @@
         <children>
           <vspacer id="8334d">
             <constraints>
-              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false">
+              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false">
                 <preferred-size width="-1" height="50"/>
               </grid>
             </constraints>
           </vspacer>
           <component id="9c0d5" class="javax.swing.JLabel" binding="AccountHeader">
             <constraints>
-              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <text value="Account Balance -&gt;"/>
             </properties>
           </component>
-          <hspacer id="f35d1">
+          <component id="9efee" class="javax.swing.JLabel" binding="balanceLabel">
             <constraints>
-              <grid row="1" column="1" row-span="1" col-span="3" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false">
-                <minimum-size width="700" height="-1"/>
-                <preferred-size width="550" height="-1"/>
-              </grid>
-            </constraints>
-          </hspacer>
-          <component id="9efee" class="javax.swing.JLabel">
-            <constraints>
-              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+              <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
                 <preferred-size width="64" height="16"/>
               </grid>
             </constraints>
             <properties>
-              <text value="balance"/>
+              <text value="current balance"/>
             </properties>
           </component>
           <component id="4c52e" class="javax.swing.JComboBox" binding="accountBalanceComboBox">
             <constraints>
-              <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+              <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties/>
           </component>
+          <hspacer id="e569c">
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+          </hspacer>
         </children>
       </grid>
     </children>

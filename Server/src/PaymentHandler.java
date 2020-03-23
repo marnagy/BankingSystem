@@ -142,7 +142,7 @@ public class PaymentHandler {
 		+ ".curr"))){
 			Set<CurrencyType> keySet = Values.keySet();
 			for ( CurrencyType curr: keySet) {
-				bw.write( curr.name() + ":" + Values.get(curr));
+				bw.write( curr.name() + ":" + Values.get(curr) + "\n");
 			}
 		}
 
