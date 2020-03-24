@@ -88,7 +88,7 @@ public class ServerSession extends Thread {
 						break;
 					case End:
 						EndRequest eReq = EndRequest.ReadArgs(oi);
-						if ( ! LogOut() ){
+						if ( userID == null || ! loggedIn ){
 							resp = new IllegalRequestResponse(sessionID);
 						}
 						else{
@@ -98,15 +98,15 @@ public class ServerSession extends Thread {
 						}
 						break;
 					case Logout:
+						LogOutRequest LOReq = LogOutRequest.ReadArgs(oi);
 						if (!loggedIn){
 							resp = new IllegalRequestResponse(sessionID);
 							break;
 						}
 						else{
-							LogOutRequest LOReq = LogOutRequest.ReadArgs(oi);
 							resp = new SuccessResponse(sessionID);
+							logout = true;
 						}
-						logout = true;
 						break;
 					default:
 						resp = new IllegalRequestResponse(sessionID);
@@ -120,6 +120,7 @@ public class ServerSession extends Thread {
 					accountCreated = null;
 				}
 				if (logout){
+					logout = false;
 					userID = null;
 					loggedIn = false;
 				}
@@ -151,15 +152,6 @@ public class ServerSession extends Thread {
 		}
 		outPrinter.println("Thread " + sessionID + " ended.");
 		outPrinter.flush();
-	}
-
-	private boolean LogOut() {
-		if (userID == null){
-			return false;
-		}
-		loggedUsers.remove(userID);
-		userID = null;
-		return true;
 	}
 
 	private void SetInputOutput(Socket s) throws IOException {
