@@ -18,7 +18,7 @@ public class SuccessPaymentResponse extends Response {
 		oo.flush();
 	}
 	public static SuccessPaymentResponse ReadArgs(ObjectInput oi) throws IOException{
-		int sessionID = oi.readInt();
+		long sessionID = oi.readLong();
 		String paymentFileName = oi.readUTF();
 		return new SuccessPaymentResponse(paymentFileName, sessionID);
 	}

@@ -3,6 +3,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
+import java.util.regex.Pattern;
 
 public class ClientGUI {
 	private JPanel MyPanel;
@@ -18,19 +19,19 @@ public class ClientGUI {
 	private Account account;
 	private JFrame frame;
 
-	public ClientGUI(JFrame frame) {
-		this.frame = frame;
-		try {
-			session = new ClientSession();
-			session.connect();
-			oo = new ObjectOutputStream(session.getOutputStream());
-			oi = new ObjectInputStream(session.getInputStream());
+	private static final Pattern emailPattern = Pattern.compile("^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$");
 
-			sessionID = GetSessionID(oi);
-		} catch (IOException e) {
-			MessageForm.Show("Network error.");
-			frame.dispose();
-		}
+	public ClientGUI(JFrame frame, ClientSession session, ObjectInput oi, ObjectOutput oo) {
+		this.frame = frame;
+		this.session = session;
+//		try {
+
+			//sessionID = GetSessionID(oi);
+			sessionID = session.sessionID;
+//		} catch (IOException e) {
+//			MessageForm.Show("Network error.");
+//			frame.dispose();
+//		}
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 		frame.setLocation(dim.width / 2 - frame.getSize().width / 2, dim.height / 2 - frame.getSize().height / 2);
 		createAccountButton.addActionListener(new ActionListener() {
@@ -39,7 +40,10 @@ public class ClientGUI {
 			public void actionPerformed(ActionEvent actionEvent) {
 				String msg = null;
 				try {
-
+					if (!CheckEmail(emailTextField.getText())) {
+						MessageForm.Show("Incorrect email format.");
+						return;
+					}
 					Request req = new AccountCreateRequest(emailTextField.getText(), passwordPasswordField.getPassword(), sessionID);
 					req.Send(oo);
 					ResponseType respType = ResponseType.values()[oi.readInt()];
@@ -53,6 +57,7 @@ public class ClientGUI {
 							msg = "Account created.";
 							break;
 						case EmailAlreadySignedUp:
+							Response resp = EmailAlreadySignedUpResponse.ReadArgs(oi);
 							msg = "Email already exists.";
 							break;
 						default:
@@ -94,20 +99,36 @@ public class ClientGUI {
 					MessageForm.Show(msg);
 				} else { // successful login
 					frame.dispose();
-					LoggedInForm.Open(account, oi, oo, sessionID);
+					LoggedInForm.Open(account, oi, oo, session, sessionID);
 				}
 			}
 		});
+	}
+
+	private boolean CheckEmail(String text) {
+		return emailPattern.matcher(text).matches();
 	}
 
 	private long GetSessionID(ObjectInput oi) throws IOException {
 		return oi.readLong();
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		JFrame frame = new JFrame("ClientGUI");
-		frame.setContentPane(new ClientGUI(frame).MyPanel);
+		ClientSession session = new ClientSession();
+		ObjectInput oi = new ObjectInputStream(session.getInputStream());
+		ObjectOutput oo = new ObjectOutputStream(session.getOutputStream());
+		session.getID(oi);
+		frame.setContentPane(new ClientGUI(frame, session, oi, oo).MyPanel);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.pack();
+		frame.setVisible(true);
+	}
+
+	public static void Open(ClientSession session, ObjectInput oi, ObjectOutput oo) {
+		JFrame frame = new JFrame("ClientGUI");
+		frame.setContentPane(new ClientGUI(frame, session, oi, oo).MyPanel);
+		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.pack();
 		frame.setVisible(true);
 	}

@@ -19,7 +19,6 @@ public class ClientCLI {
 			Request req;
 			Response resp;
 				ClientSession session = new ClientSession();
-				session.connect();
 				oo = new ObjectOutputStream(session.getOutputStream());
 				oi = new ObjectInputStream(session.getInputStream());
 				pw.println("Connected");

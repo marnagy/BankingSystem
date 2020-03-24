@@ -87,11 +87,24 @@ public class ServerSession extends Thread {
 						resp = PaymentHandler.Run(outPrinter, errPrinter, oi, oo, accounts, sessionID);
 						break;
 					case End:
-						endSession = true;
+						EndRequest eReq = EndRequest.ReadArgs(oi);
+						if ( ! LogOut() ){
+							resp = new IllegalRequestResponse(sessionID);
+						}
+						else{
+							resp = new SuccessResponse(sessionID);
+							logout = true;
+							endSession = true;
+						}
+						break;
 					case Logout:
 						if (!loggedIn){
 							resp = new IllegalRequestResponse(sessionID);
 							break;
+						}
+						else{
+							LogOutRequest LOReq = LogOutRequest.ReadArgs(oi);
+							resp = new SuccessResponse(sessionID);
 						}
 						logout = true;
 						break;
@@ -111,13 +124,27 @@ public class ServerSession extends Thread {
 					loggedIn = false;
 				}
 				if (endSession){
+					socket.close();
 					break;
 				}
 			}
 		} catch (IOException e){
-			errPrinter.println("IOException occurred (mostly client disconnected)");
-			e.printStackTrace(errPrinter);
-			errPrinter.flush();
+			synchronized (errPrinter) {
+				errPrinter.println("IOException occurred (mostly client suddenly disconnected)");
+				e.printStackTrace(errPrinter);
+				errPrinter.flush();
+			}
+			try {
+				if (!socket.isClosed()){
+					socket.close();
+				}
+			} catch (IOException ex) {
+				synchronized (errPrinter) {
+					errPrinter.println("IOException occurred during ");
+					ex.printStackTrace(errPrinter);
+					errPrinter.flush();
+				}
+			}
 		}
 		synchronized (threadIDs){
 			threadIDs.remove(sessionID);
@@ -126,9 +153,18 @@ public class ServerSession extends Thread {
 		outPrinter.flush();
 	}
 
+	private boolean LogOut() {
+		if (userID == null){
+			return false;
+		}
+		loggedUsers.remove(userID);
+		userID = null;
+		return true;
+	}
+
 	private void SetInputOutput(Socket s) throws IOException {
-		oi = new ObjectInputStream(socket.getInputStream());
 		oo = new ObjectOutputStream(socket.getOutputStream());
+		oi = new ObjectInputStream(socket.getInputStream());
 	}
 	private void SendSessionID(Socket socket) throws IOException {
 		long l = Long.parseLong(this.getName());

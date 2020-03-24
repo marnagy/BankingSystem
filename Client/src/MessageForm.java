@@ -25,7 +25,7 @@ public class MessageForm {
 		MessageForm msgForm = new MessageForm();
 		msgForm.label.setText(msg);
 		msgForm.frame.setContentPane(msgForm.panel1);
-		msgForm.frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		msgForm.frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		msgForm.frame.pack();
 		msgForm.frame.setVisible(true);
 	}

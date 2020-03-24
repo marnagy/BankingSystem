@@ -1,3 +1,4 @@
+import javax.security.sasl.SaslClientFactory;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -5,6 +6,7 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.net.Socket;
 import java.util.regex.Pattern;
 
 public class LoggedInForm {
@@ -42,12 +44,15 @@ public class LoggedInForm {
 	private final Account account;
 	private final JFrame frame;
 	private final long sessionID;
+	private final ClientSession session;
 
-	private LoggedInForm(JFrame frame, Account account, ObjectInput oi, ObjectOutput oo, long sessionID) {
+	private LoggedInForm(JFrame frame, Account account, ObjectInput oi, ObjectOutput oo,
+	                     ClientSession session, long sessionID) {
 		this.account = account;
 		this.oi = oi;
 		this.oo = oo;
 		this.frame = frame;
+		this.session = session;
 		this.sessionID = sessionID;
 		makePaymentButton.addActionListener(new ActionListener() {
 			@Override
@@ -71,17 +76,22 @@ public class LoggedInForm {
 		exitButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent actionEvent) {
-				System.out.println("Exit in progress");
-
 				// close connection
 				try {
-					oi.close();
-					oo.close();
+					Request req = new EndRequest(sessionID);
+					req.Send(oo);
+					ResponseType respType = ResponseType.values()[oi.readInt()];
+					if (respType != ResponseType.Success) {
+						MessageForm.Show("Error occurred during exiting out.");
+						return;
+					} else {
+						Response resp = SuccessResponse.ReadArgs(oi);
+						session.close();
+					}
 				} catch (IOException e) {
 				}
 
 				// close window
-				System.out.println("Closing window");
 				frame.dispose();
 			}
 		});
@@ -110,6 +120,7 @@ public class LoggedInForm {
 										msg = "Invalid receiver ID.";
 										break;
 									case SuccessPaymentResponse:
+										SuccessPaymentResponse resp = SuccessPaymentResponse.ReadArgs(oi);
 										long valBefore = account.Values.get(fromCurr);
 										account.Values.put(fromCurr, valBefore - amount);
 										msg = "Payment sent and processed.";
@@ -142,11 +153,31 @@ public class LoggedInForm {
 				balanceLabel.setText(String.format("%.2f", val));
 			}
 		});
+		logOutButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent actionEvent) {
+// close connection
+				try {
+					Request req = new LogOutRequest(sessionID);
+					req.Send(oo);
+					ResponseType respType = ResponseType.values()[oi.readInt()];
+					if (respType != ResponseType.Success) {
+						MessageForm.Show("Error occurred during logging out.");
+						return;
+					} else {
+						Response resp = SuccessResponse.ReadArgs(oi);
+						ClientGUI.Open(session, oi, oo);
+						frame.dispose();
+					}
+				} catch (IOException e) {
+				}
+			}
+		});
 	}
 
 	private void UpdateBalance(Account account, JLabel balanceLabel, JComboBox accountBalanceComboBox) {
 		double val = account.Values.get(accountBalanceComboBox.getSelectedItem()) / 100D;
-		balanceLabel.setText( String.format("%.2f", val));
+		balanceLabel.setText(String.format("%.2f", val));
 	}
 
 	private long amountToLong(String text) {
@@ -184,14 +215,14 @@ public class LoggedInForm {
 		return amountPattern.matcher(text).matches();
 	}
 
-	public static void Open(Account account, ObjectInput oi, ObjectOutput oo, long sessionID) {
+	public static void Open(Account account, ObjectInput oi, ObjectOutput oo, ClientSession session, long sessionID) {
 		JFrame frame = new JFrame("LoggedInForm");
 
 		// center frame
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 		frame.setLocation(dim.width / 2 - frame.getSize().width / 2, dim.height / 2 - frame.getSize().height / 2);
 
-		LoggedInForm loggedInForm = new LoggedInForm(frame, account, oi, oo, sessionID);
+		LoggedInForm loggedInForm = new LoggedInForm(frame, account, oi, oo, session, sessionID);
 		JPanel parent = loggedInForm.parentPanel;
 		parent.removeAll();
 		parent.add(loggedInForm.homePanel);
@@ -215,7 +246,7 @@ public class LoggedInForm {
 	}
 
 	public static void main(String[] args) {
-		Open(null, null, null, -1);
+		Open(null, null, null, null, -1);
 	}
 
 	private void ShowOnTop(JPanel parent, JPanel child) {

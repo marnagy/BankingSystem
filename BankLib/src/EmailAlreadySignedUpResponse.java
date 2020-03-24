@@ -14,7 +14,8 @@ public class EmailAlreadySignedUpResponse extends Response {
 		oo.flush();
 	}
 
-	public static Response ReadArgs(ObjectInput oi) throws IOException, ArgsException {
-		throw new RuntimeException("Method not yet implemented");
+	public static EmailAlreadySignedUpResponse ReadArgs(ObjectInput oi) throws IOException {
+		long sessionID = oi.readLong();
+		return new EmailAlreadySignedUpResponse(sessionID);
 	}
 }

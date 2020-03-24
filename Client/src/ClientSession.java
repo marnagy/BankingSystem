@@ -1,19 +1,14 @@
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
 
-public class ClientSession {
-    Socket socket;
+public final class ClientSession {
+    private final Socket socket;
     final String host;
     final int port;
+    Long sessionID = null;
     public ClientSession() throws IOException {
         host = "localhost";
         port = 5000;
-    }
-
-    public void connect() throws IOException {
-        //socket = SSLSocketFactory.getDefault().createSocket("localhost", 5000);
         socket = new Socket(host, port);
     }
 
@@ -22,5 +17,13 @@ public class ClientSession {
     }
     public InputStream getInputStream() throws IOException {
         return socket.getInputStream();
+    }
+    public void close() throws IOException {
+        socket.close();
+    }
+
+    public Object getID(ObjectInput oi) throws IOException {
+        sessionID = oi.readLong();
+        return sessionID;
     }
 }
