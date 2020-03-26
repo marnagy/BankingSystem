@@ -5,6 +5,7 @@ public class Payment {
 	public final long amount;
 	public final CurrencyType fromCurr, toCurr;
 	public final ZonedDateTime sendingDateTime, receivedDateTime;
+	public PaymentCategory category;
 	public Payment(PaymentRequest pr) {
 		receivedDateTime = ZonedDateTime.now();
 
@@ -14,5 +15,6 @@ public class Payment {
 		fromCurr = pr.fromCurr;
 		toCurr = pr.toCurr;
 		sendingDateTime = pr.sendingDateTime;
+		category = PaymentCategory.Other;
 	}
 }

@@ -24,14 +24,7 @@ public class ClientGUI {
 	public ClientGUI(JFrame frame, ClientSession session, ObjectInput oi, ObjectOutput oo) {
 		this.frame = frame;
 		this.session = session;
-//		try {
-
-			//sessionID = GetSessionID(oi);
-			sessionID = session.sessionID;
-//		} catch (IOException e) {
-//			MessageForm.Show("Network error.");
-//			frame.dispose();
-//		}
+		this.sessionID = session.sessionID;
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 		frame.setLocation(dim.width / 2 - frame.getSize().width / 2, dim.height / 2 - frame.getSize().height / 2);
 		createAccountButton.addActionListener(new ActionListener() {
