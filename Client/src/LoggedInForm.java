@@ -207,7 +207,6 @@ public class LoggedInForm {
 
 	private boolean HasEnoughMoney(Account account, long amount, CurrencyType curr) {
 		long money = account.Values.get(curr);
-		boolean res = false;
 		return money - amount > 0;
 	}
 

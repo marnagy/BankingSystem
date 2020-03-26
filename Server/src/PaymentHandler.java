@@ -40,7 +40,7 @@ public class PaymentHandler {
 		return new SuccessPaymentResponse( paymentFile.getName(), sessionID);
 	}
 
-	private static synchronized void SavePaymentToAccounts(Payment payment, String paymentFilePath, String accountsFolderPath) throws IOException {
+	private static synchronized void SavePaymentToAccounts(Payment payment, String paymentFileName, String accountsFolderPath) throws IOException {
 		int senderAccountID = payment.senderAccountID;
 		int receiverAccountID = payment.receiverAccountID;
 		ZonedDateTime dateTime = ZonedDateTime.now();
@@ -53,11 +53,11 @@ public class PaymentHandler {
 				+ receiverAccountID + MasterServerSession.FileSystemSeparator + year + "_" + month);
 		currMonthPaymentsSenderFile.createNewFile(); // if not created, create new empty file
 		try (FileWriter fw = new FileWriter(currMonthPaymentsSenderFile.getAbsolutePath(), true)){
-			fw.write( paymentFilePath + ":" + "Unknown" + "\n");
+			fw.write( paymentFileName + ":" + "Unknown" + "\n");
 		}
 		currMonthPaymentsReceiverFile.createNewFile(); // if not created, create new empty file
 		try (FileWriter fw = new FileWriter(currMonthPaymentsReceiverFile.getAbsolutePath(), true)){
-			fw.write( paymentFilePath + ":" + "Unknown" + "\n");
+			fw.write( paymentFileName + ":" + "Unknown" + "\n");
 		}
 	}
 

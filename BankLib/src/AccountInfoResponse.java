@@ -1,12 +1,16 @@
 import java.io.*;
+import java.net.FileNameMap;
 import java.nio.file.FileSystems;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.ZonedDateTime;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.regex.Pattern;
+
 
 public class AccountInfoResponse extends Response {
 
-	public final Map<CurrencyType, Long> Values = new HashMap<CurrencyType, Long>();
-
+	public final Dictionary<CurrencyType, Long> Values = new Hashtable<CurrencyType, Long>();
+	public final Dictionary<MonthYear, Payment[]> History = new Hashtable<MonthYear, Payment[]>();
 	public final int accountID;
 
 //	public AccountInfoResponse(String email){
@@ -25,10 +29,9 @@ public class AccountInfoResponse extends Response {
 
 	public AccountInfoResponse(String email, File accountDir, long sessionID){
 		super(ResponseType.AccountInfo, sessionID);
-		//this.email = email;
 		accountID = email.hashCode();
 		File currFile = new File(accountDir.getAbsolutePath() + FileSystems.getDefault().getSeparator() + ".curr");
-		try(BufferedReader br = new BufferedReader(new FileReader(currFile))) {
+		try( BufferedReader br = new BufferedReader(new FileReader(currFile)) ) {
 			String line;
 			String[] lineParts;
 			long l;
@@ -43,6 +46,17 @@ public class AccountInfoResponse extends Response {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		ZonedDateTime dateTime = ZonedDateTime.now();
+		FilenameFilter filter = (File file, String s) ->
+				Pattern.matches( dateTime.getYear() + "_" + dateTime.getMonthValue(), s);
+		// file for current month exists
+		if ( accountDir.list(filter).length == 1 ){
+			// CONTINUE HERE
+		}
+		else{
+
+			History.put(new MonthYear(dateTime), null);
+		}
 	}
 	@Override
 	void Send(ObjectOutput oo) throws IOException {
@@ -50,13 +64,16 @@ public class AccountInfoResponse extends Response {
 		oo.writeLong(super.sessionID);
 		oo.writeInt(accountID);
 		int size = Values.size();
-		CurrencyType[] currs = new CurrencyType[size];
-		Values.keySet().toArray(currs);
+
 		oo.writeInt(size);
-		for ( CurrencyType curr: currs) {
-			oo.writeInt(curr.ordinal());
-			oo.writeLong(Values.get(curr));
-		}
+		Values.keys().asIterator().forEachRemaining((x) -> {
+			try {
+				oo.writeInt(x.ordinal());
+				oo.writeLong(Values.get(x));
+			} catch (IOException e) {
+				throw new Error("ObjectOutput IOException");
+			}
+		});
 
 		oo.flush();
 	}
