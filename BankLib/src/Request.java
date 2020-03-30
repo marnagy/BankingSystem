@@ -13,7 +13,7 @@ public abstract class Request {
     // used by client
     public abstract void Send(ObjectOutput oo) throws IOException;
     // used by server
-    public static Request ReadArgs(ObjectInput oi) throws IOException, ArgsException, ClassNotFoundException {
+    public static Request ReadArgs(ObjectInput oi) throws IOException {
         assert false;
         return null;
     }

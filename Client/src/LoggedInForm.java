@@ -34,7 +34,7 @@ public class LoggedInForm {
 	private JComboBox accountBalanceComboBox;
 	private JLabel balanceLabel;
 	private JComboBox monthComboBox;
-	private JPanel monthhistoryPanel;
+	private JPanel monthHistoryPanel;
 
 	// custom-added
 	private final ObjectInput oi;

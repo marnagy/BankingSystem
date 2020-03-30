@@ -13,8 +13,8 @@ public class ServerSession extends Thread {
 	Integer userID = null;
 
 	// on account number get active thread or null
-	Map<Integer, ServerSession> threadMap;
-	final Map<Integer, Account> accounts;
+	Dictionary<Integer, ServerSession> threadMap;
+	final Dictionary<Integer, Account> accounts;
 	final Set<Integer> loggedUsers;
 	final Set<Long> threadIDs;
 
@@ -24,8 +24,8 @@ public class ServerSession extends Thread {
 	ObjectInput oi;
 	ObjectOutput oo;
 
-	public ServerSession(Socket socket, Set<Integer> loggedUsers, Map<Integer, Account> accounts,
-	                     Map<Integer, ServerSession> accountToThread, long sessionID,
+	public ServerSession(Socket socket, Set<Integer> loggedUsers, Dictionary<Integer, Account> accounts,
+	                     Dictionary<Integer, ServerSession> accountToThread, long sessionID,
 	                     PrintWriter outWriter, PrintWriter errWriter, Set<Long> threadIDs) throws IOException {
 		this.socket = socket;
 		this.accounts = accounts;
@@ -85,6 +85,9 @@ public class ServerSession extends Thread {
 						break;
 					case Payment:
 						resp = PaymentHandler.Run(outPrinter, errPrinter, oi, oo, accounts, sessionID);
+						break;
+					case AccountHistory:
+						resp = AccountHistoryHandler.Run(outPrinter, errPrinter, oi, oo, accounts, sessionID);
 						break;
 					case End:
 						EndRequest eReq = EndRequest.ReadArgs(oi);

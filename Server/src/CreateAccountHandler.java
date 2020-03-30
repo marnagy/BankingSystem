@@ -1,13 +1,14 @@
 import java.io.*;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Dictionary;
 import java.util.Map;
 import java.util.Set;
 
 public class CreateAccountHandler {
 	static AccountCreateRequest req;
 	static Response resp;
-	public static Response Run(final ObjectInput oi, final Map<Integer, Account> accounts, long sessionID) {
+	public static Response Run(final ObjectInput oi, final Dictionary<Integer, Account> accounts, long sessionID) {
 		req = AccountCreateRequest.ReadArgs(oi);
 
 		try {

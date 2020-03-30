@@ -4,15 +4,14 @@ import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.time.ZonedDateTime;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class PaymentHandler {
 	static Set<Integer> accountIDs;
 	static long sessionID;
 	public static Response Run(PrintWriter outPrinter, PrintWriter errPrinter,
-	                                        ObjectInput oi, ObjectOutput oo, Map<Integer, Account> accounts,
+	                                        ObjectInput oi, ObjectOutput oo, Dictionary<Integer, Account> accounts,
 	                                        long sessionID) throws IOException {
 		String paymentFilePath = null; // just init
 		File paymentFile = null;
@@ -62,9 +61,6 @@ public class PaymentHandler {
 	}
 
 	private static synchronized File CreatePaymentFile(Payment payment, PrintWriter errPrinter) throws IOException {
-//		String sendingDate = DateTimeToString(payment.sendingDateTime);
-//		String receivedDate = DateTimeToString(payment.receivedDateTime);
-
 		String paymentFileName = MasterServerSession.PaymentsFolder.getAbsolutePath() + MasterServerSession.FileSystemSeparator
 				+ payment.senderAccountID + "_" + payment.receiverAccountID + "_"
 				+ payment.sendingDateTime.getNano() + "_" + payment.receivedDateTime.getNano() + ".payment";
@@ -74,30 +70,13 @@ public class PaymentHandler {
 				pw.println(payment.amount);
 				pw.println("from:" + payment.fromCurr.name());
 				pw.println("to:" + payment.toCurr.name());
+				pw.println("category:" + payment.category.name());
 			}
 		}
 		return paymentFile;
 	}
 
-	private static String DateTimeToString(ZonedDateTime dateTime) {
-		StringBuilder sb = new StringBuilder();
-
-		sb.append(dateTime.getYear());
-		sb.append('_');
-		sb.append(dateTime.getMonthValue());
-		sb.append('_');
-		sb.append(dateTime.getDayOfMonth());
-		sb.append('-');
-		sb.append(dateTime.getHour());
-		sb.append(':');
-		sb.append(dateTime.getMinute());
-		sb.append('_');
-		sb.append(dateTime.getSecond());
-
-		return sb.toString();
-	}
-
-	private static synchronized Payment MakePayment(PaymentRequest pr, Map<Integer, Account> accounts, PrintWriter errPrinter) throws IOException {
+	private static synchronized Payment MakePayment(PaymentRequest pr, Dictionary<Integer, Account> accounts, PrintWriter errPrinter) throws IOException {
 		int senderID = pr.senderAccountID;
 		int receiverID = pr.receiverAccountID;
 
@@ -149,11 +128,11 @@ public class PaymentHandler {
 	}
 
 	private static synchronized void ModifyValueFiles(Account Account, PrintWriter errPrinter) throws IOException {
-		Map<CurrencyType, Long> Values = Account.Values;
+		Dictionary<CurrencyType, Long> Values = Account.Values;
 		try( var bw = new BufferedWriter( new FileWriter(MasterServerSession.AccountsFolder.getAbsolutePath()
 		+ MasterServerSession.FileSystemSeparator + Account.accountID + MasterServerSession.FileSystemSeparator
 		+ ".curr"))){
-			Set<CurrencyType> keySet = Values.keySet();
+			Set<CurrencyType> keySet = Collections.synchronizedSet(new HashSet(Collections.list(Values.keys())) );
 			for ( CurrencyType curr: keySet) {
 				bw.write( curr.name() + ":" + Values.get(curr) + "\n");
 			}
