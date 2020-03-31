@@ -1,6 +1,5 @@
-import java.io.File;
-import java.io.IOException;
-import java.io.ObjectOutput;
+import javax.naming.InvalidNameException;
+import java.io.*;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.regex.Pattern;
@@ -11,6 +10,7 @@ public class Payment {
 	public final CurrencyType fromCurr, toCurr;
 	public final ZonedDateTime sendingDateTime, receivedDateTime;
 	public PaymentCategory category;
+
 	public Payment(PaymentRequest pr) {
 		this(pr.senderAccountID, pr.receiverAccountID, pr.amount, pr.fromCurr, pr.toCurr,
 				pr.sendingDateTime, ZonedDateTime.now(), PaymentCategory.Other);
@@ -38,13 +38,28 @@ public class Payment {
 		oo.writeInt(category.ordinal());
 		oo.flush();
 	}
-	public static Payment FromFile(File paymentFile) throws IOException {
+	public static Payment FromFile(File paymentFile) throws IOException, InvalidFormatException {
+		if (!paymentFile.getName().endsWith(".payment")){
+			throw new InvalidFormatException("Payment file doesn't end with '.payment'");
+		}
 		String[] nameParts = paymentFile.getName().split("_");
 		if (nameParts.length == 4){
 			int senderAccountID = Integer.parseInt(nameParts[0]);
 			int receiverAccountID = Integer.parseInt(nameParts[1]);
-			//ZonedDateTime sendingDateTime = ZonedDateTime.
-			return null;
+			ZonedDateTime sendingDateTime = Destringify(nameParts[2]);
+			ZonedDateTime receivedDateTime = Destringify(nameParts[3]);
+			CurrencyType fromCurr;
+			CurrencyType toCurr;
+			PaymentCategory category;
+			long amount;
+			try(BufferedReader br = new BufferedReader(new FileReader(paymentFile))){
+				amount = Long.parseLong(br.readLine());
+				fromCurr = CurrencyType.valueOf(br.readLine().split(":")[1]);
+				toCurr = CurrencyType.valueOf(br.readLine().split(":")[1]);
+				category = PaymentCategory.valueOf(br.readLine().split(":")[1]);
+			}
+			return new Payment(senderAccountID, receiverAccountID, amount, fromCurr, toCurr,
+					sendingDateTime, receivedDateTime, category);
 		}
 		else{
 			throw new IOException("Illegal name of file: " + paymentFile.getAbsolutePath());

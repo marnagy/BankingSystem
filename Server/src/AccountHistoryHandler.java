@@ -20,8 +20,11 @@ public class AccountHistoryHandler {
 							MasterServerSession.FileSystemSeparator + lineParts[0]) ) );
 				}
 			}
+			return new PaymentHistoryResponse(history, sessionID);
 		}
-		catch (IOException e){
+		catch (Exception e){
+			e.printStackTrace(errPrinter);
+			errPrinter.flush();
 			return new IllegalRequestResponse(sessionID);
 		}
 	}

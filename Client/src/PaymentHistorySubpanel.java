@@ -5,12 +5,20 @@ public class PaymentHistorySubpanel extends JPanel {
 
 	public PaymentHistorySubpanel(Account account, Payment payment) {
 		super(new GridLayout(1, 5));
-		if ()
-		this.add(new JLabel("Sender:" + payment.senderAccountID));
-		this.add(new JLabel("Receiver:" + payment.receiverAccountID));
-		String temp = "Amount " + (payment.amount / 100D) + " " + payment.fromCurr + " to " + payment.toCurr;
-		this.add(new JLabel(temp));
-		this.add(new JLabel("Category: " + payment.category));
+		if (account.accountID == payment.senderAccountID){
+
+		}
+		else if (account.accountID == payment.receiverAccountID){
+
+		}
+		else{
+			assert false;
+		}
+//		this.add(new JLabel("Sender:" + payment.senderAccountID));
+//		this.add(new JLabel("Receiver:" + payment.receiverAccountID));
+//		String temp = "Amount " + (payment.amount / 100D) + " " + payment.fromCurr + " to " + payment.toCurr;
+//		this.add(new JLabel(temp));
+//		this.add(new JLabel("Category: " + payment.category));
 	}
 
 	// for test

@@ -29,7 +29,7 @@ public class MasterServerSession {
 	static final Set<Integer> loggedUsers = Collections.synchronizedSet(new HashSet<Integer>());
 
 	// insert account ID, get ServerSession or null if the user is logged in currently
-	static final Map<Integer, ServerSession> threads = new Hashtable<Integer, ServerSession>();
+	static final Dictionary<Integer, ServerSession> threads = new Hashtable<Integer, ServerSession>();
 
 	// for unique ID for each thread/session
 	// used for authentication
@@ -38,7 +38,7 @@ public class MasterServerSession {
 	// all valid account IDs, loaded from appropriate folder
 	// new are added
 	//static final Set<Integer> accountIDs = Collections.synchronizedSet(new HashSet<Integer>());
-	static final Map<Integer, Account> accounts = new Hashtable<Integer, Account>();
+	static final Dictionary<Integer, Account> accounts = new Hashtable<Integer, Account>();
 
 	// random variable
 	static final Random rand = new Random(System.nanoTime());
@@ -116,7 +116,7 @@ public class MasterServerSession {
 		}
 	}
 
-	private static void LoadAccountFromDir(File accountsDir, Map<Integer,Account> accounts) {
+	private static void LoadAccountFromDir(File accountsDir, Dictionary<Integer,Account> accounts) {
 		int accountID = Integer.parseInt(accountsDir.getName());
 		File infoFile = new File(accountsDir.getAbsolutePath() + FileSystemSeparator
 		+ ".info");
