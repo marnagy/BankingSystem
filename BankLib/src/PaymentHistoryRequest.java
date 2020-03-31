@@ -1,22 +1,21 @@
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.time.LocalDate;
 
 public class PaymentHistoryRequest extends Request {
 	public final MonthYear monthYear;
 	public final int accountID;
-	private PaymentHistoryRequest(long sessionID){
+	private PaymentHistoryRequest(int accountID, MonthYear date, long sessionID){
 		super(RequestType.AccountHistory, sessionID);
+		this.accountID = accountID;
+		monthYear = date;
 	}
 	public PaymentHistoryRequest(MonthYear monthYear, Account account, long sessionID){
-		this(sessionID);
-		this.monthYear = monthYear;
-		this.accountID = account.accountID;
+		this(account.accountID, monthYear, sessionID);
 	}
 	private PaymentHistoryRequest(MonthYear monthYear, int accountID, long sessionID){
-		this(sessionID);
-		this.monthYear = monthYear;
-		this.accountID = accountID;
+		this(accountID, monthYear, sessionID);
 	}
 
 	@Override

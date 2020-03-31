@@ -1,3 +1,4 @@
+import java.time.LocalDate;
 import java.time.Month;
 import java.time.ZonedDateTime;
 
@@ -16,5 +17,9 @@ public class MonthYear {
 	public MonthYear(ZonedDateTime datetime) {
 		this.year = datetime.getYear();
 		this.month = datetime.getMonth();
+	}
+	public MonthYear(LocalDate date) {
+		this.year = date.getYear();
+		this.month = date.getMonth();
 	}
 }

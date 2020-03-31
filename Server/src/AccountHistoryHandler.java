@@ -10,11 +10,14 @@ public class AccountHistoryHandler {
 		try {
 			PaymentHistoryRequest req = PaymentHistoryRequest.ReadArgs(oi);
 			final List<Payment> history = new ArrayList<Payment>();
-			File historyFile = new File( MasterServerSession.AccountsFolder.getAbsolutePath() + MasterServerSession.FileSystemSeparator
+			File monthHistoryFile = new File( MasterServerSession.AccountsFolder.getAbsolutePath() + MasterServerSession.FileSystemSeparator
 			+ req.accountID + MasterServerSession.FileSystemSeparator + req.monthYear.year + "_" + req.monthYear.month);
-			if ( historyFile.exists() ) {
-				try(BufferedReader br = new BufferedReader( new FileReader(historyFile.getAbsolutePath()))){
-
+			if ( monthHistoryFile.exists() ) {
+				String[] lineParts;
+				try(BufferedReader br = new BufferedReader( new FileReader(monthHistoryFile.getAbsolutePath()))){
+					lineParts = br.readLine().split(":");
+					history.add( Payment.FromFile( new File(MasterServerSession.PaymentsFolder.getAbsolutePath() +
+							MasterServerSession.FileSystemSeparator + lineParts[0]) ) );
 				}
 			}
 		}
