@@ -63,7 +63,7 @@ public class PaymentHandler {
 	private static synchronized File CreatePaymentFile(Payment payment, PrintWriter errPrinter) throws IOException {
 		String paymentFileName = MasterServerSession.PaymentsFolder.getAbsolutePath() + MasterServerSession.FileSystemSeparator
 				+ payment.senderAccountID + "_" + payment.receiverAccountID + "_"
-				+ Stringify(payment.sendingDateTime) + "_" + Stringify(payment.receivedDateTime) + ".payment";
+				+ Payment.Stringify(payment.sendingDateTime) + "_" + Payment.Stringify(payment.receivedDateTime) + ".payment";
 		File paymentFile = new File(paymentFileName);
 		if (paymentFile.createNewFile()){
 			try(PrintWriter pw = new PrintWriter(paymentFile)){
@@ -74,11 +74,6 @@ public class PaymentHandler {
 			}
 		}
 		return paymentFile;
-	}
-
-	private static String Stringify(ZonedDateTime datetime){
-		return String.format("%02d%02d%04d-%02d%02d", datetime.getDayOfMonth(), datetime.getMonthValue(),
-				datetime.getYear(), datetime.getHour(), datetime.getMinute());
 	}
 
 	private static synchronized Payment MakePayment(PaymentRequest pr, Dictionary<Integer, Account> accounts, PrintWriter errPrinter) throws IOException {

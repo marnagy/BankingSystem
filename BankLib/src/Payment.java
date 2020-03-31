@@ -18,7 +18,6 @@ public class Payment {
 	private Payment(int senderID, int receiverID, long amount, CurrencyType fromCurr, CurrencyType toCurr,
 	                ZonedDateTime sendingDateTime, ZonedDateTime receivedDateTime, PaymentCategory category){
 		this.receivedDateTime = receivedDateTime;
-
 		this.senderAccountID = senderID;
 		this.receiverAccountID = receiverID;
 		this.amount = amount;
@@ -27,14 +26,28 @@ public class Payment {
 		this.sendingDateTime = sendingDateTime;
 		this.category = category;
 	}
+
+	public static Payment FromObjInput(ObjectInput oi) throws IOException {
+		int senderAccountID = oi.readInt();
+		int receiverAccountID = oi.readInt();
+		long amount = oi.readLong();
+		CurrencyType fromCurr =  CurrencyType.values()[oi.readInt()];
+		CurrencyType toCurr = CurrencyType.values()[oi.readInt()];
+		ZonedDateTime sendingDateTime = Destringify(oi.readUTF());
+		ZonedDateTime receivedDateTime = Destringify(oi.readUTF());
+		PaymentCategory category = PaymentCategory.values()[oi.readInt()];
+		return new Payment(senderAccountID, receiverAccountID, amount, fromCurr, toCurr,
+				sendingDateTime, receivedDateTime, category);
+	}
+
 	public void Send(ObjectOutput oo) throws IOException {
 		oo.writeInt(senderAccountID);
 		oo.writeInt(receiverAccountID);
 		oo.writeLong(amount);
 		oo.writeInt(fromCurr.ordinal());
 		oo.writeInt(toCurr.ordinal());
-		oo.writeInt(sendingDateTime.getNano());
-		oo.writeInt(receivedDateTime.getNano());
+		oo.writeUTF(Stringify(sendingDateTime));
+		oo.writeUTF(Stringify(receivedDateTime));
 		oo.writeInt(category.ordinal());
 		oo.flush();
 	}
@@ -79,5 +92,10 @@ public class Payment {
 		int minutes = time % 100;
 		return datetime.withHour(hour).withMinute(minutes).
 				withYear(year).withMonth(month).withDayOfMonth(day);
+	}
+
+	public static String Stringify(ZonedDateTime datetime){
+		return String.format("%02d%02d%04d-%02d%02d", datetime.getDayOfMonth(), datetime.getMonthValue(),
+				datetime.getYear(), datetime.getHour(), datetime.getMinute());
 	}
 }

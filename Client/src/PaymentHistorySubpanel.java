@@ -6,10 +6,10 @@ public class PaymentHistorySubpanel extends JPanel {
 	public PaymentHistorySubpanel(Account account, Payment payment) {
 		super(new GridLayout(1, 5));
 		if (account.accountID == payment.senderAccountID){
-
+			// CONTINUE HERE
 		}
 		else if (account.accountID == payment.receiverAccountID){
-
+			// CONTINUE HERE
 		}
 		else{
 			assert false;
