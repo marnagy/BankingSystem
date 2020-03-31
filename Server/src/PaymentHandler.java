@@ -13,7 +13,6 @@ public class PaymentHandler {
 	public static Response Run(PrintWriter outPrinter, PrintWriter errPrinter,
 	                                        ObjectInput oi, ObjectOutput oo, Dictionary<Integer, Account> accounts,
 	                                        long sessionID) throws IOException {
-		String paymentFilePath = null; // just init
 		File paymentFile = null;
 		try {
 			PaymentRequest pr = PaymentRequest.ReadArgs(oi);

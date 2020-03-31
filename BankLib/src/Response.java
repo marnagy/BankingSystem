@@ -14,7 +14,7 @@ public abstract class Response {
 	abstract void Send(ObjectOutput oo) throws IOException;
 	// used for reading arguments of the response
 	// used by client
-	public static Response ReadArgs(ObjectInput oi) throws IOException, ArgsException{
+	public static Response ReadArgs(ObjectInput oi) throws IOException, ArgsException, InvalidFormatException {
 		assert false;
 		return null;
 	}
