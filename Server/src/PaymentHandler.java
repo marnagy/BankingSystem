@@ -14,9 +14,10 @@ public class PaymentHandler {
 	                                        ObjectInput oi, ObjectOutput oo, Dictionary<Integer, Account> accounts,
 	                                        long sessionID) throws IOException {
 		File paymentFile = null;
+		Payment payment = null;
 		try {
 			PaymentRequest pr = PaymentRequest.ReadArgs(oi);
-			Payment payment = MakePayment(pr, accounts, errPrinter);
+			payment = MakePayment(pr, accounts, errPrinter);
 			if ( payment == null ){
 				// TO-DO
 				outPrinter.println("Check receiver's ID and amount.");
@@ -35,7 +36,7 @@ public class PaymentHandler {
 			e.printStackTrace(errPrinter);
 			return new UnknownErrorResponse("Server error", sessionID);
 		}
-		return new SuccessPaymentResponse( paymentFile.getName(), sessionID);
+		return new SuccessPaymentResponse( payment, sessionID);
 	}
 
 	private static synchronized void SavePaymentToAccounts(Payment payment, String paymentFileName, String accountsFolderPath) throws IOException {

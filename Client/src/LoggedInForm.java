@@ -71,8 +71,11 @@ public class LoggedInForm {
 				parentPanel.add(historyPanel);
 				parentPanel.repaint();
 				parentPanel.revalidate();
-
-
+				try {
+					UpdateHistoryPanel();
+				} catch (IOException e) {
+					MessageForm.Show("IO Error occurred");
+				}
 			}
 		});
 		exitButton.addActionListener(new ActionListener() {
@@ -112,6 +115,7 @@ public class LoggedInForm {
 
 						if (HasEnoughMoney(account, amount, fromCurr)) {
 							try {
+								ZonedDateTime dateTime = ZonedDateTime.now();
 								String[] symbols = {variableSymbolTextField.getText(), specificSymbolTextField.getText()};
 								Request req = new PaymentRequest(account.accountID, receiverID, amount,
 										fromCurr, toCurr, symbols, typeHereTextField.getText(), sessionID);
@@ -127,6 +131,7 @@ public class LoggedInForm {
 										account.Values.put(fromCurr, valBefore - amount);
 										msg = "Payment sent and processed.";
 										UpdateBalance(account, balanceLabel, accountBalanceComboBox);
+										UpdatePaymentHistory(resp);
 										break;
 									default:
 										msg = "Unknown response error occurred.";
@@ -175,6 +180,58 @@ public class LoggedInForm {
 				}
 			}
 		});
+	}
+
+	private void UpdatePaymentHistory(SuccessPaymentResponse resp) {
+		ZonedDateTime datetime = resp.payment.sendingDateTime;
+		MonthYear now = new MonthYear(datetime);
+		Payment[] gotArr = account.History.get(now);
+		Payment[] arr;
+		if ( gotArr == null) {
+			arr = new Payment[1];
+		} else {
+			arr = new Payment[gotArr.length + 1];
+			System.arraycopy(gotArr, 0, arr, 1, gotArr.length);
+		}
+		arr[0] = resp.payment;
+		account.History.put(now, arr);
+	}
+
+	private void UpdateHistoryPanel() throws IOException {
+		if (account.History.get((MonthYear) monthComboBox.getSelectedItem()) == null) {
+			monthHistoryPanel.removeAll();
+
+			Request req = new PaymentHistoryRequest((MonthYear) monthComboBox.getSelectedItem(), account, sessionID);
+			req.Send(oo);
+			ResponseType respType = ResponseType.values()[oi.readInt()];
+			String msg = null;
+			switch (respType) {
+				case PaymentHistoryResponse:
+					PaymentHistoryResponse resp = PaymentHistoryResponse.ReadArgs(oi);
+					for (Payment payment : resp.history) {
+						try {
+							monthHistoryPanel.add(new PaymentHistorySubpanel(account, payment));
+						} catch (InvalidFormatException e) {
+							System.err.println("Invalid payment received");
+						}
+					}
+					break;
+				case IllegalRequestResponse:
+					msg = "Illegal request received by server";
+					break;
+				default:
+					msg = "Unknown response from server";
+					break;
+			}
+			if (msg != null) { // problem
+				MessageForm.Show(msg);
+			} else {
+				monthHistoryPanel.revalidate();
+				monthHistoryPanel.repaint();
+			}
+		} else {
+
+		}
 	}
 
 	private void UpdateBalance(Account account, JLabel balanceLabel, JComboBox accountBalanceComboBox) {
@@ -240,17 +297,17 @@ public class LoggedInForm {
 		loggedInForm.toCurrencyComboBox.setModel(new DefaultComboBoxModel(CurrencyType.values()));
 		loggedInForm.toCurrencyComboBox.setSelectedItem(null);
 
-		MonthYear current = new MonthYear(ZonedDateTime.now());
-		MonthYear i = current;
+		MonthYear i = new MonthYear(ZonedDateTime.now());
 		MonthYear created = new MonthYear(account.created);
 		ArrayList<MonthYear> list = new ArrayList<MonthYear>();
-		while (! i.equals(created)){
+		while (!i.equals(created)) {
 			list.add(i);
 			i = i.getOneSooner();
 		}
 		list.add(created);
 
 		loggedInForm.monthComboBox.setModel(new DefaultComboBoxModel(list.toArray()));
+
 
 		frame.setContentPane(loggedInForm.panel1);
 		//frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -391,10 +448,10 @@ public class LoggedInForm {
 		monthHistoryPanel = new JPanel();
 		monthHistoryPanel.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
 		scrollPane2.setViewportView(monthHistoryPanel);
-		monthComboBox = new JComboBox();
-		historyPanel.add(monthComboBox, new com.intellij.uiDesigner.core.GridConstraints(0, 1, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		final com.intellij.uiDesigner.core.Spacer spacer1 = new com.intellij.uiDesigner.core.Spacer();
 		historyPanel.add(spacer1, new com.intellij.uiDesigner.core.GridConstraints(1, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+		monthComboBox = new JComboBox();
+		historyPanel.add(monthComboBox, new com.intellij.uiDesigner.core.GridConstraints(0, 1, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		homePanel = new JPanel();
 		homePanel.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
 		homePanel.setBackground(new Color(-11775918));

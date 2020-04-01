@@ -6,7 +6,7 @@ public class Account {
 	public final int accountID;
 	public final ZonedDateTime created;
 	public final Dictionary<CurrencyType, Long> Values;
-	public final Dictionary<MonthYear, Payment> payments = new Hashtable<MonthYear, Payment>();
+	public final Dictionary<MonthYear, Payment[]> History = new Hashtable<MonthYear, Payment[]>();
 	public Account(String email){
 		this.accountID = email.hashCode();
 		Values = new Hashtable<CurrencyType, Long>();

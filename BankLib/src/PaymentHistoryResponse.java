@@ -26,7 +26,7 @@ public class PaymentHistoryResponse extends Response {
 
 		oo.flush();
 	}
-	public static Response ReadArgs(ObjectInput oi) throws IOException {
+	public static PaymentHistoryResponse ReadArgs(ObjectInput oi) throws IOException {
 		long sessionID = oi.readLong();
 		int size = oi.readInt();
 		Payment[] history = new Payment[size];
