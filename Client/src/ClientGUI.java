@@ -75,8 +75,12 @@ public class ClientGUI {
 					ResponseType respType = ResponseType.values()[val];
 					switch (respType) {
 						case AccountInfo:
-							resp = AccountInfoResponse.ReadArgs(oi);
-							account = Account.fromAccountInfoResponse((AccountInfoResponse) resp);
+							try {
+								resp = AccountInfoResponse.ReadArgs(oi);
+								account = Account.fromAccountInfoResponse((AccountInfoResponse) resp);
+							} catch (ClassNotFoundException e) {
+								msg = "Received incorrect format of payment history.";
+							}
 							break;
 						case IncorrectLoginError:
 							msg = "Email or password are not correct. Try again.";

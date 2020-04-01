@@ -99,13 +99,20 @@ public class ClientCLI {
 						pw.flush();
 						continue;
 					case AccountInfo:
-						resp = AccountInfoResponse.ReadArgs(oi);
-						if (resp.getClass() == IllegalRequestResponse.class) {
-							continue;
+						try {
+							resp = AccountInfoResponse.ReadArgs(oi);
+
+							if (resp.getClass() == IllegalRequestResponse.class) {
+								continue;
+							}
+							if (resp.getClass() == AccountInfoResponse.class) {
+								account = Account.fromAccountInfoResponse((AccountInfoResponse) resp);
+								loggedIn = true;
+							}
 						}
-						if (resp.getClass() == AccountInfoResponse.class){
-							account = Account.fromAccountInfoResponse((AccountInfoResponse)resp);
-							loggedIn = true;
+						catch (ClassNotFoundException e){
+							System.err.println("Class Not Found Exception");
+							e.printStackTrace(System.err);
 						}
 						break;
 					default:

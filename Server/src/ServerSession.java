@@ -69,7 +69,7 @@ public class ServerSession extends Thread {
 							LoginRequest LoginReq = (LoginRequest) req;
 							if (AccountCheck(LoginReq)){
 								// accountDir has to exist (AccountCheck checks it)
-								resp = new AccountInfoResponse(LoginReq.email, new File(MasterServerSession.AccountsFolder.getCanonicalPath() +
+								resp = new AccountInfoResponse(new File(MasterServerSession.AccountsFolder.getCanonicalPath() +
 										MasterServerSession.FileSystemSeparator + LoginReq.email.hashCode()), sessionID);
 								loggedUsers.add(LoginReq.email.hashCode());
 								this.userID = LoginReq.email.hashCode();

@@ -1,5 +1,6 @@
 import java.io.*;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Map;
@@ -56,16 +57,14 @@ public class CreateAccountHandler {
 			try (BufferedWriter bwInfoFile = new BufferedWriter(new FileWriter(infoFile));
 			     BufferedWriter bwCurrenciesFile = new BufferedWriter(new FileWriter(currenciesFile))){
 				//hash of email will be accountID
-				bwInfoFile.write(email + "\n");
+					bwInfoFile.write(email + "\n");
 				int salt = MasterServerSession.rand.nextInt();
-				bwInfoFile.write(salt + "\n");
+					bwInfoFile.write(salt + "\n");
 				int passwdHash = Arrays.hashCode(passwd);
 				int checkHash = email.hashCode() + salt + passwdHash;
-				bwInfoFile.write(checkHash + "\n");
-				LocalDateTime creationDateTime = LocalDateTime.now();
-				bwInfoFile.write(creationDateTime.getYear() + "_" + creationDateTime.getMonthValue() + "_" +
-						creationDateTime.getDayOfMonth() + "-" +
-						creationDateTime.getHour() + ":" + creationDateTime.getMinute() + "\n");
+					bwInfoFile.write(checkHash + "\n");
+				ZonedDateTime creationDateTime = ZonedDateTime.now();
+					bwInfoFile.write(Payment.Stringify(creationDateTime) + "\n");
 				//bwInfoFile.close();
 
 				//currencies File

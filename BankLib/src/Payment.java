@@ -78,7 +78,7 @@ public class Payment {
 			throw new IOException("Illegal name of file: " + paymentFile.getAbsolutePath());
 		}
 	}
-	private static ZonedDateTime Destringify(String text){
+	public static ZonedDateTime Destringify(String text){
 		ZonedDateTime datetime = ZonedDateTime.now();
 		String[] textPart = text.split("-");
 		long date = Long.parseLong(textPart[0]);

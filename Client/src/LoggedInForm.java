@@ -5,6 +5,8 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 public class LoggedInForm {
@@ -206,8 +208,7 @@ public class LoggedInForm {
 	}
 
 	private boolean HasEnoughMoney(Account account, long amount, CurrencyType curr) {
-		long money = account.Values.get(curr);
-		return money - amount > 0;
+		return account.Values.get(curr) - amount > 0;
 	}
 
 	private boolean CheckAmount(String text) {
@@ -234,13 +235,26 @@ public class LoggedInForm {
 		loggedInForm.balanceLabel.setText(String.format("%.2f", account.Values.get(CurrencyType.EUR) / 100D));
 
 		loggedInForm.fromCurrencyComboBox.setModel(new DefaultComboBoxModel(CurrencyType.values()));
-		//loggedInForm.fromCurrencyComboBox.setSelectedItem(null);
+		loggedInForm.fromCurrencyComboBox.setSelectedItem(null);
 
 		loggedInForm.toCurrencyComboBox.setModel(new DefaultComboBoxModel(CurrencyType.values()));
-		//loggedInForm.toCurrencyComboBox.setSelectedItem(null);
+		loggedInForm.toCurrencyComboBox.setSelectedItem(null);
+
+		MonthYear current = new MonthYear(ZonedDateTime.now());
+		MonthYear i = current;
+		MonthYear created = new MonthYear(account.created);
+		ArrayList<MonthYear> list = new ArrayList<MonthYear>();
+		while (! i.equals(created)){
+			list.add(i);
+			i = i.getOneSooner();
+		}
+		list.add(created);
+
+		loggedInForm.monthComboBox.setModel(new DefaultComboBoxModel(list.toArray()));
 
 		frame.setContentPane(loggedInForm.panel1);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		//frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.pack();
 		frame.setVisible(true);
 	}

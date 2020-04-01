@@ -1,8 +1,10 @@
 import java.io.File;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 public class Account {
 	public final int accountID;
+	public final ZonedDateTime created;
 	public final Dictionary<CurrencyType, Long> Values;
 	public final Dictionary<MonthYear, Payment> payments = new Hashtable<MonthYear, Payment>();
 	public Account(String email){
@@ -11,28 +13,18 @@ public class Account {
 		for ( CurrencyType curr: CurrencyType.values() ) {
 			Values.put(curr, 3000L);
 		}
+		// current Date
+		this.created = ZonedDateTime.now();
 	}
 	private Account(AccountInfoResponse air){
 		accountID = air.accountID;
 		this.Values = air.Values;
+		this.created = air.created;
 	}
-	private Account(int accountID){
+	private Account(int accountID, ZonedDateTime created){
 		this.accountID = accountID;
 		Values = new Hashtable<CurrencyType, Long>();
-	}
-	public static Account FromDictionary(File accountFile, File paymentsDict){
-		Account account = new Account(Integer.parseInt(accountFile.getName()));
-//		File[] files = accountFile.listFiles();
-//		for (File file: files ) {
-//			String[] nameParts;
-//			// check if info file or curr (current balance) file
-//			if ( !( file.getName().endsWith(".info") || file.getName().endsWith(".curr") )){
-//				nameParts = file.getName().split("_");
-//				int year = Integer.parseInt(nameParts[0]);
-//				int month = Integer.parseInt(nameParts[1]);
-//			}
-//		}
-		return account;
+		this.created = created;
 	}
 	public static Account fromAccountInfoResponse(AccountInfoResponse air){
 		return new Account(air);
