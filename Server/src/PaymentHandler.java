@@ -1,11 +1,12 @@
+import com.sun.mail.smtp.SMTPTransport;
+
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
 import java.time.ZonedDateTime;
 import java.util.*;
-import java.util.stream.Stream;
+import javax.mail.*;
+import javax.mail.internet.*;
 
 public class PaymentHandler {
 	static Set<Integer> accountIDs;
@@ -29,19 +30,19 @@ public class PaymentHandler {
 				}
 			}
 			else{
-				Run(outPrinter, errPrinter, pr, accounts, sessionID);
+				payment = Run(outPrinter, errPrinter, pr, accounts, sessionID);
 				return new SuccessPaymentResponse( payment, sessionID);
 			}
 
 		} catch (IOException e) {
 			e.printStackTrace(errPrinter);
-			return new UnknownErrorResponse("I/O error", sessionID);
-		} catch (ClassNotFoundException e) {
+			return new UnknownErrorResponse("I/O error: " + e.getMessage(), sessionID);
+		} catch (ClassNotFoundException | NullPointerException e) {
 			e.printStackTrace(errPrinter);
-			return new UnknownErrorResponse("Server error", sessionID);
+			return new UnknownErrorResponse("Server error: " + e.getMessage(), sessionID);
 		}
 	}
-	public static void Run(PrintWriter outPrinter, PrintWriter errPrinter,
+	public static Payment Run(PrintWriter outPrinter, PrintWriter errPrinter,
 	                  PaymentRequest req, Dictionary<Integer, Account> accounts,
 	                  long sessionID) throws IOException {
 		File paymentFile;
@@ -50,13 +51,64 @@ public class PaymentHandler {
 			// TO-DO
 			outPrinter.println("Check receiver's ID and amount.");
 			outPrinter.flush();
+			throw new IOException("wrong ID or amount");
 		}
 		else{
 			outPrinter.println("Payment made.");
 			outPrinter.println("Creating file for payment...");
 			paymentFile = CreatePaymentFile(payment, errPrinter);
 			SavePaymentToAccounts(payment, paymentFile.getName(), MasterServerSession.AccountsFolder.getAbsolutePath());
+			SendEmail(payment);
 		}
+		return payment;
+	}
+
+	private static void SendEmail(Payment payment) {
+		Properties prop = new Properties();
+		prop.put("mail.smtp.auth", true);
+		prop.put("mail.smtp.starttls.enable", "true");
+		prop.put("mail.smtp.host", "smtp.gmail.com");
+		prop.put("mail.smtp.port", "587");
+
+		String myAccount = MasterServerSession.emailAddr;
+		String myPasswd = new String(MasterServerSession.emailPasswd);
+		String recipientAddr = GetRecipientAddr(payment);
+
+		Session session = Session.getDefaultInstance(prop, new Authenticator() {
+			@Override
+			protected PasswordAuthentication getPasswordAuthentication() {
+				return new PasswordAuthentication(myAccount, myPasswd);
+			}
+		});
+
+		Message msg = new MimeMessage(session);
+		try {
+			msg.setFrom(new InternetAddress(myAccount));
+			msg.setRecipient(Message.RecipientType.TO, new InternetAddress(recipientAddr));
+			msg.setSubject("Payment received");
+			msg.setText(CreateEmailText(payment));
+			Transport.send(msg);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private static String CreateEmailText(Payment payment) {
+		return "To your account was sent " + String.format("%.2f",payment.amount / 100D) + " " + payment.fromCurr + " converted to " +
+				payment.toCurr + ".\n\nYour BankingApp";
+	}
+
+	private static String GetRecipientAddr(Payment payment) {
+		try(BufferedReader br = new BufferedReader(new FileReader(MasterServerSession.AccountsFolder.getAbsolutePath() +
+				MasterServerSession.FileSystemSeparator + payment.receiverAccountID + MasterServerSession.FileSystemSeparator +
+				".info"))){
+			return br.readLine();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	private static synchronized void SavePaymentToAccounts(Payment payment, String paymentFileName, String accountsFolderPath) throws IOException {

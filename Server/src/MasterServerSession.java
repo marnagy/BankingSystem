@@ -43,9 +43,15 @@ public class MasterServerSession {
 	// random variable
 	static final Random rand = new Random(System.nanoTime());
 
+	public static String emailAddr;
+	public static char[] emailPasswd;
+
 	// used for testing
 	static final boolean IsTest = false;
-	public static void Run(){
+	public static void Run(String addr, char[] passwd){
+		emailAddr = addr;
+		emailPasswd = passwd;
+
 		if (IsTest && RootFolder.exists()){
 			deleteDirectory(RootFolder);
 			outWriter.println("Root folder reset.");

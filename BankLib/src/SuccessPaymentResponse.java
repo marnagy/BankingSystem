@@ -12,14 +12,18 @@ public class SuccessPaymentResponse extends Response {
 	void Send(ObjectOutput oo) throws IOException {
 		oo.writeInt(super.type.ordinal());
 		oo.writeLong(super.sessionID);
-
-		payment.Send(oo);
+		oo.writeBoolean(payment != null);
+		if (payment != null) {
+			payment.Send(oo);
+		}
 
 		oo.flush();
 	}
 	public static SuccessPaymentResponse ReadArgs(ObjectInput oi) throws IOException{
 		long sessionID = oi.readLong();
-		Payment payment = Payment.FromObjInput(oi);
+		if (oi.readBoolean()) {
+			Payment payment = Payment.FromObjInput(oi);
+		}
 		return new SuccessPaymentResponse(payment, sessionID);
 	}
 }
