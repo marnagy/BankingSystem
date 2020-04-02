@@ -5,12 +5,16 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.mail.*;
 import javax.mail.internet.*;
 
 public class PaymentHandler {
 	static Set<Integer> accountIDs;
 	static long sessionID;
+
+	static Pattern exchangePattern = Pattern.compile("[1-9]*[0-9](\\.[0-9]+)?");
 	public static Response Run(PrintWriter outPrinter, PrintWriter errPrinter,
 	                                        ObjectInput oi, ObjectOutput oo, Dictionary<Integer, Account> accounts,
 	                                        long sessionID) throws IOException {
@@ -182,17 +186,28 @@ public class PaymentHandler {
 		return new Payment(pr);
 	}
 
-	private static long Convert(long amount, CurrencyType from, CurrencyType to){
+	private static long Convert(long amount, CurrencyType from, CurrencyType to) throws IOException {
+		String apiKey = "3fa4ba21d24d7294d6a9";
 		try {
-			String addr = "https://api.exchangeratesapi.io/latest?symbols=" + from.name() + "," + "to";
+
+			String addr = "https://free.currconv.com/api/v7/convert?q=" + from + "_" + to + "&compact=ultra&apiKey=" + apiKey;
 			URL url = new URL(addr);
 			StringBuffer sb = new StringBuffer();
 			try (BufferedReader reader = new BufferedReader(new InputStreamReader( url.openStream() )) ){
 				reader.lines().forEach(x -> sb.append(x + "\n"));
-				System.out.println(sb);
-				return -1;
+//				System.out.println(sb);
+//				return -1;
 			} catch (IOException e) {
 				e.printStackTrace();
+			}
+			Matcher matcher = exchangePattern.matcher(sb.toString());
+			if (matcher.find()){
+				double rate = Double.valueOf(matcher.group(1));
+				long result = (long) (amount * rate);
+				return result;
+			}
+			else{
+				throw new IOException("API malfunction.");
 			}
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
