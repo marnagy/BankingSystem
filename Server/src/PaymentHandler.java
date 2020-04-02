@@ -27,7 +27,7 @@ public class PaymentHandler {
 				outPrinter.println("Payment made.");
 				outPrinter.println("Creating file for payment...");
 				paymentFile = CreatePaymentFile(payment, errPrinter);
-				SavePaymentToAccounts(payment, paymentFile.getAbsolutePath(), MasterServerSession.AccountsFolder.getAbsolutePath());
+				SavePaymentToAccounts(payment, paymentFile.getName(), MasterServerSession.AccountsFolder.getAbsolutePath());
 			}
 		} catch (IOException e) {
 			e.printStackTrace(errPrinter);
@@ -52,11 +52,11 @@ public class PaymentHandler {
 				+ receiverAccountID + MasterServerSession.FileSystemSeparator + year + "_" + month);
 		currMonthPaymentsSenderFile.createNewFile(); // if not created, create new empty file
 		try (FileWriter fw = new FileWriter(currMonthPaymentsSenderFile.getAbsolutePath(), true)){
-			fw.write( paymentFileName + ":" + "Unknown" + "\n");
+			fw.write( paymentFileName + ":" + PaymentCategory.Other + "\n");
 		}
 		currMonthPaymentsReceiverFile.createNewFile(); // if not created, create new empty file
 		try (FileWriter fw = new FileWriter(currMonthPaymentsReceiverFile.getAbsolutePath(), true)){
-			fw.write( paymentFileName + ":" + "Unknown" + "\n");
+			fw.write( paymentFileName + ":" + PaymentCategory.Other + "\n");
 		}
 	}
 
@@ -70,7 +70,8 @@ public class PaymentHandler {
 				pw.println(payment.amount);
 				pw.println("from:" + payment.fromCurr.name());
 				pw.println("to:" + payment.toCurr.name());
-				pw.println("category:" + payment.category.name());
+				// each account can set different category in their history
+				//pw.println("category:" + payment.category.name());
 			}
 		}
 		return paymentFile;

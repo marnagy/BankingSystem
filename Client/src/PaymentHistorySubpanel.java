@@ -3,22 +3,24 @@ import java.awt.*;
 
 public class PaymentHistorySubpanel extends JPanel {
 
-	public PaymentHistorySubpanel(Account account, Payment payment) throws InvalidFormatException {
+	public PaymentHistorySubpanel(int accountID, Payment payment) throws InvalidFormatException {
 		super(new GridLayout(1, 5));
 		this.setPreferredSize(new Dimension(-1, 40));
-		if (account.accountID == payment.senderAccountID){
+		this.setMaximumSize(new Dimension(-1, 40));
+		this.setMinimumSize(new Dimension(-1, 40));
+		if ( accountID == payment.senderAccountID){
 			this.add(new JLabel("To: " + payment.receiverAccountID));
 			this.add(new JLabel("Amount: " + String.format("%.2f", -payment.amount / 100D)));
 		}
-		else if (account.accountID == payment.receiverAccountID){
+		else if ( accountID == payment.receiverAccountID){
 			this.add(new JLabel("From: " + payment.senderAccountID));
 			this.add(new JLabel("Amount: " + String.format("%.2f", payment.amount / 100D)));
 		}
 		else{
-			throw new InvalidFormatException("Invalid information in payment: account " + account.accountID +
+			throw new InvalidFormatException("Invalid information in payment: account " + accountID +
 					" is not sender neither receiver.");
 		}
-
+		this.add(new JLabel("Category: " + payment.category));
 	}
 
 	// for test

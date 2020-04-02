@@ -55,7 +55,7 @@ public class Payment {
 		if (!paymentFile.getName().endsWith(".payment")){
 			throw new InvalidFormatException("Payment file doesn't end with '.payment'");
 		}
-		String[] nameParts = paymentFile.getName().split("_");
+		String[] nameParts = paymentFile.getName().split("\\.")[0].split("_");
 		if (nameParts.length == 4){
 			int senderAccountID = Integer.parseInt(nameParts[0]);
 			int receiverAccountID = Integer.parseInt(nameParts[1]);
@@ -63,16 +63,14 @@ public class Payment {
 			ZonedDateTime receivedDateTime = Destringify(nameParts[3]);
 			CurrencyType fromCurr;
 			CurrencyType toCurr;
-			PaymentCategory category;
 			long amount;
 			try(BufferedReader br = new BufferedReader(new FileReader(paymentFile))){
 				amount = Long.parseLong(br.readLine());
 				fromCurr = CurrencyType.valueOf(br.readLine().split(":")[1]);
 				toCurr = CurrencyType.valueOf(br.readLine().split(":")[1]);
-				category = PaymentCategory.valueOf(br.readLine().split(":")[1]);
 			}
 			return new Payment(senderAccountID, receiverAccountID, amount, fromCurr, toCurr,
-					sendingDateTime, receivedDateTime, category);
+					sendingDateTime, receivedDateTime, PaymentCategory.Other);
 		}
 		else{
 			throw new IOException("Illegal name of file: " + paymentFile.getAbsolutePath());

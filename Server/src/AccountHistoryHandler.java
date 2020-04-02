@@ -11,13 +11,19 @@ public class AccountHistoryHandler {
 			PaymentHistoryRequest req = PaymentHistoryRequest.ReadArgs(oi);
 			final List<Payment> history = new ArrayList<Payment>();
 			File monthHistoryFile = new File( MasterServerSession.AccountsFolder.getAbsolutePath() + MasterServerSession.FileSystemSeparator
-			+ req.accountID + MasterServerSession.FileSystemSeparator + req.monthYear.year + "_" + req.monthYear.month);
+			+ req.accountID + MasterServerSession.FileSystemSeparator + req.monthYear.year + "_" + req.monthYear.month.getValue());
 			if ( monthHistoryFile.exists() ) {
 				String[] lineParts;
+				String line;
+				Payment temp;
 				try(BufferedReader br = new BufferedReader( new FileReader(monthHistoryFile.getAbsolutePath()))){
-					lineParts = br.readLine().split(":");
-					history.add( Payment.FromFile( new File(MasterServerSession.PaymentsFolder.getAbsolutePath() +
-							MasterServerSession.FileSystemSeparator + lineParts[0]) ) );
+					while( (line = br.readLine()) != null ) {
+						lineParts = line.split(":");
+						temp = Payment.FromFile(new File(MasterServerSession.PaymentsFolder.getAbsolutePath() +
+								MasterServerSession.FileSystemSeparator + lineParts[0]));
+						temp.category = PaymentCategory.valueOf(lineParts[1]);
+						history.add(temp);
+					}
 				}
 			}
 			return new PaymentHistoryResponse(history, sessionID);

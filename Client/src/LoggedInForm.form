@@ -91,13 +91,13 @@
                 <properties/>
                 <border type="none"/>
                 <children>
-                  <grid id="20f59" binding="paymentPanel" layout-manager="GridLayoutManager" row-count="7" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                  <grid id="20f59" binding="paymentPanel" layout-manager="GridLayoutManager" row-count="7" column-count="5" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                     <margin top="10" left="10" bottom="10" right="10"/>
                     <constraints>
                       <card name="Card1"/>
                     </constraints>
                     <properties>
-                      <visible value="false"/>
+                      <visible value="true"/>
                     </properties>
                     <border type="none"/>
                     <children>
@@ -155,7 +155,7 @@
                       </component>
                       <component id="ebf30" class="javax.swing.JComboBox" binding="fromCurrencyComboBox" default-binding="true">
                         <constraints>
-                          <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                          <grid row="1" column="3" row-span="1" col-span="2" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
                           <editable value="true"/>
@@ -166,7 +166,7 @@
                       </component>
                       <component id="d08c2" class="javax.swing.JComboBox" binding="toCurrencyComboBox" default-binding="true">
                         <constraints>
-                          <grid row="2" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                          <grid row="2" column="3" row-span="1" col-span="2" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
                           <editable value="true"/>
@@ -228,10 +228,46 @@
                       </component>
                       <component id="c344d" class="javax.swing.JButton" binding="sendPaymentButton" default-binding="true">
                         <constraints>
-                          <grid row="6" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                          <grid row="6" column="3" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
                           <text value="Send Payment"/>
+                        </properties>
+                      </component>
+                      <component id="8a9cd" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text value="With Delay"/>
+                        </properties>
+                      </component>
+                      <component id="89094" class="javax.swing.JComboBox" binding="hoursDelayBox">
+                        <constraints>
+                          <grid row="3" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties/>
+                      </component>
+                      <component id="c57db" class="javax.swing.JComboBox" binding="minutesDelayBox">
+                        <constraints>
+                          <grid row="3" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties/>
+                      </component>
+                      <component id="ce132" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="4" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="1" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text value="hours"/>
+                        </properties>
+                      </component>
+                      <component id="5376a" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="4" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="1" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text value="minutes"/>
                         </properties>
                       </component>
                     </children>
@@ -242,7 +278,7 @@
                       <card name="Card2"/>
                     </constraints>
                     <properties>
-                      <visible value="true"/>
+                      <visible value="false"/>
                     </properties>
                     <border type="none"/>
                     <children>

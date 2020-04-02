@@ -7,6 +7,7 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 public class LoggedInForm {
@@ -37,6 +38,8 @@ public class LoggedInForm {
 	private JLabel balanceLabel;
 	private JComboBox monthComboBox;
 	private JPanel monthHistoryPanel;
+	private JComboBox hoursDelayBox;
+	private JComboBox minutesDelayBox;
 
 	// custom-added
 	private final ObjectInput oi;
@@ -187,7 +190,7 @@ public class LoggedInForm {
 		MonthYear now = new MonthYear(datetime);
 		Payment[] gotArr = account.History.get(now);
 		Payment[] arr;
-		if ( gotArr == null) {
+		if (gotArr == null) {
 			arr = new Payment[1];
 		} else {
 			arr = new Payment[gotArr.length + 1];
@@ -198,7 +201,8 @@ public class LoggedInForm {
 	}
 
 	private void UpdateHistoryPanel() throws IOException {
-		if (account.History.get((MonthYear) monthComboBox.getSelectedItem()) == null) {
+		MonthYear selectedMonth = (MonthYear) monthComboBox.getSelectedItem();
+		if (account.History.get(selectedMonth) == null) {
 			monthHistoryPanel.removeAll();
 
 			Request req = new PaymentHistoryRequest((MonthYear) monthComboBox.getSelectedItem(), account, sessionID);
@@ -208,9 +212,14 @@ public class LoggedInForm {
 			switch (respType) {
 				case PaymentHistoryResponse:
 					PaymentHistoryResponse resp = PaymentHistoryResponse.ReadArgs(oi);
+					account.History.put(selectedMonth, resp.history);
+					monthHistoryPanel.setLayout(new GridLayout(resp.history.length, 1));
+					int i = 0;
 					for (Payment payment : resp.history) {
+						i++;
 						try {
-							monthHistoryPanel.add(new PaymentHistorySubpanel(account, payment));
+							JPanel subpanel = new PaymentHistorySubpanel(account.accountID, payment);
+							monthHistoryPanel.add(subpanel);
 						} catch (InvalidFormatException e) {
 							System.err.println("Invalid payment received");
 						}
@@ -292,21 +301,33 @@ public class LoggedInForm {
 		loggedInForm.balanceLabel.setText(String.format("%.2f", account.Values.get(CurrencyType.EUR) / 100D));
 
 		loggedInForm.fromCurrencyComboBox.setModel(new DefaultComboBoxModel(CurrencyType.values()));
-		loggedInForm.fromCurrencyComboBox.setSelectedItem(null);
+		//loggedInForm.fromCurrencyComboBox.setSelectedItem(null);
 
 		loggedInForm.toCurrencyComboBox.setModel(new DefaultComboBoxModel(CurrencyType.values()));
-		loggedInForm.toCurrencyComboBox.setSelectedItem(null);
+		//loggedInForm.toCurrencyComboBox.setSelectedItem(null);
 
-		MonthYear i = new MonthYear(ZonedDateTime.now());
-		MonthYear created = new MonthYear(account.created);
-		ArrayList<MonthYear> list = new ArrayList<MonthYear>();
-		while (!i.equals(created)) {
+		List<Integer> list = new ArrayList<>();
+		for (int i = 0; i < 24; i++) {
 			list.add(i);
-			i = i.getOneSooner();
 		}
-		list.add(created);
+		loggedInForm.hoursDelayBox.setModel(new DefaultComboBoxModel(list.toArray()));
 
-		loggedInForm.monthComboBox.setModel(new DefaultComboBoxModel(list.toArray()));
+		list = new ArrayList<>();
+		for (int i = 0; i < 60; i++) {
+			list.add(i);
+		}
+		loggedInForm.minutesDelayBox.setModel(new DefaultComboBoxModel(list.toArray()));
+
+		MonthYear monthYear = new MonthYear(ZonedDateTime.now());
+		MonthYear created = new MonthYear(account.created);
+		ArrayList<MonthYear> monthYearList = new ArrayList<MonthYear>();
+		while (!monthYear.equals(created)) {
+			monthYearList.add(monthYear);
+			monthYear = monthYear.getOneSooner();
+		}
+		monthYearList.add(created);
+
+		loggedInForm.monthComboBox.setModel(new DefaultComboBoxModel(monthYearList.toArray()));
 
 
 		frame.setContentPane(loggedInForm.panel1);
@@ -385,8 +406,8 @@ public class LoggedInForm {
 		parentPanel.setLayout(new CardLayout(0, 0));
 		scrollPane1.setViewportView(parentPanel);
 		paymentPanel = new JPanel();
-		paymentPanel.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(7, 4, new Insets(10, 10, 10, 10), -1, -1));
-		paymentPanel.setVisible(false);
+		paymentPanel.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(7, 5, new Insets(10, 10, 10, 10), -1, -1));
+		paymentPanel.setVisible(true);
 		parentPanel.add(paymentPanel, "Card1");
 		final JLabel label1 = new JLabel();
 		label1.setText("Receiver's ID");
@@ -410,12 +431,12 @@ public class LoggedInForm {
 		fromCurrencyComboBox.setLightWeightPopupEnabled(true);
 		final DefaultComboBoxModel defaultComboBoxModel1 = new DefaultComboBoxModel();
 		fromCurrencyComboBox.setModel(defaultComboBoxModel1);
-		paymentPanel.add(fromCurrencyComboBox, new com.intellij.uiDesigner.core.GridConstraints(1, 3, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		paymentPanel.add(fromCurrencyComboBox, new com.intellij.uiDesigner.core.GridConstraints(1, 3, 1, 2, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		toCurrencyComboBox = new JComboBox();
 		toCurrencyComboBox.setEditable(true);
 		final DefaultComboBoxModel defaultComboBoxModel2 = new DefaultComboBoxModel();
 		toCurrencyComboBox.setModel(defaultComboBoxModel2);
-		paymentPanel.add(toCurrencyComboBox, new com.intellij.uiDesigner.core.GridConstraints(2, 3, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		paymentPanel.add(toCurrencyComboBox, new com.intellij.uiDesigner.core.GridConstraints(2, 3, 1, 2, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		final JLabel label5 = new JLabel();
 		label5.setText("Variable Symbol");
 		paymentPanel.add(label5, new com.intellij.uiDesigner.core.GridConstraints(3, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -435,14 +456,27 @@ public class LoggedInForm {
 		paymentPanel.add(typeHereTextField, new com.intellij.uiDesigner.core.GridConstraints(5, 1, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
 		sendPaymentButton = new JButton();
 		sendPaymentButton.setText("Send Payment");
-		paymentPanel.add(sendPaymentButton, new com.intellij.uiDesigner.core.GridConstraints(6, 3, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		paymentPanel.add(sendPaymentButton, new com.intellij.uiDesigner.core.GridConstraints(6, 3, 1, 2, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		final JLabel label8 = new JLabel();
+		label8.setText("With Delay");
+		paymentPanel.add(label8, new com.intellij.uiDesigner.core.GridConstraints(3, 2, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		hoursDelayBox = new JComboBox();
+		paymentPanel.add(hoursDelayBox, new com.intellij.uiDesigner.core.GridConstraints(3, 3, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		minutesDelayBox = new JComboBox();
+		paymentPanel.add(minutesDelayBox, new com.intellij.uiDesigner.core.GridConstraints(3, 4, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		final JLabel label9 = new JLabel();
+		label9.setText("hours");
+		paymentPanel.add(label9, new com.intellij.uiDesigner.core.GridConstraints(4, 3, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_NORTH, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		final JLabel label10 = new JLabel();
+		label10.setText("minutes");
+		paymentPanel.add(label10, new com.intellij.uiDesigner.core.GridConstraints(4, 4, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_NORTH, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		historyPanel = new JPanel();
 		historyPanel.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(3, 2, new Insets(0, 0, 0, 0), -1, -1));
-		historyPanel.setVisible(true);
+		historyPanel.setVisible(false);
 		parentPanel.add(historyPanel, "Card2");
-		final JLabel label8 = new JLabel();
-		label8.setText("Month");
-		historyPanel.add(label8, new com.intellij.uiDesigner.core.GridConstraints(0, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_EAST, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		final JLabel label11 = new JLabel();
+		label11.setText("Month");
+		historyPanel.add(label11, new com.intellij.uiDesigner.core.GridConstraints(0, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_EAST, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		final JScrollPane scrollPane2 = new JScrollPane();
 		historyPanel.add(scrollPane2, new com.intellij.uiDesigner.core.GridConstraints(2, 0, 1, 2, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
 		monthHistoryPanel = new JPanel();
@@ -457,11 +491,11 @@ public class LoggedInForm {
 		homePanel.setBackground(new Color(-11775918));
 		homePanel.setEnabled(false);
 		parentPanel.add(homePanel, "Card3");
-		final JLabel label9 = new JLabel();
-		Font label9Font = this.$$$getFont$$$("Comic Sans MS", Font.BOLD | Font.ITALIC, 48, label9.getFont());
-		if (label9Font != null) label9.setFont(label9Font);
-		label9.setText("Home Screen");
-		homePanel.add(label9, new com.intellij.uiDesigner.core.GridConstraints(0, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		final JLabel label12 = new JLabel();
+		Font label12Font = this.$$$getFont$$$("Comic Sans MS", Font.BOLD | Font.ITALIC, 48, label12.getFont());
+		if (label12Font != null) label12.setFont(label12Font);
+		label12.setText("Home Screen");
+		homePanel.add(label12, new com.intellij.uiDesigner.core.GridConstraints(0, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		accountBalancePanel = new JPanel();
 		accountBalancePanel.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(2, 4, new Insets(0, 0, 0, 0), -1, -1));
 		panel1.add(accountBalancePanel, new com.intellij.uiDesigner.core.GridConstraints(0, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
@@ -487,7 +521,7 @@ public class LoggedInForm {
 		label4.setLabelFor(toCurrencyComboBox);
 		label5.setLabelFor(variableSymbolTextField);
 		label6.setLabelFor(specificSymbolTextField);
-		label8.setLabelFor(monthComboBox);
+		label11.setLabelFor(monthComboBox);
 	}
 
 	/**
