@@ -21,8 +21,9 @@ public class SuccessPaymentResponse extends Response {
 	}
 	public static SuccessPaymentResponse ReadArgs(ObjectInput oi) throws IOException{
 		long sessionID = oi.readLong();
+		Payment payment = null;
 		if (oi.readBoolean()) {
-			Payment payment = Payment.FromObjInput(oi);
+			payment = Payment.FromObjInput(oi);
 		}
 		return new SuccessPaymentResponse(payment, sessionID);
 	}

@@ -188,6 +188,10 @@ public class LoggedInForm {
 	}
 
 	private void UpdatePaymentHistory(SuccessPaymentResponse resp) {
+		if (resp.payment == null){
+			MessageForm.Show("This payment is delayed. Please, restart your account after sending to see effect.");
+			return;
+		}
 		ZonedDateTime datetime = resp.payment.sendingDateTime;
 		MonthYear now = new MonthYear(datetime);
 		Payment[] gotArr = account.History.get(now);
