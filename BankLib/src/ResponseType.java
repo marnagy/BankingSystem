@@ -13,6 +13,7 @@ public enum ResponseType {
     UnknownErrorResponse,
     SuccessPaymentResponse,
     PaymentHistoryResponse,
+    PaymentWithDelayResponse,
     // used only by client
     IllegalServerResponse
 }
