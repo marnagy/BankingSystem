@@ -120,7 +120,9 @@ public class LoggedInForm {
 							try {
 								ZonedDateTime dateTime = ZonedDateTime.now();
 								String[] symbols = {variableSymbolTextField.getText(), specificSymbolTextField.getText()};
-								Request req = new PaymentRequest(account.accountID, receiverID, amount,
+								int hoursDelay = (int) hoursDelayBox.getSelectedItem();
+								int minutesDelay = (int) minutesDelayBox.getSelectedItem();
+								Request req = new PaymentRequest(account.accountID, receiverID, amount, hoursDelay, minutesDelay,
 										fromCurr, toCurr, symbols, typeHereTextField.getText(), sessionID);
 								req.Send(oo);
 								ResponseType respType = ResponseType.values()[oi.readInt()];

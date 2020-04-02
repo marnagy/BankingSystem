@@ -6,6 +6,7 @@ import java.util.Set;
 
 public class PaymentRequest extends Request {
 	public final int senderAccountID, receiverAccountID;
+	public final int hoursDelay, minutesDelay;
 	public final long amount;
 	public final String[] symbols;
 	public final String information;
@@ -13,7 +14,7 @@ public class PaymentRequest extends Request {
 	public final ZonedDateTime sendingDateTime;
 
 	// used by client
-	public PaymentRequest(int senderAccountID, int receiverAccountID, long amount,
+	public PaymentRequest(int senderAccountID, int receiverAccountID, long amount, int hoursDelay, int minutesDelay,
 	                      CurrencyType fromCurr, CurrencyType toCurr,
 	                      String[] symbols, String information,
 	                      long sessionID){
@@ -23,7 +24,8 @@ public class PaymentRequest extends Request {
 		}
 		this.senderAccountID = senderAccountID;
 		this.receiverAccountID = receiverAccountID;
-
+		this.hoursDelay = hoursDelay;
+		this.minutesDelay = minutesDelay;
 		this.amount = amount;
 		this.fromCurr = fromCurr;
 		this.toCurr = toCurr;
@@ -32,7 +34,7 @@ public class PaymentRequest extends Request {
 		this.sendingDateTime = ZonedDateTime.now();
 	}
 	// used when reading request on server
-	private PaymentRequest(int senderAccountID, int receiverAccountID, long amount,
+	private PaymentRequest(int senderAccountID, int receiverAccountID, long amount, int hoursDelay, int minutesDelay,
 	                       CurrencyType fromCurr, CurrencyType toCurr, ZonedDateTime dateTime,
 	                       String[] symbols, String information, long sessionID){
 		super(RequestType.Payment, sessionID);
@@ -41,6 +43,8 @@ public class PaymentRequest extends Request {
 		}
 		this.senderAccountID = senderAccountID;
 		this.receiverAccountID = receiverAccountID;
+		this.hoursDelay = hoursDelay;
+		this.minutesDelay = minutesDelay;
 		this.amount = amount;
 		this.fromCurr = fromCurr;
 		this.toCurr = toCurr;
@@ -56,6 +60,8 @@ public class PaymentRequest extends Request {
 		oo.writeInt(senderAccountID);
 		oo.writeInt(receiverAccountID);
 		oo.writeLong(amount);
+		oo.writeInt(hoursDelay);
+		oo.writeInt(minutesDelay);
 		// enum
 		oo.writeInt(fromCurr.ordinal());
 		oo.writeInt(toCurr.ordinal());
@@ -76,6 +82,8 @@ public class PaymentRequest extends Request {
 		int receiverAccountID = oi.readInt();
 		// amount already check in client, no need to test here
 		long amount = oi.readLong();
+		int hoursDelay = oi.readInt();
+		int minutesDelay = oi.readInt();
 		CurrencyType fromCurr = CurrencyType.values()[ oi.readInt() ];
 		CurrencyType toCurr = CurrencyType.values()[ oi.readInt() ];
 		ZonedDateTime dateTime = (ZonedDateTime) oi.readObject();
@@ -83,7 +91,7 @@ public class PaymentRequest extends Request {
 		String specificSymbol = oi.readUTF();
 		String[] symbols = {variableSymbol, specificSymbol};
 		String information = oi.readUTF();
-		return new PaymentRequest(senderAccountID, receiverAccountID, amount, fromCurr, toCurr,
-				dateTime, symbols, information, sessionID);
+		return new PaymentRequest(senderAccountID, receiverAccountID, amount, hoursDelay, minutesDelay,
+				fromCurr, toCurr, dateTime, symbols, information, sessionID);
 	}
 }

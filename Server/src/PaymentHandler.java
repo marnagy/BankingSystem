@@ -17,18 +17,22 @@ public class PaymentHandler {
 		Payment payment = null;
 		try {
 			PaymentRequest pr = PaymentRequest.ReadArgs(oi);
-			payment = MakePayment(pr, accounts, errPrinter);
-			if ( payment == null ){
-				// TO-DO
-				outPrinter.println("Check receiver's ID and amount.");
-				outPrinter.flush();
+			if (pr.hoursDelay > 0 || pr.minutesDelay > 0){
+				DelayedPaymentThread thread = new DelayedPaymentThread(pr,
+						outPrinter, errPrinter, accounts, sessionID);
+				if (thread.isValid()){
+					thread.start();
+					return new SuccessResponse(sessionID);
+				}
+				else{
+					return new IllegalRequestResponse(sessionID);
+				}
 			}
 			else{
-				outPrinter.println("Payment made.");
-				outPrinter.println("Creating file for payment...");
-				paymentFile = CreatePaymentFile(payment, errPrinter);
-				SavePaymentToAccounts(payment, paymentFile.getName(), MasterServerSession.AccountsFolder.getAbsolutePath());
+				Run(outPrinter, errPrinter, pr, accounts, sessionID);
+				return new SuccessPaymentResponse( payment, sessionID);
 			}
+
 		} catch (IOException e) {
 			e.printStackTrace(errPrinter);
 			return new UnknownErrorResponse("I/O error", sessionID);
@@ -36,7 +40,23 @@ public class PaymentHandler {
 			e.printStackTrace(errPrinter);
 			return new UnknownErrorResponse("Server error", sessionID);
 		}
-		return new SuccessPaymentResponse( payment, sessionID);
+	}
+	public static void Run(PrintWriter outPrinter, PrintWriter errPrinter,
+	                  PaymentRequest req, Dictionary<Integer, Account> accounts,
+	                  long sessionID) throws IOException {
+		File paymentFile;
+		Payment payment = MakePayment(req, accounts, errPrinter);
+		if ( payment == null ){
+			// TO-DO
+			outPrinter.println("Check receiver's ID and amount.");
+			outPrinter.flush();
+		}
+		else{
+			outPrinter.println("Payment made.");
+			outPrinter.println("Creating file for payment...");
+			paymentFile = CreatePaymentFile(payment, errPrinter);
+			SavePaymentToAccounts(payment, paymentFile.getName(), MasterServerSession.AccountsFolder.getAbsolutePath());
+		}
 	}
 
 	private static synchronized void SavePaymentToAccounts(Payment payment, String paymentFileName, String accountsFolderPath) throws IOException {

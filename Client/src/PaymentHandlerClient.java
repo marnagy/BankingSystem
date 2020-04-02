@@ -39,7 +39,7 @@ public class PaymentHandlerClient {
 		} while (!(isValid && canSend));
 
 		String[] symbols = {varSymbol, specSymbol};
-		req = new PaymentRequest(account.accountID, receiverID, amount,
+		req = new PaymentRequest(account.accountID, receiverID, amount, 0, 0,
 				curr, curr, symbols, "info", sessionID);
 		req.Send(ooSocket);
 		ResponseType respType = ResponseType.values()[oiSocket.readInt()];
