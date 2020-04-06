@@ -9,12 +9,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.*;
 import javax.mail.internet.*;
+import org.json.*;
 
 public class PaymentHandler {
 	static Set<Integer> accountIDs;
 	static long sessionID;
 
-	static Pattern exchangePattern = Pattern.compile("[1-9]*[0-9](\\.[0-9]+)?");
+	static Pattern exchangePattern = Pattern.compile("[1-9]*[0-9](\\.[0-9]+)");
 	public static Response Run(PrintWriter outPrinter, PrintWriter errPrinter,
 	                                        ObjectInput oi, ObjectOutput oo, Dictionary<Integer, Account> accounts,
 	                                        long sessionID) throws IOException {
@@ -202,7 +203,8 @@ public class PaymentHandler {
 			}
 			Matcher matcher = exchangePattern.matcher(sb.toString());
 			if (matcher.find()){
-				double rate = Double.valueOf(matcher.group(1));
+				String matched = matcher.group();
+				double rate = Double.valueOf(matched);
 				long result = (long) (amount * rate);
 				return result;
 			}
