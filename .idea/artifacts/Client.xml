@@ -1,15 +1,18 @@
 <component name="ArtifactManager">
   <artifact type="jar" name="Client">
     <output-path>$PROJECT_DIR$/out/artifacts/Client</output-path>
-    <root id="archive" name="BankClient.jar">
+    <root id="archive" name="BankingSystem.jar">
       <element id="directory" name="META-INF">
-        <element id="file-copy" path="$PROJECT_DIR$/META-INF/MANIFEST.MF" />
+        <element id="file-copy" path="$PROJECT_DIR$/../MavenBankSys/src/main/java/Client/META-INF/MANIFEST.MF" />
       </element>
-      <element id="module-output" name="MavenBankSys" />
-      <element id="module-output" name="BankingSystem" />
-      <element id="module-output" name="BankLib" />
-      <element id="module-output" name="Server" />
       <element id="module-output" name="Client" />
+      <element id="module-output" name="BankLib" />
+      <element id="module-output" name="BankingSystem" />
+      <element id="module-output" name="MavenBankSys" />
+      <element id="module-output" name="Server" />
+      <element id="extracted-dir" path="$USER_HOME$/Desktop/json-20190722.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/Desktop/activation.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/Desktop/javax.mail.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>
