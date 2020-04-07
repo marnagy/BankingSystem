@@ -137,7 +137,10 @@ public class LoggedInForm {
 										account.Values.put(fromCurr, valBefore - amount);
 										msg = "Payment sent and processed.";
 										UpdateBalance(account, balanceLabel, accountBalanceComboBox);
-										UpdatePaymentHistory(resp);
+										//UpdatePaymentHistory(resp);
+										break;
+									case Success:
+										msg = "Payment is about to be processed in the given time.";
 										break;
 									default:
 										msg = "Unknown response error occurred.";
@@ -209,44 +212,40 @@ public class LoggedInForm {
 
 	private void UpdateHistoryPanel() throws IOException {
 		MonthYear selectedMonth = (MonthYear) monthComboBox.getSelectedItem();
-		if (account.History.get(selectedMonth) == null) {
-			monthHistoryPanel.removeAll();
+		monthHistoryPanel.removeAll();
 
-			Request req = new PaymentHistoryRequest((MonthYear) monthComboBox.getSelectedItem(), account, sessionID);
-			req.Send(oo);
-			ResponseType respType = ResponseType.values()[oi.readInt()];
-			String msg = null;
-			switch (respType) {
-				case PaymentHistoryResponse:
-					PaymentHistoryResponse resp = PaymentHistoryResponse.ReadArgs(oi);
-					account.History.put(selectedMonth, resp.history);
-					monthHistoryPanel.setLayout(new GridLayout(resp.history.length, 1));
-					int i = 0;
-					for (Payment payment : resp.history) {
-						i++;
-						try {
-							JPanel subpanel = new PaymentHistorySubpanel(account.accountID, payment);
-							monthHistoryPanel.add(subpanel);
-						} catch (InvalidFormatException e) {
-							System.err.println("Invalid payment received");
-						}
+		Request req = new PaymentHistoryRequest((MonthYear) monthComboBox.getSelectedItem(), account, sessionID);
+		req.Send(oo);
+		ResponseType respType = ResponseType.values()[oi.readInt()];
+		String msg = null;
+		switch (respType) {
+			case PaymentHistoryResponse:
+				PaymentHistoryResponse resp = PaymentHistoryResponse.ReadArgs(oi);
+				account.History.put(selectedMonth, resp.history);
+				monthHistoryPanel.setLayout(new GridLayout(resp.history.length, 1));
+				int i = 0;
+				for (Payment payment : resp.history) {
+					i++;
+					try {
+						JPanel subpanel = new PaymentHistorySubpanel(account.accountID, payment);
+						monthHistoryPanel.add(subpanel);
+					} catch (InvalidFormatException e) {
+						System.err.println("Invalid payment received");
 					}
-					break;
-				case IllegalRequestResponse:
-					msg = "Illegal request received by server";
-					break;
-				default:
-					msg = "Unknown response from server";
-					break;
-			}
-			if (msg != null) { // problem
-				MessageForm.Show(msg);
-			} else {
-				monthHistoryPanel.revalidate();
-				monthHistoryPanel.repaint();
-			}
+				}
+				break;
+			case IllegalRequestResponse:
+				msg = "Illegal request received by server";
+				break;
+			default:
+				msg = "Unknown response from server";
+				break;
+		}
+		if (msg != null) { // problem
+			MessageForm.Show(msg);
 		} else {
-
+			monthHistoryPanel.revalidate();
+			monthHistoryPanel.repaint();
 		}
 	}
 
