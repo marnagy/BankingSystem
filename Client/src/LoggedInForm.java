@@ -189,6 +189,16 @@ public class LoggedInForm {
 				}
 			}
 		});
+		monthComboBox.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent actionEvent) {
+				try {
+					UpdateHistoryPanel();
+				} catch (IOException e) {
+					MessageForm.Show("IO Error occurred");
+				}
+			}
+		});
 	}
 
 	private void UpdatePaymentHistory(SuccessPaymentResponse resp) {

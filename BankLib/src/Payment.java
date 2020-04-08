@@ -86,14 +86,16 @@ public class Payment {
 		date = date / 100;
 		int day = (int)date % 100;
 		int time = Integer.parseInt(textPart[1]);
-		int hour = time/100;
+		int seconds = time % 100;
+		time = time / 100;
+		int hour = time / 100;
 		int minutes = time % 100;
-		return datetime.withHour(hour).withMinute(minutes).
+		return datetime.withHour(hour).withMinute(minutes).withSecond(seconds).
 				withYear(year).withMonth(month).withDayOfMonth(day);
 	}
 
 	public static String Stringify(ZonedDateTime datetime){
-		return String.format("%02d%02d%04d-%02d%02d", datetime.getDayOfMonth(), datetime.getMonthValue(),
-				datetime.getYear(), datetime.getHour(), datetime.getMinute());
+		return String.format("%02d%02d%04d-%02d%02d%02d", datetime.getDayOfMonth(), datetime.getMonthValue(),
+				datetime.getYear(), datetime.getHour(), datetime.getMinute(), datetime.getSecond());
 	}
 }
