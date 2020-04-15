@@ -8,13 +8,13 @@ public class EmailAlreadySignedUpResponse extends Response {
 	}
 
 	@Override
-	void Send(ObjectOutput oo) throws IOException {
+	void send(ObjectOutput oo) throws IOException {
 		oo.writeInt(super.type.ordinal());
 		oo.writeLong(sessionID);
 		oo.flush();
 	}
 
-	public static EmailAlreadySignedUpResponse ReadArgs(ObjectInput oi) throws IOException {
+	public static EmailAlreadySignedUpResponse readArgs(ObjectInput oi) throws IOException {
 		long sessionID = oi.readLong();
 		return new EmailAlreadySignedUpResponse(sessionID);
 	}

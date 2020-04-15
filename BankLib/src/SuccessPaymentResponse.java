@@ -14,7 +14,7 @@ public class SuccessPaymentResponse extends Response {
 		oo.writeLong(super.sessionID);
 		oo.writeBoolean(payment != null);
 		if (payment != null) {
-			payment.Send(oo);
+			payment.send(oo);
 		}
 
 		oo.flush();

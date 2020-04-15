@@ -8,10 +8,10 @@ public class AccountHistoryHandler {
 	                           ObjectInput oi, ObjectOutput oo,
 	                           Dictionary<Integer, Account> accounts, long sessionID) {
 		try {
-			PaymentHistoryRequest req = PaymentHistoryRequest.ReadArgs(oi);
+			PaymentHistoryRequest req = PaymentHistoryRequest.readArgs(oi);
 			final List<Payment> history = new ArrayList<Payment>();
 			File monthHistoryFile = new File( MasterServerSession.AccountsFolder.getAbsolutePath() + MasterServerSession.FileSystemSeparator
-			+ req.accountID + MasterServerSession.FileSystemSeparator + req.monthYear.year + "_" + req.monthYear.month.getValue());
+			+ req.accountID + MasterServerSession.FileSystemSeparator + req.monthYear.getYear() + "_" + req.monthYear.getMonthValue());
 			if ( monthHistoryFile.exists() ) {
 				String[] lineParts;
 				String line;
@@ -19,7 +19,7 @@ public class AccountHistoryHandler {
 				try(BufferedReader br = new BufferedReader( new FileReader(monthHistoryFile.getAbsolutePath()))){
 					while( (line = br.readLine()) != null ) {
 						lineParts = line.split(":");
-						temp = Payment.FromFile(new File(MasterServerSession.PaymentsFolder.getAbsolutePath() +
+						temp = Payment.fromFile(new File(MasterServerSession.PaymentsFolder.getAbsolutePath() +
 								MasterServerSession.FileSystemSeparator + lineParts[0]));
 						temp.category = PaymentCategory.valueOf(lineParts[1]);
 						history.add(temp);

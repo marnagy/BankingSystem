@@ -12,7 +12,7 @@ public class LoginRequest extends Request {
 		this.passwd = passwd;
 	}
 	@Override
-	public void Send(ObjectOutput oo) throws IOException {
+	public void send(ObjectOutput oo) throws IOException {
 		oo.writeInt(super.type.ordinal());
 		oo.writeLong(sessionID);
 
@@ -20,7 +20,7 @@ public class LoginRequest extends Request {
 		oo.writeObject(passwd);
 		oo.flush();
 	}
-	public static Request ReadArgs(ObjectInput oi){
+	public static Request readArgs(ObjectInput oi){
 		try {
 			long sessionID = oi.readLong();
 			String email = oi.readUTF();

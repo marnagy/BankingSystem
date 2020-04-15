@@ -3,6 +3,7 @@ import com.sun.mail.smtp.SMTPTransport;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.YearMonth;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -22,7 +23,7 @@ public class PaymentHandler {
 		File paymentFile = null;
 		Payment payment = null;
 		try {
-			PaymentRequest pr = PaymentRequest.ReadArgs(oi);
+			PaymentRequest pr = PaymentRequest.readArgs(oi);
 			if (pr.hoursDelay > 0 || pr.minutesDelay > 0){
 				DelayedPaymentThread thread = new DelayedPaymentThread(pr,
 						outPrinter, errPrinter, accounts, sessionID);
@@ -119,9 +120,9 @@ public class PaymentHandler {
 	private static synchronized void savePaymentToAccounts(Payment payment, String paymentFileName, String accountsFolderPath) throws IOException {
 		int senderAccountID = payment.senderAccountID;
 		int receiverAccountID = payment.receiverAccountID;
-		ZonedDateTime dateTime = ZonedDateTime.now();
-		int year = dateTime.getYear();
-		int month = dateTime.getMonthValue();
+		YearMonth yearMonth = YearMonth.now();
+		int year = yearMonth.getYear();
+		int month = yearMonth.getMonthValue();
 
 		File currMonthPaymentsSenderFile = new File(accountsFolderPath + MasterServerSession.FileSystemSeparator
 				+ senderAccountID + MasterServerSession.FileSystemSeparator + year + "_" + month);
@@ -140,7 +141,7 @@ public class PaymentHandler {
 	private static synchronized File createPaymentFile(Payment payment, PrintWriter errPrinter) throws IOException {
 		String paymentFileName = MasterServerSession.PaymentsFolder.getAbsolutePath() + MasterServerSession.FileSystemSeparator
 				+ payment.senderAccountID + "_" + payment.receiverAccountID + "_"
-				+ Payment.Stringify(payment.sendingDateTime) + "_" + Payment.Stringify(payment.receivedDateTime) + ".payment";
+				+ Payment.stringify(payment.sendingDateTime) + "_" + Payment.stringify(payment.receivedDateTime) + ".payment";
 		File paymentFile = new File(paymentFileName);
 		if (paymentFile.createNewFile()){
 			try(PrintWriter pw = new PrintWriter(paymentFile)){

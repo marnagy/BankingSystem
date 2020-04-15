@@ -53,12 +53,12 @@ public class ClientCLI {
 						char[] passwd = "test".toCharArray();
 						req = new AccountCreateRequest(email, passwd, sessionID);
 						// sending
-						req.Send(oo);
+						req.send(oo);
 						// receiving
 						ResponseType respType = ResponseType.values()[oi.readInt()];
 						switch (respType) {
 							case Success:
-								SuccessResponse sr = SuccessResponse.ReadArgs(oi);
+								SuccessResponse sr = SuccessResponse.readArgs(oi);
 								success = sr != null;
 								break;
 							case EmailAlreadySignedUp:
@@ -89,7 +89,7 @@ public class ClientCLI {
 //                char[] passwd = br.readLine().toCharArray();
 				char[] passwd = "test".toCharArray();
 				req = new LoginRequest(email, passwd, sessionID);
-				req.Send(oo);
+				req.send(oo);
 				// if success, client receives AccountInfo
 				ResponseType respType = ResponseType.values()[oi.readInt()];
 
@@ -100,7 +100,7 @@ public class ClientCLI {
 						continue;
 					case AccountInfo:
 						try {
-							resp = AccountInfoResponse.ReadArgs(oi);
+							resp = AccountInfoResponse.readArgs(oi);
 
 							if (resp.getClass() == IllegalRequestResponse.class) {
 								continue;

@@ -7,13 +7,13 @@ public class EndRequest extends Request {
 		super(RequestType.End, sessionID);
 	}
 	@Override
-	public void Send(ObjectOutput oo) throws IOException {
+	public void send(ObjectOutput oo) throws IOException {
 		oo.writeInt(super.type.ordinal());
 		oo.writeLong(super.sessionID);
 
 		oo.flush();
 	}
-	public static EndRequest ReadArgs(ObjectInput oi) throws IOException {
+	public static EndRequest readArgs(ObjectInput oi) throws IOException {
 		long sessionID = oi.readLong();
 		return new EndRequest(sessionID);
 	}

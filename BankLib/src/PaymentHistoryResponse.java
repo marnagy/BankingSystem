@@ -21,7 +21,7 @@ public class PaymentHistoryResponse extends Response {
 
 		oo.writeInt(history.length);
 		for (int i = 0; i < history.length; i++) {
-			history[i].Send(oo);
+			history[i].send(oo);
 		}
 
 		oo.flush();

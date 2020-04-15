@@ -98,4 +98,9 @@ public class Payment {
 		return String.format("%02d%02d%04d-%02d%02d%02d", datetime.getDayOfMonth(), datetime.getMonthValue(),
 				datetime.getYear(), datetime.getHour(), datetime.getMinute(), datetime.getSecond());
 	}
+
+	public Payment WithCategory(PaymentCategory cat){
+		return new Payment(senderAccountID, receiverAccountID, amount, fromCurr, toCurr,
+				sendingDateTime, receivedDateTime, cat);
+	}
 }

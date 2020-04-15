@@ -5,6 +5,7 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.time.YearMonth;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -88,13 +89,13 @@ public class LoggedInForm {
 				// close connection
 				try {
 					Request req = new EndRequest(sessionID);
-					req.Send(oo);
+					req.send(oo);
 					ResponseType respType = ResponseType.values()[oi.readInt()];
 					if (respType != ResponseType.Success) {
 						MessageForm.show("Error occurred during exiting out.");
 						return;
 					} else {
-						Response resp = SuccessResponse.ReadArgs(oi);
+						Response resp = SuccessResponse.readArgs(oi);
 						session.close();
 					}
 				} catch (IOException e) {
@@ -125,14 +126,14 @@ public class LoggedInForm {
 								int minutesDelay = (int) minutesDelayBox.getSelectedItem();
 								Request req = new PaymentRequest(account.accountID, receiverID, amount, hoursDelay, minutesDelay,
 										fromCurr, toCurr, symbols, typeHereTextField.getText(), sessionID);
-								req.Send(oo);
+								req.send(oo);
 								ResponseType respType = ResponseType.values()[oi.readInt()];
 								switch (respType) {
 									case InvalidReceiverIDResponse:
 										msg = "Invalid receiver ID.";
 										break;
 									case SuccessPaymentResponse:
-										SuccessPaymentResponse resp = SuccessPaymentResponse.ReadArgs(oi);
+										SuccessPaymentResponse resp = SuccessPaymentResponse.readArgs(oi);
 										long valBefore = account.Values.get(fromCurr);
 										account.Values.put(fromCurr, valBefore - amount);
 										msg = "Payment sent and processed.";
@@ -140,6 +141,7 @@ public class LoggedInForm {
 										//UpdatePaymentHistory(resp);
 										break;
 									case Success:
+										SuccessResponse temp = SuccessResponse.readArgs(oi);
 										msg = "Payment is about to be processed in the given time.";
 										break;
 									default:
@@ -175,13 +177,13 @@ public class LoggedInForm {
 // close connection
 				try {
 					Request req = new LogOutRequest(sessionID);
-					req.Send(oo);
+					req.send(oo);
 					ResponseType respType = ResponseType.values()[oi.readInt()];
 					if (respType != ResponseType.Success) {
 						MessageForm.show("Error occurred during logging out.");
 						return;
 					} else {
-						Response resp = SuccessResponse.ReadArgs(oi);
+						Response resp = SuccessResponse.readArgs(oi);
 						ClientGUI.Open(session, oi, oo);
 						frame.dispose();
 					}
@@ -207,7 +209,7 @@ public class LoggedInForm {
 			return;
 		}
 		ZonedDateTime datetime = resp.payment.sendingDateTime;
-		MonthYear now = new MonthYear(datetime);
+		YearMonth now = YearMonth.of(datetime.getYear(), datetime.getMonth());
 		Payment[] gotArr = account.History.get(now);
 		Payment[] arr;
 		if (gotArr == null) {
@@ -221,23 +223,23 @@ public class LoggedInForm {
 	}
 
 	private void updateHistoryPanel() throws IOException {
-		MonthYear selectedMonth = (MonthYear) monthComboBox.getSelectedItem();
+		YearMonth selectedMonth = (YearMonth) monthComboBox.getSelectedItem();
 		monthHistoryPanel.removeAll();
 
-		Request req = new PaymentHistoryRequest((MonthYear) monthComboBox.getSelectedItem(), account, sessionID);
-		req.Send(oo);
+		Request req = new PaymentHistoryRequest((YearMonth) monthComboBox.getSelectedItem(), account, sessionID);
+		req.send(oo);
 		ResponseType respType = ResponseType.values()[oi.readInt()];
 		String msg = null;
 		switch (respType) {
 			case PaymentHistoryResponse:
-				PaymentHistoryResponse resp = PaymentHistoryResponse.ReadArgs(oi);
+				PaymentHistoryResponse resp = PaymentHistoryResponse.readArgs(oi);
 				account.History.put(selectedMonth, resp.history);
 				monthHistoryPanel.setLayout(new GridLayout(resp.history.length, 1));
 				int i = 0;
-				for (Payment payment : resp.history) {
+				for (int j = resp.history.length - 1; j >= 0; j--) {
 					i++;
 					try {
-						JPanel subpanel = new PaymentHistorySubpanel(account.accountID, payment);
+						JPanel subpanel = new PaymentHistorySubpanel(account.accountID, resp.history[j]);
 						monthHistoryPanel.add(subpanel);
 					} catch (InvalidFormatException e) {
 						System.err.println("Invalid payment received");
@@ -334,12 +336,13 @@ public class LoggedInForm {
 		}
 		loggedInForm.minutesDelayBox.setModel(new DefaultComboBoxModel(list.toArray()));
 
-		MonthYear monthYear = new MonthYear(ZonedDateTime.now());
-		MonthYear created = new MonthYear(account.created);
-		ArrayList<MonthYear> monthYearList = new ArrayList<MonthYear>();
+		YearMonth monthYear = YearMonth.now();
+		YearMonth created = YearMonth.of(account.created.getYear(), account.created.getMonth());
+		ArrayList<YearMonth> monthYearList = new ArrayList<YearMonth>();
 		while (!monthYear.equals(created)) {
 			monthYearList.add(monthYear);
-			monthYear = monthYear.getOneSooner();
+			monthYear = monthYear.minusMonths(1);
+			//monthYear = monthYear.getOneSooner();
 		}
 		monthYearList.add(created);
 

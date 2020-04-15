@@ -64,7 +64,7 @@ public class ServerSession extends Thread {
 						break;
 					case Login:
 						// read args
-						req = LoginRequest.ReadArgs(oi);
+						req = LoginRequest.readArgs(oi);
 						if (req != null) {
 							LoginRequest LoginReq = (LoginRequest) req;
 							if ( accountCheck(LoginReq) ){
@@ -84,13 +84,13 @@ public class ServerSession extends Thread {
 						}
 						break;
 					case Payment:
-						resp = PaymentHandler.Run(outPrinter, errPrinter, oi, oo, accounts, sessionID);
+						resp = PaymentHandler.run(outPrinter, errPrinter, oi, oo, accounts, sessionID);
 						break;
 					case AccountHistory:
 						resp = AccountHistoryHandler.run(outPrinter, errPrinter, oi, oo, accounts, sessionID);
 						break;
 					case End:
-						EndRequest eReq = EndRequest.ReadArgs(oi);
+						EndRequest eReq = EndRequest.readArgs(oi);
 						if ( userID == null || ! loggedIn ){
 							resp = new IllegalRequestResponse(sessionID);
 						}
@@ -101,7 +101,7 @@ public class ServerSession extends Thread {
 						}
 						break;
 					case Logout:
-						LogOutRequest LOReq = LogOutRequest.ReadArgs(oi);
+						LogOutRequest LOReq = LogOutRequest.readArgs(oi);
 						if (!loggedIn){
 							resp = new IllegalRequestResponse(sessionID);
 							break;
@@ -115,7 +115,7 @@ public class ServerSession extends Thread {
 						resp = new IllegalRequestResponse(sessionID);
 				}
 
-				resp.Send(oo);
+				resp.send(oo);
 				resp = null;
 				if (accountCreated != null){
 					outPrinter.println("Thread " + this.getName() + " has created account number " + accountCreated + ".");

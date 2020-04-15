@@ -27,7 +27,7 @@ public class DelayedPaymentThread extends Thread {
 	public void run(){
 		try {
 			Thread.sleep(((long)req.hoursDelay * 60 + (long)req.minutesDelay)*60 * 1000, 0);
-			PaymentHandler.Run(outPrinter, errWriter, req, accounts, sessionID);
+			PaymentHandler.run(outPrinter, errWriter, req, accounts, sessionID);
 		} catch (InterruptedException | IOException e) {
 			e.printStackTrace();
 		}

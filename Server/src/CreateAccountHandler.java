@@ -10,7 +10,7 @@ public class CreateAccountHandler {
 	static AccountCreateRequest req;
 	static Response resp;
 	public static Response run(final ObjectInput oi, final Dictionary<Integer, Account> accounts, long sessionID) {
-		req = AccountCreateRequest.ReadArgs(oi);
+		req = AccountCreateRequest.readArgs(oi);
 
 		try {
 			if (req != null) {
@@ -64,7 +64,7 @@ public class CreateAccountHandler {
 				int checkHash = email.hashCode() + salt + passwdHash;
 					bwInfoFile.write(checkHash + "\n");
 				ZonedDateTime creationDateTime = ZonedDateTime.now();
-					bwInfoFile.write(Payment.Stringify(creationDateTime) + "\n");
+					bwInfoFile.write(Payment.stringify(creationDateTime) + "\n");
 				//bwInfoFile.close();
 
 				//currencies File

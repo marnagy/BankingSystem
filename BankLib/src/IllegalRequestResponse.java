@@ -8,12 +8,12 @@ public class IllegalRequestResponse extends Response {
 	}
 
 	@Override
-	void Send(ObjectOutput oo) throws IOException {
+	void send(ObjectOutput oo) throws IOException {
 		oo.writeInt(super.type.ordinal());
 		oo.writeLong(super.sessionID);
 		oo.flush();
 	}
-	public static IllegalRequestResponse ReadArgs(ObjectInput oi) throws IOException {
+	public static IllegalRequestResponse readArgs(ObjectInput oi) throws IOException {
 		long sessionID = oi.readLong();
 		return new IllegalRequestResponse(sessionID);
 	}

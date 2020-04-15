@@ -32,7 +32,7 @@ public class PaymentHistorySubpanel extends JPanel {
 		comboBox.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent actionEvent) {
-				if ((PaymentCategory)comboBox.getSelectedItem() != payment.category){
+				if (comboBox.getSelectedItem() != payment.category){
 
 				}
 			}

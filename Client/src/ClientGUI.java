@@ -38,7 +38,7 @@ public class ClientGUI {
 						return;
 					}
 					Request req = new AccountCreateRequest(emailTextField.getText(), passwordPasswordField.getPassword(), sessionID);
-					req.Send(oo);
+					req.send(oo);
 					ResponseType respType = ResponseType.values()[oi.readInt()];
 
 					switch (respType) {
@@ -46,11 +46,11 @@ public class ClientGUI {
 							msg = "Failed to create account.";
 							break;
 						case Success:
-							SuccessResponse sr = SuccessResponse.ReadArgs(oi);
+							SuccessResponse sr = SuccessResponse.readArgs(oi);
 							msg = "Account created.";
 							break;
 						case EmailAlreadySignedUp:
-							Response resp = EmailAlreadySignedUpResponse.ReadArgs(oi);
+							Response resp = EmailAlreadySignedUpResponse.readArgs(oi);
 							msg = "Email already exists.";
 							break;
 						default:
@@ -67,16 +67,17 @@ public class ClientGUI {
 			@Override
 			public void actionPerformed(ActionEvent actionEvent) {
 				String msg = null;
+				boolean fatalError = false;
 				try {
 					Response resp;
 					Request req = new LoginRequest(emailTextField.getText(), passwordPasswordField.getPassword(), sessionID);
-					req.Send(oo);
+					req.send(oo);
 					int val = oi.readInt();
 					ResponseType respType = ResponseType.values()[val];
 					switch (respType) {
 						case AccountInfo:
 							try {
-								resp = AccountInfoResponse.ReadArgs(oi);
+								resp = AccountInfoResponse.readArgs(oi);
 								account = Account.fromAccountInfoResponse((AccountInfoResponse) resp);
 							} catch (ClassNotFoundException e) {
 								msg = "Received incorrect format of payment history.";
@@ -84,9 +85,11 @@ public class ClientGUI {
 							break;
 						case IncorrectLoginError:
 							msg = "Email or password are not correct. Try again.";
+							IncorrectLoginResponse.readArgs(oi);
 							break;
 						default:
 							msg = "Unexpected response from server.";
+							fatalError = true;
 							break;
 					}
 				} catch (IOException e) {
@@ -94,6 +97,9 @@ public class ClientGUI {
 				}
 				if (msg != null) { // error
 					MessageForm.show(msg);
+					if (fatalError){
+						frame.dispose();
+					}
 				} else { // successful login
 					frame.dispose();
 					LoggedInForm.open(account, oi, oo, session, sessionID);

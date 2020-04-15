@@ -9,14 +9,14 @@ public class AccountCreateFailResponse extends Response {
 		this.mssg = errMssg;
 	}
 	@Override
-	void Send(ObjectOutput oo) throws IOException {
+	void send(ObjectOutput oo) throws IOException {
 		oo.writeInt(super.type.ordinal());
 		oo.writeLong(super.sessionID);
 		oo.writeUTF(this.mssg);
 
 		oo.flush();
 	}
-	public static AccountCreateFailResponse ReadArgs(ObjectInput oi) throws IOException {
+	public static AccountCreateFailResponse readArgs(ObjectInput oi) throws IOException {
 		long sessionID = oi.readLong();
 		String mssg = oi.readUTF();
 		return new AccountCreateFailResponse(mssg, sessionID);

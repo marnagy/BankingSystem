@@ -41,7 +41,7 @@ public class PaymentHandlerClient {
 		String[] symbols = {varSymbol, specSymbol};
 		req = new PaymentRequest(account.accountID, receiverID, amount, 0, 0,
 				curr, curr, symbols, "info", sessionID);
-		req.Send(ooSocket);
+		req.send(ooSocket);
 		ResponseType respType = ResponseType.values()[oiSocket.readInt()];
 		switch (respType){
 			case InvalidReceiverIDResponse:

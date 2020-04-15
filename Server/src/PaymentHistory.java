@@ -11,7 +11,7 @@ public class PaymentHistory {
 		String[] lineParts;
 		try(BufferedReader br = new BufferedReader(new FileReader(historyFile))){
 			lineParts = br.readLine().split(":");
-			temp = Payment.FromFile( new File(paymentDir.getAbsolutePath() + MasterServerSession.FileSystemSeparator
+			temp = Payment.fromFile( new File(paymentDir.getAbsolutePath() + MasterServerSession.FileSystemSeparator
 			+ lineParts[0]));
 			temp.category = PaymentCategory.valueOf(lineParts[1]);
 			list.add(temp);

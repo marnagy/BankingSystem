@@ -45,12 +45,12 @@ public class AccountInfoResponse extends Response {
 			for (int i = 0; i < 3; i++) {
 				line = brInfo.readLine();
 			}
-			created = Payment.Destringify(brInfo.readLine());
+			created = Payment.destringify(brInfo.readLine());
 		}
 	}
 
 	@Override
-	void Send(ObjectOutput oo) throws IOException {
+	void send(ObjectOutput oo) throws IOException {
 		oo.writeInt(super.type.ordinal());
 		oo.writeLong(super.sessionID);
 		oo.writeInt(accountID);
@@ -67,7 +67,7 @@ public class AccountInfoResponse extends Response {
 		});
 		oo.flush();
 	}
-	public static AccountInfoResponse ReadArgs(ObjectInput oi) throws IOException, ClassNotFoundException {
+	public static AccountInfoResponse readArgs(ObjectInput oi) throws IOException, ClassNotFoundException {
 		//String email = oi.readUTF();
 		long sessionID = oi.readLong();
 		int accountID = oi.readInt();

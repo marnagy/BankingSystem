@@ -8,13 +8,13 @@ public class LogOutRequest extends Request {
 	}
 
 	@Override
-	public void Send(ObjectOutput oo) throws IOException {
+	public void send(ObjectOutput oo) throws IOException {
 		oo.writeInt(super.type.ordinal());
 		oo.writeLong(super.sessionID);
 
 		oo.flush();
 	}
-	public static LogOutRequest ReadArgs(ObjectInput oi) throws IOException {
+	public static LogOutRequest readArgs(ObjectInput oi) throws IOException {
 		long sessionID = oi.readLong();
 		return new LogOutRequest(sessionID);
 	}

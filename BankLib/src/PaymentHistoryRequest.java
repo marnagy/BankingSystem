@@ -2,19 +2,20 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.time.LocalDate;
+import java.time.YearMonth;
 
 public class PaymentHistoryRequest extends Request {
-	public final MonthYear monthYear;
+	public final YearMonth monthYear;
 	public final int accountID;
-	private PaymentHistoryRequest(int accountID, MonthYear date, long sessionID){
+	private PaymentHistoryRequest(int accountID, YearMonth date, long sessionID){
 		super(RequestType.AccountHistory, sessionID);
 		this.accountID = accountID;
 		monthYear = date;
 	}
-	public PaymentHistoryRequest(MonthYear monthYear, Account account, long sessionID){
+	public PaymentHistoryRequest(YearMonth monthYear, Account account, long sessionID){
 		this(account.accountID, monthYear, sessionID);
 	}
-	private PaymentHistoryRequest(MonthYear monthYear, int accountID, long sessionID){
+	private PaymentHistoryRequest(YearMonth monthYear, int accountID, long sessionID){
 		this(accountID, monthYear, sessionID);
 	}
 
@@ -24,8 +25,8 @@ public class PaymentHistoryRequest extends Request {
 		oo.writeLong(super.sessionID);
 
 		oo.writeInt(accountID);
-		oo.writeInt(monthYear.year);
-		oo.writeInt(monthYear.month.getValue());
+		oo.writeInt(monthYear.getYear());
+		oo.writeInt(monthYear.getMonthValue());
 
 		oo.flush();
 	}
@@ -34,11 +35,8 @@ public class PaymentHistoryRequest extends Request {
 		int accountID = oi.readInt();
 		int year = oi.readInt();
 		int month = oi.readInt();
-		try {
-			return new PaymentHistoryRequest(new MonthYear(month, year), accountID, sessionID);
-		}
-		catch (InvalidFormatException e){
-			return null;
-		}
+
+		//return new PaymentHistoryRequest(new MonthYear(month, year), accountID, sessionID);
+		return new PaymentHistoryRequest( YearMonth.of(year, month), accountID, sessionID);
 	}
 }

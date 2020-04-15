@@ -1,4 +1,5 @@
 import java.io.File;
+import java.time.YearMonth;
 import java.time.ZonedDateTime;
 import java.util.*;
 
@@ -6,7 +7,7 @@ public class Account {
 	public final int accountID;
 	public final ZonedDateTime created;
 	public final Dictionary<CurrencyType, Long> Values;
-	public final Dictionary<MonthYear, Payment[]> History = new Hashtable<MonthYear, Payment[]>();
+	public final Dictionary<YearMonth, Payment[]> History = new Hashtable<YearMonth, Payment[]>();
 	public Account(String email){
 		this.accountID = email.hashCode();
 		Values = new Hashtable<CurrencyType, Long>();

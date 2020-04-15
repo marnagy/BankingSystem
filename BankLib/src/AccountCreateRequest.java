@@ -13,7 +13,7 @@ public class AccountCreateRequest extends Request {
     }
 
     @Override
-    public void Send(ObjectOutput oo) throws IOException {
+    public void send(ObjectOutput oo) throws IOException {
         oo.writeInt(super.type.ordinal());
         oo.writeLong(super.sessionID);
         oo.writeUTF(email);
@@ -21,7 +21,7 @@ public class AccountCreateRequest extends Request {
         oo.flush();
     }
 
-    public static AccountCreateRequest ReadArgs(ObjectInput oi){
+    public static AccountCreateRequest readArgs(ObjectInput oi){
         try {
             long sessionID = oi.readLong();
             String email = oi.readUTF();

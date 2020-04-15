@@ -17,7 +17,7 @@ public class PaymentRequestWithDelay extends Request {
 		oo.writeInt(super.type.ordinal());
 		oo.writeLong(super.sessionID);
 
-		req.Send(oo);
+		req.send(oo);
 		oo.writeInt(hours);
 		oo.writeInt(minutes);
 
@@ -27,7 +27,7 @@ public class PaymentRequestWithDelay extends Request {
 		long sessionID = oi.readLong();
 		// reading og Request type of req
 		oi.readInt();
-		PaymentRequest req = PaymentRequest.ReadArgs(oi);
+		PaymentRequest req = PaymentRequest.readArgs(oi);
 		int hours = oi.readInt();
 		int minutes = oi.readInt();
 		return new PaymentRequestWithDelay(req, hours, minutes, sessionID);
