@@ -12,12 +12,12 @@ public class PaymentHistorySubpanel extends JPanel {
 		this.setMaximumSize(new Dimension(-1, 40));
 		this.setMinimumSize(new Dimension(-1, 40));
 		if ( accountID == payment.senderAccountID){
-			this.add(new JLabel("Sent: " + DateTimeToString(payment.sendingDateTime)));
+			this.add(new JLabel("Sent: " + dateTimeToString(payment.sendingDateTime)));
 			this.add(new JLabel("To: " + payment.receiverAccountID));
 			this.add(new JLabel("Amount: " + String.format("%.2f", -payment.amount / 100D)));
 		}
 		else if ( accountID == payment.receiverAccountID){
-			this.add(new JLabel("Received: " + DateTimeToString(payment.receivedDateTime)));
+			this.add(new JLabel("Received: " + dateTimeToString(payment.receivedDateTime)));
 			this.add(new JLabel("From: " + payment.senderAccountID));
 			this.add(new JLabel("Amount sent: " + String.format("%.2f", payment.amount / 100D)));
 		}
@@ -40,7 +40,7 @@ public class PaymentHistorySubpanel extends JPanel {
 		this.add(comboBox);
 	}
 
-	private String DateTimeToString(ZonedDateTime datetime){
+	private String dateTimeToString(ZonedDateTime datetime){
 		return String.format("%02d:%02d:%02d %02d.%02d.%04d",
 				datetime.getHour(), datetime.getMinute(), datetime.getSecond(),
 				datetime.getDayOfMonth(), datetime.getMonthValue(), datetime.getYear());

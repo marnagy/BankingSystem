@@ -13,7 +13,7 @@ public class PaymentRequestWithDelay extends Request {
 	}
 
 	@Override
-	public void Send(ObjectOutput oo) throws IOException {
+	public void send(ObjectOutput oo) throws IOException {
 		oo.writeInt(super.type.ordinal());
 		oo.writeLong(super.sessionID);
 
@@ -23,7 +23,7 @@ public class PaymentRequestWithDelay extends Request {
 
 		oo.flush();
 	}
-	public static PaymentRequestWithDelay ReadArgs(ObjectInput oi) throws IOException, ClassNotFoundException {
+	public static PaymentRequestWithDelay readArgs(ObjectInput oi) throws IOException, ClassNotFoundException {
 		long sessionID = oi.readLong();
 		// reading og Request type of req
 		oi.readInt();

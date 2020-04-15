@@ -42,8 +42,8 @@ public class ServerSession extends Thread {
 		Integer accountCreated;
 		boolean loggedIn = false, endSession = false, logout = false;
 		try{
-			SetInputOutput(socket);
-			SendSessionID(socket);
+			setInputOutput(socket);
+			sendSessionID(socket);
 			outPrinter.println("Thread " + sessionID + " running");
 			outPrinter.flush();
 			//loggedIn = false;
@@ -59,7 +59,7 @@ public class ServerSession extends Thread {
 					case CreateAccount:
 						// read args
 						synchronized (accounts) {
-							resp = CreateAccountHandler.Run(oi, accounts, sessionID);
+							resp = CreateAccountHandler.run(oi, accounts, sessionID);
 						}
 						break;
 					case Login:
@@ -67,7 +67,7 @@ public class ServerSession extends Thread {
 						req = LoginRequest.ReadArgs(oi);
 						if (req != null) {
 							LoginRequest LoginReq = (LoginRequest) req;
-							if (AccountCheck(LoginReq)){
+							if ( accountCheck(LoginReq) ){
 								// accountDir has to exist (AccountCheck checks it)
 								resp = new AccountInfoResponse(new File(MasterServerSession.AccountsFolder.getCanonicalPath() +
 										MasterServerSession.FileSystemSeparator + LoginReq.email.hashCode()), sessionID);
@@ -87,7 +87,7 @@ public class ServerSession extends Thread {
 						resp = PaymentHandler.Run(outPrinter, errPrinter, oi, oo, accounts, sessionID);
 						break;
 					case AccountHistory:
-						resp = AccountHistoryHandler.Run(outPrinter, errPrinter, oi, oo, accounts, sessionID);
+						resp = AccountHistoryHandler.run(outPrinter, errPrinter, oi, oo, accounts, sessionID);
 						break;
 					case End:
 						EndRequest eReq = EndRequest.ReadArgs(oi);
@@ -157,17 +157,17 @@ public class ServerSession extends Thread {
 		outPrinter.flush();
 	}
 
-	private void SetInputOutput(Socket s) throws IOException {
+	private void setInputOutput(Socket s) throws IOException {
 		oo = new ObjectOutputStream(socket.getOutputStream());
 		oi = new ObjectInputStream(socket.getInputStream());
 	}
-	private void SendSessionID(Socket socket) throws IOException {
+	private void sendSessionID(Socket socket) throws IOException {
 		long l = Long.parseLong(this.getName());
 		oo.writeLong(l);
 		oo.flush();
 	}
 
-	private boolean AccountCheck(LoginRequest loginReq) {
+	private boolean accountCheck(LoginRequest loginReq) {
 		File accountDir = new File(MasterServerSession.AccountsFolder.getAbsolutePath() + MasterServerSession.FileSystemSeparator + loginReq.email.hashCode());
 		File infoFile = new File(accountDir.getAbsolutePath() + MasterServerSession.FileSystemSeparator + ".info");
 		try (BufferedReader br = new BufferedReader(new FileReader(infoFile))){

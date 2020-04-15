@@ -15,7 +15,7 @@ public class PaymentHistoryResponse extends Response {
 		this.history = history;
 	}
 	@Override
-	void Send(ObjectOutput oo) throws IOException {
+	void send(ObjectOutput oo) throws IOException {
 		oo.writeInt(super.type.ordinal());
 		oo.writeLong(super.sessionID);
 
@@ -26,7 +26,7 @@ public class PaymentHistoryResponse extends Response {
 
 		oo.flush();
 	}
-	public static PaymentHistoryResponse ReadArgs(ObjectInput oi) throws IOException {
+	public static PaymentHistoryResponse readArgs(ObjectInput oi) throws IOException {
 		long sessionID = oi.readLong();
 		int size = oi.readInt();
 		Payment[] history = new Payment[size];

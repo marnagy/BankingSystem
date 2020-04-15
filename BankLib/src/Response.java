@@ -11,10 +11,10 @@ public abstract class Response {
 	}
 	// used for sending object
 	// used by server
-	abstract void Send(ObjectOutput oo) throws IOException;
+	abstract void send(ObjectOutput oo) throws IOException;
 	// used for reading arguments of the response
 	// used by client
-	public static Response ReadArgs(ObjectInput oi) throws IOException, ArgsException, InvalidFormatException, ClassNotFoundException {
+	public static Response readArgs(ObjectInput oi) throws IOException, ArgsException, InvalidFormatException, ClassNotFoundException {
 		assert false;
 		return null;
 	}

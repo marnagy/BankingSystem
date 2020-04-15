@@ -4,6 +4,7 @@ import java.net.Socket;
 import java.nio.file.FileSystems;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.*;
 
 // TO-DO:
 // Change naming of subdirectories
@@ -37,7 +38,6 @@ public class MasterServerSession {
 
 	// all valid account IDs, loaded from appropriate folder
 	// new are added
-	//static final Set<Integer> accountIDs = Collections.synchronizedSet(new HashSet<Integer>());
 	static final Dictionary<Integer, Account> accounts = new Hashtable<Integer, Account>();
 
 	// random variable
@@ -61,7 +61,7 @@ public class MasterServerSession {
 
 		//Init folders for accounts and payments
 		try {
-			InitFolders();
+			initFolders();
 			outWriter.println("Folders initiated.");
 			outWriter.flush();
 		} catch (InitException e) {
@@ -78,7 +78,7 @@ public class MasterServerSession {
 		//load accounts from dirictories
 		File[] accountsDirs = AccountsFolder.listFiles();
 		for (int i = 0; i < accountsDirs.length; i++){
-			LoadAccountFromDir(accountsDirs[i], accounts);
+			loadAccountFromDir(accountsDirs[i], accounts);
 		}
 		outWriter.println("Accounts loaded");
 		outWriter.flush();
@@ -97,6 +97,8 @@ public class MasterServerSession {
 			e.printStackTrace(errWriter);
 			return;
 		}
+		ExecutorService pool = Executors.newFixedThreadPool(Thread.activeCount());
+
 		long sessionID;
 		while (true){
 			try {
@@ -113,7 +115,8 @@ public class MasterServerSession {
 						sessionID, outWriter, errWriter, threadIDs);
 				session.setName(sessionID + "");
 				threadIDs.add(sessionID);
-				session.start();
+				pool.execute(session);
+				//session.start();
 			}
 			catch (IOException e) {
 				errWriter.println("IOException while running ServerSocket");
@@ -122,7 +125,7 @@ public class MasterServerSession {
 		}
 	}
 
-	private static void LoadAccountFromDir(File accountsDir, Dictionary<Integer,Account> accounts) {
+	private static void loadAccountFromDir(File accountsDir, Dictionary<Integer,Account> accounts) {
 		int accountID = Integer.parseInt(accountsDir.getName());
 		File infoFile = new File(accountsDir.getAbsolutePath() + FileSystemSeparator
 		+ ".info");
@@ -149,18 +152,7 @@ public class MasterServerSession {
 			throw new Error("Invalid Account " + accountID + " state");
 		}
 	}
-
-	private static boolean ContainsFileWithName(File[] fileNames, File fileToFind) {
-		boolean result = false;
-		for ( File file : fileNames) {
-			if (file.equals(fileToFind)) {
-				result = true;
-				break;
-			}
-		}
-		return result;
-	}
-	private static void InitFolders() throws InitException, IOException {
+	private static void initFolders() throws InitException, IOException {
 		if(!RootFolder.mkdir()){
 			return;
 		}

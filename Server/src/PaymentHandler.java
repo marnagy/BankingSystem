@@ -16,7 +16,7 @@ public class PaymentHandler {
 	static long sessionID;
 
 	static Pattern exchangePattern = Pattern.compile("[1-9]*[0-9](\\.[0-9]+)");
-	public static Response Run(PrintWriter outPrinter, PrintWriter errPrinter,
+	public static Response run(PrintWriter outPrinter, PrintWriter errPrinter,
 	                                        ObjectInput oi, ObjectOutput oo, Dictionary<Integer, Account> accounts,
 	                                        long sessionID) throws IOException {
 		File paymentFile = null;
@@ -35,7 +35,7 @@ public class PaymentHandler {
 				}
 			}
 			else{
-				payment = Run(outPrinter, errPrinter, pr, accounts, sessionID);
+				payment = run(outPrinter, errPrinter, pr, accounts, sessionID);
 				return new SuccessPaymentResponse( payment, sessionID);
 			}
 
@@ -47,11 +47,11 @@ public class PaymentHandler {
 			return new UnknownErrorResponse("Server error: " + e.getMessage(), sessionID);
 		}
 	}
-	public static Payment Run(PrintWriter outPrinter, PrintWriter errPrinter,
+	public static Payment run(PrintWriter outPrinter, PrintWriter errPrinter,
 	                  PaymentRequest req, Dictionary<Integer, Account> accounts,
 	                  long sessionID) throws IOException {
 		File paymentFile;
-		Payment payment = MakePayment(req, accounts, errPrinter);
+		Payment payment = makePayment(req, accounts, errPrinter);
 		if ( payment == null ){
 			// TO-DO
 			outPrinter.println("Check receiver's ID and amount.");
@@ -61,14 +61,14 @@ public class PaymentHandler {
 		else{
 			outPrinter.println("Payment made.");
 			outPrinter.println("Creating file for payment...");
-			paymentFile = CreatePaymentFile(payment, errPrinter);
-			SavePaymentToAccounts(payment, paymentFile.getName(), MasterServerSession.AccountsFolder.getAbsolutePath());
-			SendEmail(payment);
+			paymentFile = createPaymentFile(payment, errPrinter);
+			savePaymentToAccounts(payment, paymentFile.getName(), MasterServerSession.AccountsFolder.getAbsolutePath());
+			sendEmail(payment);
 		}
 		return payment;
 	}
 
-	private static void SendEmail(Payment payment) {
+	private static void sendEmail(Payment payment) {
 		Properties prop = new Properties();
 		prop.put("mail.smtp.auth", true);
 		prop.put("mail.smtp.starttls.enable", "true");
@@ -77,7 +77,7 @@ public class PaymentHandler {
 
 		String myAccount = MasterServerSession.emailAddr;
 		String myPasswd = new String(MasterServerSession.emailPasswd);
-		String recipientAddr = GetRecipientAddr(payment);
+		String recipientAddr = getRecipientAddr(payment);
 
 		Session session = Session.getDefaultInstance(prop, new Authenticator() {
 			@Override
@@ -91,19 +91,19 @@ public class PaymentHandler {
 			msg.setFrom(new InternetAddress(myAccount));
 			msg.setRecipient(Message.RecipientType.TO, new InternetAddress(recipientAddr));
 			msg.setSubject("Payment received");
-			msg.setText(CreateEmailText(payment));
+			msg.setText( createEmailText(payment) );
 			Transport.send(msg);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	private static String CreateEmailText(Payment payment) {
+	private static String createEmailText(Payment payment) {
 		return "To your account was sent " + String.format("%.2f",payment.amount / 100D) + " " + payment.fromCurr + " converted to " +
 				payment.toCurr + ".\n\nYour BankingApp";
 	}
 
-	private static String GetRecipientAddr(Payment payment) {
+	private static String getRecipientAddr(Payment payment) {
 		try(BufferedReader br = new BufferedReader(new FileReader(MasterServerSession.AccountsFolder.getAbsolutePath() +
 				MasterServerSession.FileSystemSeparator + payment.receiverAccountID + MasterServerSession.FileSystemSeparator +
 				".info"))){
@@ -116,7 +116,7 @@ public class PaymentHandler {
 		return null;
 	}
 
-	private static synchronized void SavePaymentToAccounts(Payment payment, String paymentFileName, String accountsFolderPath) throws IOException {
+	private static synchronized void savePaymentToAccounts(Payment payment, String paymentFileName, String accountsFolderPath) throws IOException {
 		int senderAccountID = payment.senderAccountID;
 		int receiverAccountID = payment.receiverAccountID;
 		ZonedDateTime dateTime = ZonedDateTime.now();
@@ -137,7 +137,7 @@ public class PaymentHandler {
 		}
 	}
 
-	private static synchronized File CreatePaymentFile(Payment payment, PrintWriter errPrinter) throws IOException {
+	private static synchronized File createPaymentFile(Payment payment, PrintWriter errPrinter) throws IOException {
 		String paymentFileName = MasterServerSession.PaymentsFolder.getAbsolutePath() + MasterServerSession.FileSystemSeparator
 				+ payment.senderAccountID + "_" + payment.receiverAccountID + "_"
 				+ Payment.Stringify(payment.sendingDateTime) + "_" + Payment.Stringify(payment.receivedDateTime) + ".payment";
@@ -154,7 +154,7 @@ public class PaymentHandler {
 		return paymentFile;
 	}
 
-	private static synchronized Payment MakePayment(PaymentRequest pr, Dictionary<Integer, Account> accounts, PrintWriter errPrinter) throws IOException {
+	private static synchronized Payment makePayment(PaymentRequest pr, Dictionary<Integer, Account> accounts, PrintWriter errPrinter) throws IOException {
 		int senderID = pr.senderAccountID;
 		int receiverID = pr.receiverAccountID;
 
@@ -175,19 +175,19 @@ public class PaymentHandler {
 				Long receiverAmount = senderAccount.Values.get(pr.toCurr);
 				long amount = pr.amount;
 				if (pr.fromCurr != pr.toCurr){
-					amount = Convert(amount, pr.fromCurr, pr.toCurr);
+					amount = convert(amount, pr.fromCurr, pr.toCurr);
 				}
 				// because wrapper types are immutable
 				senderAccount.Values.put(pr.fromCurr, senderAmount - pr.amount);
 				receiverAccount.Values.put(pr.toCurr, receiverAmount + amount);
-				ModifyValueFiles(senderAccount,errPrinter);
-				ModifyValueFiles(receiverAccount, errPrinter);
+				modifyValueFiles(senderAccount,errPrinter);
+				modifyValueFiles(receiverAccount, errPrinter);
 			}
 		}
 		return new Payment(pr);
 	}
 
-	private static long Convert(long amount, CurrencyType from, CurrencyType to) throws IOException {
+	private static long convert(long amount, CurrencyType from, CurrencyType to) throws IOException {
 		String apiKey = "3fa4ba21d24d7294d6a9";
 		try {
 
@@ -217,7 +217,7 @@ public class PaymentHandler {
 		return -1;
 	}
 
-	private static synchronized void ModifyValueFiles(Account Account, PrintWriter errPrinter) throws IOException {
+	private static synchronized void modifyValueFiles(Account Account, PrintWriter errPrinter) throws IOException {
 		Dictionary<CurrencyType, Long> Values = Account.Values;
 		try( var bw = new BufferedWriter( new FileWriter(MasterServerSession.AccountsFolder.getAbsolutePath()
 		+ MasterServerSession.FileSystemSeparator + Account.accountID + MasterServerSession.FileSystemSeparator

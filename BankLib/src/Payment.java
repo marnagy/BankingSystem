@@ -33,25 +33,25 @@ public class Payment {
 		long amount = oi.readLong();
 		CurrencyType fromCurr =  CurrencyType.values()[oi.readInt()];
 		CurrencyType toCurr = CurrencyType.values()[oi.readInt()];
-		ZonedDateTime sendingDateTime = Destringify(oi.readUTF());
-		ZonedDateTime receivedDateTime = Destringify(oi.readUTF());
+		ZonedDateTime sendingDateTime = destringify(oi.readUTF());
+		ZonedDateTime receivedDateTime = destringify(oi.readUTF());
 		PaymentCategory category = PaymentCategory.values()[oi.readInt()];
 		return new Payment(senderAccountID, receiverAccountID, amount, fromCurr, toCurr,
 				sendingDateTime, receivedDateTime, category);
 	}
 
-	public void Send(ObjectOutput oo) throws IOException {
+	public void send(ObjectOutput oo) throws IOException {
 		oo.writeInt(senderAccountID);
 		oo.writeInt(receiverAccountID);
 		oo.writeLong(amount);
 		oo.writeInt(fromCurr.ordinal());
 		oo.writeInt(toCurr.ordinal());
-		oo.writeUTF(Stringify(sendingDateTime));
-		oo.writeUTF(Stringify(receivedDateTime));
+		oo.writeUTF(stringify(sendingDateTime));
+		oo.writeUTF(stringify(receivedDateTime));
 		oo.writeInt(category.ordinal());
 		oo.flush();
 	}
-	public static Payment FromFile(File paymentFile) throws IOException, InvalidFormatException {
+	public static Payment fromFile(File paymentFile) throws IOException, InvalidFormatException {
 		if (!paymentFile.getName().endsWith(".payment")){
 			throw new InvalidFormatException("Payment file doesn't end with '.payment'");
 		}
@@ -59,8 +59,8 @@ public class Payment {
 		if (nameParts.length == 4){
 			int senderAccountID = Integer.parseInt(nameParts[0]);
 			int receiverAccountID = Integer.parseInt(nameParts[1]);
-			ZonedDateTime sendingDateTime = Destringify(nameParts[2]);
-			ZonedDateTime receivedDateTime = Destringify(nameParts[3]);
+			ZonedDateTime sendingDateTime = destringify(nameParts[2]);
+			ZonedDateTime receivedDateTime = destringify(nameParts[3]);
 			CurrencyType fromCurr;
 			CurrencyType toCurr;
 			long amount;
@@ -76,7 +76,7 @@ public class Payment {
 			throw new IOException("Illegal name of file: " + paymentFile.getAbsolutePath());
 		}
 	}
-	public static ZonedDateTime Destringify(String text){
+	public static ZonedDateTime destringify(String text){
 		ZonedDateTime datetime = ZonedDateTime.now();
 		String[] textPart = text.split("-");
 		long date = Long.parseLong(textPart[0]);
@@ -94,7 +94,7 @@ public class Payment {
 				withYear(year).withMonth(month).withDayOfMonth(day);
 	}
 
-	public static String Stringify(ZonedDateTime datetime){
+	public static String stringify(ZonedDateTime datetime){
 		return String.format("%02d%02d%04d-%02d%02d%02d", datetime.getDayOfMonth(), datetime.getMonthValue(),
 				datetime.getYear(), datetime.getHour(), datetime.getMinute(), datetime.getSecond());
 	}

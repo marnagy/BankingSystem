@@ -10,14 +10,14 @@ public class UnknownErrorResponse extends Response {
 	}
 
 	@Override
-	void Send(ObjectOutput oo) throws IOException {
+	void send(ObjectOutput oo) throws IOException {
 		oo.writeInt(super.type.ordinal());
 		oo.writeLong(super.sessionID);
 		oo.writeUTF(this.msg);
 
 		oo.flush();
 	}
-	public static UnknownErrorResponse ReadArgs(ObjectInput oi) throws IOException {
+	public static UnknownErrorResponse readArgs(ObjectInput oi) throws IOException {
 		long sessionID = oi.readLong();
 		String msg = oi.readUTF();
 		return new UnknownErrorResponse(msg, sessionID);

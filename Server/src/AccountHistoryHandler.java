@@ -4,7 +4,7 @@ import java.util.Dictionary;
 import java.util.List;
 
 public class AccountHistoryHandler {
-	public static Response Run(PrintWriter outPrinter, PrintWriter errPrinter,
+	public static Response run(PrintWriter outPrinter, PrintWriter errPrinter,
 	                           ObjectInput oi, ObjectOutput oo,
 	                           Dictionary<Integer, Account> accounts, long sessionID) {
 		try {

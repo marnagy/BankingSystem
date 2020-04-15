@@ -11,9 +11,9 @@ public abstract class Request {
         this.sessionID = sessionID;
     }
     // used by client
-    public abstract void Send(ObjectOutput oo) throws IOException;
+    public abstract void send(ObjectOutput oo) throws IOException;
     // used by server
-    public static Request ReadArgs(ObjectInput oi) throws IOException, ClassNotFoundException {
+    public static Request readArgs(ObjectInput oi) throws IOException, ClassNotFoundException {
         assert false;
         return null;
     }

@@ -19,7 +19,7 @@ public class PaymentHistoryRequest extends Request {
 	}
 
 	@Override
-	public void Send(ObjectOutput oo) throws IOException {
+	public void send(ObjectOutput oo) throws IOException {
 		oo.writeInt(super.type.ordinal());
 		oo.writeLong(super.sessionID);
 
@@ -29,7 +29,7 @@ public class PaymentHistoryRequest extends Request {
 
 		oo.flush();
 	}
-	public static PaymentHistoryRequest ReadArgs(ObjectInput oi) throws IOException {
+	public static PaymentHistoryRequest readArgs(ObjectInput oi) throws IOException {
 		long sessionID = oi.readLong();
 		int accountID = oi.readInt();
 		int year = oi.readInt();

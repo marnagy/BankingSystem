@@ -53,7 +53,7 @@ public class PaymentRequest extends Request {
 		this.sendingDateTime = dateTime;
 	}
 	@Override
-	public void Send(ObjectOutput oo) throws IOException {
+	public void send(ObjectOutput oo) throws IOException {
 		oo.writeInt(super.type.ordinal());
 		oo.writeLong(super.sessionID);
 		// numbers
@@ -75,7 +75,7 @@ public class PaymentRequest extends Request {
 		oo.flush();
 	}
 
-	public static PaymentRequest ReadArgs(ObjectInput oi) throws IOException, ClassNotFoundException {
+	public static PaymentRequest readArgs(ObjectInput oi) throws IOException, ClassNotFoundException {
 		// ADD reading
 		long sessionID = oi.readLong();
 		int senderAccountID = oi.readInt();

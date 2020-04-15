@@ -9,7 +9,7 @@ import java.util.Set;
 public class CreateAccountHandler {
 	static AccountCreateRequest req;
 	static Response resp;
-	public static Response Run(final ObjectInput oi, final Dictionary<Integer, Account> accounts, long sessionID) {
+	public static Response run(final ObjectInput oi, final Dictionary<Integer, Account> accounts, long sessionID) {
 		req = AccountCreateRequest.ReadArgs(oi);
 
 		try {
@@ -18,7 +18,7 @@ public class CreateAccountHandler {
 				Account account = null;
 				//check if email is already registered
 				if (accounts.get(acr.email.hashCode()) == null &&
-						(account = CreateAccount(acr.email, acr.passwd)) != null) {
+						(account = createAccount(acr.email, acr.passwd)) != null) {
 					int accountCreated = acr.email.hashCode();
 					assert accountCreated == account.accountID;
 					accounts.put(accountCreated, account );
@@ -35,11 +35,11 @@ public class CreateAccountHandler {
 			return new AccountCreateFailResponse("Account already exists.", sessionID);
 		}
 	}
-	private static Account CreateAccount(String email, char[] passwd) throws IOException {
+	private static Account createAccount(String email, char[] passwd) throws IOException {
 		File newAccountFolder = new File(MasterServerSession.AccountsFolder.getAbsolutePath() + MasterServerSession.FileSystemSeparator + email.hashCode());
 		Account account = new Account(email);
 		if ( newAccountFolder.mkdir() ) {
-			if (CreateAccountInfoFile( newAccountFolder, account, email, passwd)){
+			if ( createAccountInfoFile( newAccountFolder, account, email, passwd) ){
 				return account;
 			}
 			else {
@@ -50,7 +50,7 @@ public class CreateAccountHandler {
 			return null;
 		}
 	}
-	private static boolean CreateAccountInfoFile(File accountFolderFile, Account account, String email, char[] passwd) throws IOException {
+	private static boolean createAccountInfoFile(File accountFolderFile, Account account, String email, char[] passwd) throws IOException {
 		File infoFile = new File(accountFolderFile.getAbsolutePath() + MasterServerSession.FileSystemSeparator + ".info");
 		File currenciesFile = new File(accountFolderFile.getAbsolutePath() + MasterServerSession.FileSystemSeparator + ".curr");
 		if (infoFile.createNewFile() && currenciesFile.createNewFile()){

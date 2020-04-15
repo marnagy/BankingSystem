@@ -76,9 +76,9 @@ public class LoggedInForm {
 				parentPanel.repaint();
 				parentPanel.revalidate();
 				try {
-					UpdateHistoryPanel();
+					updateHistoryPanel();
 				} catch (IOException e) {
-					MessageForm.Show("IO Error occurred");
+					MessageForm.show("IO Error occurred");
 				}
 			}
 		});
@@ -91,7 +91,7 @@ public class LoggedInForm {
 					req.Send(oo);
 					ResponseType respType = ResponseType.values()[oi.readInt()];
 					if (respType != ResponseType.Success) {
-						MessageForm.Show("Error occurred during exiting out.");
+						MessageForm.show("Error occurred during exiting out.");
 						return;
 					} else {
 						Response resp = SuccessResponse.ReadArgs(oi);
@@ -109,7 +109,7 @@ public class LoggedInForm {
 			public void actionPerformed(ActionEvent actionEvent) {
 				String msg = null;
 				String amountText = amountTextField.getText();
-				if (CheckAmount(amountText)) {
+				if (checkAmount(amountText)) {
 					long amount = amountToLong(amountText);
 					if (isValidID(receiverSIDTextField.getText())) {
 						int receiverID = Integer.parseInt(receiverSIDTextField.getText());
@@ -117,7 +117,7 @@ public class LoggedInForm {
 						CurrencyType fromCurr = (CurrencyType) fromCurrencyComboBox.getSelectedItem();
 						CurrencyType toCurr = (CurrencyType) toCurrencyComboBox.getSelectedItem();
 
-						if (HasEnoughMoney(account, amount, fromCurr)) {
+						if (hasEnoughMoney(account, amount, fromCurr)) {
 							try {
 								ZonedDateTime dateTime = ZonedDateTime.now();
 								String[] symbols = {variableSymbolTextField.getText(), specificSymbolTextField.getText()};
@@ -136,7 +136,7 @@ public class LoggedInForm {
 										long valBefore = account.Values.get(fromCurr);
 										account.Values.put(fromCurr, valBefore - amount);
 										msg = "Payment sent and processed.";
-										UpdateBalance(account, balanceLabel, accountBalanceComboBox);
+										updateBalance(account, balanceLabel, accountBalanceComboBox);
 										//UpdatePaymentHistory(resp);
 										break;
 									case Success:
@@ -159,7 +159,7 @@ public class LoggedInForm {
 				} else {
 					msg = "Incorrect format of number.";
 				}
-				MessageForm.Show(msg);
+				MessageForm.show(msg);
 			}
 		});
 		accountBalanceComboBox.addActionListener(new ActionListener() {
@@ -178,7 +178,7 @@ public class LoggedInForm {
 					req.Send(oo);
 					ResponseType respType = ResponseType.values()[oi.readInt()];
 					if (respType != ResponseType.Success) {
-						MessageForm.Show("Error occurred during logging out.");
+						MessageForm.show("Error occurred during logging out.");
 						return;
 					} else {
 						Response resp = SuccessResponse.ReadArgs(oi);
@@ -193,17 +193,17 @@ public class LoggedInForm {
 			@Override
 			public void actionPerformed(ActionEvent actionEvent) {
 				try {
-					UpdateHistoryPanel();
+					updateHistoryPanel();
 				} catch (IOException e) {
-					MessageForm.Show("IO Error occurred");
+					MessageForm.show("IO Error occurred");
 				}
 			}
 		});
 	}
 
-	private void UpdatePaymentHistory(SuccessPaymentResponse resp) {
+	private void updatePaymentHistory(SuccessPaymentResponse resp) {
 		if (resp.payment == null) {
-			MessageForm.Show("This payment is delayed. Please, restart your account after sending to see effect.");
+			MessageForm.show("This payment is delayed. Please, restart your account after sending to see effect.");
 			return;
 		}
 		ZonedDateTime datetime = resp.payment.sendingDateTime;
@@ -220,7 +220,7 @@ public class LoggedInForm {
 		account.History.put(now, arr);
 	}
 
-	private void UpdateHistoryPanel() throws IOException {
+	private void updateHistoryPanel() throws IOException {
 		MonthYear selectedMonth = (MonthYear) monthComboBox.getSelectedItem();
 		monthHistoryPanel.removeAll();
 
@@ -252,14 +252,14 @@ public class LoggedInForm {
 				break;
 		}
 		if (msg != null) { // problem
-			MessageForm.Show(msg);
+			MessageForm.show(msg);
 		} else {
 			monthHistoryPanel.revalidate();
 			monthHistoryPanel.repaint();
 		}
 	}
 
-	private void UpdateBalance(Account account, JLabel balanceLabel, JComboBox accountBalanceComboBox) {
+	private void updateBalance(Account account, JLabel balanceLabel, JComboBox accountBalanceComboBox) {
 		double val = account.Values.get(accountBalanceComboBox.getSelectedItem()) / 100D;
 		balanceLabel.setText(String.format("%.2f", val));
 	}
@@ -289,15 +289,15 @@ public class LoggedInForm {
 		}
 	}
 
-	private boolean HasEnoughMoney(Account account, long amount, CurrencyType curr) {
+	private boolean hasEnoughMoney(Account account, long amount, CurrencyType curr) {
 		return account.Values.get(curr) - amount > 0;
 	}
 
-	private boolean CheckAmount(String text) {
+	private boolean checkAmount(String text) {
 		return amountPattern.matcher(text).matches();
 	}
 
-	public static void Open(Account account, ObjectInput oi, ObjectOutput oo, ClientSession session, long sessionID) {
+	public static void open(Account account, ObjectInput oi, ObjectOutput oo, ClientSession session, long sessionID) {
 		JFrame frame = new JFrame("LoggedInForm");
 
 		// center frame
@@ -356,14 +356,7 @@ public class LoggedInForm {
 	}
 
 	public static void main(String[] args) {
-		Open(null, null, null, null, -1);
-	}
-
-	private void ShowOnTop(JPanel parent, JPanel child) {
-		parent.removeAll();
-		parent.add(child);
-		parent.repaint();
-		parent.revalidate();
+		open(null, null, null, null, -1);
 	}
 
 	{

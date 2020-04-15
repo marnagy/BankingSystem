@@ -9,7 +9,7 @@ public class SuccessPaymentResponse extends Response {
 		this.payment = payment;
 	}
 	@Override
-	void Send(ObjectOutput oo) throws IOException {
+	void send(ObjectOutput oo) throws IOException {
 		oo.writeInt(super.type.ordinal());
 		oo.writeLong(super.sessionID);
 		oo.writeBoolean(payment != null);
@@ -19,7 +19,7 @@ public class SuccessPaymentResponse extends Response {
 
 		oo.flush();
 	}
-	public static SuccessPaymentResponse ReadArgs(ObjectInput oi) throws IOException{
+	public static SuccessPaymentResponse readArgs(ObjectInput oi) throws IOException{
 		long sessionID = oi.readLong();
 		Payment payment = null;
 		if (oi.readBoolean()) {
