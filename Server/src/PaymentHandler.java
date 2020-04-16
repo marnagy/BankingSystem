@@ -4,17 +4,18 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.YearMonth;
-import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.*;
 import javax.mail.internet.*;
-import org.json.*;
 
 public class PaymentHandler {
 	static Set<Integer> accountIDs;
 	static long sessionID;
+	private static ScheduledThreadPoolExecutor pool = new ScheduledThreadPoolExecutor(Thread.activeCount());
 
 	static Pattern exchangePattern = Pattern.compile("[1-9]*[0-9](\\.[0-9]+)");
 	public static Response run(PrintWriter outPrinter, PrintWriter errPrinter,
@@ -28,7 +29,9 @@ public class PaymentHandler {
 				DelayedPaymentThread thread = new DelayedPaymentThread(pr,
 						outPrinter, errPrinter, accounts, sessionID);
 				if (thread.isValid()){
-					thread.start();
+					pool.schedule(thread,(long)pr.hoursDelay * 60 + (long)pr.minutesDelay, TimeUnit.MINUTES);
+					//pool.execute(thread);
+					//thread.start();
 					return new SuccessResponse(sessionID);
 				}
 				else{

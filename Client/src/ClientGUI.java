@@ -97,7 +97,7 @@ public class ClientGUI {
 				}
 				if (msg != null) { // error
 					MessageForm.show(msg);
-					if (fatalError){
+					if (fatalError) {
 						frame.dispose();
 					}
 				} else { // successful login

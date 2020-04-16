@@ -8,8 +8,8 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="BankLib" />
+    <orderEntry type="library" name="json-20190722" level="project" />
     <orderEntry type="library" name="javax.mail" level="project" />
     <orderEntry type="library" name="activation" level="project" />
-    <orderEntry type="library" name="json-20190722" level="project" />
   </component>
 </module>

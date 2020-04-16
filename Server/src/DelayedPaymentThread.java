@@ -4,7 +4,7 @@ import java.io.ObjectOutput;
 import java.io.PrintWriter;
 import java.util.Dictionary;
 
-public class DelayedPaymentThread extends Thread {
+public class DelayedPaymentThread implements Runnable {
 	private PaymentRequest req;
 	public final long sessionID;
 	final Dictionary<Integer, Account> accounts;
@@ -26,9 +26,8 @@ public class DelayedPaymentThread extends Thread {
 	@Override
 	public void run(){
 		try {
-			Thread.sleep(((long)req.hoursDelay * 60 + (long)req.minutesDelay)*60 * 1000, 0);
 			PaymentHandler.run(outPrinter, errWriter, req, accounts, sessionID);
-		} catch (InterruptedException | IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
