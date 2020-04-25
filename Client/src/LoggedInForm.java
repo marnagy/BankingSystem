@@ -421,7 +421,7 @@ public class LoggedInForm {
 		scrollPane1.setViewportView(parentPanel);
 		paymentPanel = new JPanel();
 		paymentPanel.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(7, 5, new Insets(10, 10, 10, 10), -1, -1));
-		paymentPanel.setVisible(true);
+		paymentPanel.setVisible(false);
 		parentPanel.add(paymentPanel, "Card1");
 		final JLabel label1 = new JLabel();
 		label1.setText("Receiver's ID");
@@ -486,7 +486,7 @@ public class LoggedInForm {
 		paymentPanel.add(label10, new com.intellij.uiDesigner.core.GridConstraints(4, 4, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_NORTH, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		historyPanel = new JPanel();
 		historyPanel.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(3, 2, new Insets(0, 0, 0, 0), -1, -1));
-		historyPanel.setVisible(false);
+		historyPanel.setVisible(true);
 		parentPanel.add(historyPanel, "Card2");
 		final JLabel label11 = new JLabel();
 		label11.setText("Month");
@@ -494,7 +494,7 @@ public class LoggedInForm {
 		final JScrollPane scrollPane2 = new JScrollPane();
 		historyPanel.add(scrollPane2, new com.intellij.uiDesigner.core.GridConstraints(2, 0, 1, 2, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
 		monthHistoryPanel = new JPanel();
-		monthHistoryPanel.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+		monthHistoryPanel.setLayout(new BorderLayout(0, 0));
 		scrollPane2.setViewportView(monthHistoryPanel);
 		final com.intellij.uiDesigner.core.Spacer spacer1 = new com.intellij.uiDesigner.core.Spacer();
 		historyPanel.add(spacer1, new com.intellij.uiDesigner.core.GridConstraints(1, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
