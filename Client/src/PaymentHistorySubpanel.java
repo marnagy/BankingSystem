@@ -2,15 +2,28 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.time.ZonedDateTime;
 
 public class PaymentHistorySubpanel extends JPanel {
-
-	public PaymentHistorySubpanel(int accountID, Payment payment) throws InvalidFormatException {
+	final ObjectInput oi;
+	final ObjectOutput oo;
+	final long sessionID;
+	final int accountID;
+	final Payment payment;
+	public PaymentHistorySubpanel(int accountID, Payment payment, ObjectInput oi, ObjectOutput oo, long sessionID) throws InvalidFormatException {
 		super(new GridLayout(1, 5));
 		this.setPreferredSize(new Dimension(-1, 40));
 		this.setMaximumSize(new Dimension(-1, 40));
 		this.setMinimumSize(new Dimension(-1, 40));
+		this.oi = oi;
+		this.oo = oo;
+		this.payment = payment;
+		this.sessionID = sessionID;
+		this.accountID = accountID;
+
 		if ( accountID == payment.senderAccountID){
 			this.add(new JLabel("Sent: " + dateTimeToString(payment.sendingDateTime)));
 			this.add(new JLabel("To: " + payment.receiverAccountID));
@@ -33,6 +46,28 @@ public class PaymentHistorySubpanel extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent actionEvent) {
 				if (comboBox.getSelectedItem() != payment.category){
+					Request req = new PaymentCategoryChangeRequest(payment, (PaymentCategory) comboBox.getSelectedItem(), sessionID);
+					try {
+						req.send(oo);
+						ResponseType respType = ResponseType.values()[oi.readInt()];
+						String msg = "!Serious error occured!";
+						Response resp;
+						switch (respType){
+							case Success:
+								resp = SuccessResponse.readArgs(oi);
+								msg = "Category changed successfully.";
+								break;
+							case UnknownErrorResponse:
+								UnknownErrorResponse UEResponse = UnknownErrorResponse.readArgs(oi);
+								msg = UEResponse.msg;
+								break;
+						}
+						MessageForm.Show(msg);
+					} catch (IOException e) {
+						String msg = "Category failed to change due to network error.";
+						comboBox.setSelectedItem(payment.category);
+						MessageForm.Show(msg);
+					}
 
 				}
 			}

@@ -55,64 +55,80 @@ public class ServerSession extends Thread {
 				// check if sessionIDs match
 				Request req;
 				Response resp = null;
-				switch (reqType){
-					case CreateAccount:
-						// read args
-						synchronized (accounts) {
-							resp = CreateAccountHandler.run(oi, accounts, sessionID);
-						}
-						break;
-					case Login:
-						// read args
-						req = LoginRequest.readArgs(oi);
-						if (req != null) {
-							LoginRequest LoginReq = (LoginRequest) req;
-							if ( accountCheck(LoginReq) ){
-								// accountDir has to exist (AccountCheck checks it)
-								resp = new AccountInfoResponse(new File(MasterServerSession.AccountsFolder.getCanonicalPath() +
-										MasterServerSession.FileSystemSeparator + LoginReq.email.hashCode()), sessionID);
-								loggedUsers.add(LoginReq.email.hashCode());
-								this.userID = LoginReq.email.hashCode();
-								loggedIn = true;
+				if (!(NeedLogin(reqType) && !loggedIn)) {
+					switch (reqType) {
+						case CreateAccount:
+							// read args
+							synchronized (accounts) {
+								resp = CreateAccountHandler.run(oi, accounts, sessionID);
 							}
-							else{
-								resp = new IncorrectLoginResponse(sessionID);
-							}
-						}
-						else{
-							resp = new ArgumentMissingResponse(sessionID);
-						}
-						break;
-					case Payment:
-						resp = PaymentHandler.run(outPrinter, errPrinter, oi, oo, accounts, sessionID);
-						break;
-					case AccountHistory:
-						resp = AccountHistoryHandler.run(outPrinter, errPrinter, oi, oo, accounts, sessionID);
-						break;
-					case End:
-						EndRequest eReq = EndRequest.readArgs(oi);
-						if ( userID == null || ! loggedIn ){
-							resp = new IllegalRequestResponse(sessionID);
-						}
-						else{
-							resp = new SuccessResponse(sessionID);
-							logout = true;
-							endSession = true;
-						}
-						break;
-					case Logout:
-						LogOutRequest LOReq = LogOutRequest.readArgs(oi);
-						if (!loggedIn){
-							resp = new IllegalRequestResponse(sessionID);
 							break;
-						}
-						else{
-							resp = new SuccessResponse(sessionID);
-							logout = true;
-						}
-						break;
-					default:
-						resp = new IllegalRequestResponse(sessionID);
+						case Login:
+							// read args
+							req = LoginRequest.readArgs(oi);
+							if (req != null) {
+								LoginRequest LoginReq = (LoginRequest) req;
+								if (accountCheck(LoginReq)) {
+									// accountDir has to exist (AccountCheck checks it)
+									resp = new AccountInfoResponse(new File(MasterServerSession.AccountsFolder.getCanonicalPath() +
+											MasterServerSession.FileSystemSeparator + LoginReq.email.hashCode()), sessionID);
+									loggedUsers.add(LoginReq.email.hashCode());
+									this.userID = LoginReq.email.hashCode();
+									loggedIn = true;
+								} else {
+									resp = new IncorrectLoginResponse(sessionID);
+								}
+							} else {
+								resp = new ArgumentMissingResponse(sessionID);
+							}
+							break;
+						case Payment:
+							PaymentRequest pr = PaymentRequest.readArgs(oi);
+							if (!loggedIn) {
+								resp = new UnknownErrorResponse("You are not logged in.", sessionID);
+							}
+							resp = PaymentHandler.Run(outPrinter, errPrinter, pr, oo, accounts, sessionID);
+							break;
+						case PaymentCategoryChange:
+							PaymentCategoryChangeRequest PCChReq = PaymentCategoryChangeRequest.ReadArgs(oi);
+							if (!loggedIn) {
+								resp = new UnknownErrorResponse("You are not logged in.", sessionID);
+							}
+							resp = PaymentCategoryChangeHandler.Run(userID, PCChReq, MasterServerSession.PaymentsFolder, oo,
+									sessionID);
+							break;
+						case AccountHistory:
+							if (!loggedIn) {
+								resp = new UnknownErrorResponse("You are not logged in.", sessionID);
+							}
+							resp = AccountHistoryHandler.run(outPrinter, errPrinter, oi, oo, accounts, sessionID);
+							break;
+						case End:
+							EndRequest eReq = EndRequest.readArgs(oi);
+							if (userID == null || !loggedIn) {
+								resp = new IllegalRequestResponse(sessionID);
+							} else {
+								resp = new SuccessResponse(sessionID);
+								logout = true;
+								endSession = true;
+							}
+							break;
+						case Logout:
+							LogOutRequest LOReq = LogOutRequest.readArgs(oi);
+							if (!loggedIn) {
+								resp = new IllegalRequestResponse(sessionID);
+								break;
+							} else {
+								resp = new SuccessResponse(sessionID);
+								logout = true;
+							}
+							break;
+						default:
+							resp = new IllegalRequestResponse(sessionID);
+					}
+				}
+				else{
+					resp = new UnknownErrorResponse("You are not logged in.", sessionID);
 				}
 
 				resp.send(oo);
@@ -132,7 +148,7 @@ public class ServerSession extends Thread {
 					break;
 				}
 			}
-		} catch (IOException e){
+		} catch (IOException | ClassNotFoundException e){
 			synchronized (errPrinter) {
 				errPrinter.println("IOException occurred (mostly client suddenly disconnected)");
 				e.printStackTrace(errPrinter);
@@ -155,6 +171,13 @@ public class ServerSession extends Thread {
 		}
 		outPrinter.println("Thread " + sessionID + " ended.");
 		outPrinter.flush();
+	}
+
+	private boolean NeedLogin(RequestType reqType) {
+		return reqType == RequestType.Logout ||
+				reqType == RequestType.Payment ||
+				reqType == RequestType.AccountHistory ||
+				reqType == RequestType.PaymentCategoryChange;
 	}
 
 	private void setInputOutput(Socket s) throws IOException {

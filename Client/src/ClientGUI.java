@@ -34,7 +34,7 @@ public class ClientGUI {
 				String msg = null;
 				try {
 					if (!CheckEmail(emailTextField.getText())) {
-						MessageForm.show("Incorrect email format.");
+						MessageForm.Show("Incorrect email format.");
 						return;
 					}
 					Request req = new AccountCreateRequest(emailTextField.getText(), passwordPasswordField.getPassword(), sessionID);
@@ -60,7 +60,7 @@ public class ClientGUI {
 				} catch (IOException e) {
 					msg = "Network error occured.";
 				}
-				MessageForm.show(msg);
+				MessageForm.Show(msg);
 			}
 		});
 		logInButton.addActionListener(new ActionListener() {
@@ -96,7 +96,7 @@ public class ClientGUI {
 					msg = "Network error occured.";
 				}
 				if (msg != null) { // error
-					MessageForm.show(msg);
+					MessageForm.Show(msg);
 					if (fatalError) {
 						frame.dispose();
 					}

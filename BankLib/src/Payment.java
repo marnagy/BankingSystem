@@ -103,4 +103,8 @@ public class Payment {
 		return new Payment(senderAccountID, receiverAccountID, amount, fromCurr, toCurr,
 				sendingDateTime, receivedDateTime, cat);
 	}
+	public String GetFileName(){
+		return this.senderAccountID + "_" + this.receiverAccountID + "_"
+				+ Payment.stringify(this.sendingDateTime) + "_" + Payment.stringify(this.receivedDateTime) + ".payment";
+	}
 }

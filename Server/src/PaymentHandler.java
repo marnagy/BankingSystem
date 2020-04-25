@@ -1,8 +1,8 @@
-import com.sun.mail.smtp.SMTPTransport;
-
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.YearMonth;
 import java.util.*;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -18,13 +18,12 @@ public class PaymentHandler {
 	private static ScheduledThreadPoolExecutor pool = new ScheduledThreadPoolExecutor(Thread.activeCount());
 
 	static Pattern exchangePattern = Pattern.compile("[1-9]*[0-9](\\.[0-9]+)");
-	public static Response run(PrintWriter outPrinter, PrintWriter errPrinter,
-	                                        ObjectInput oi, ObjectOutput oo, Dictionary<Integer, Account> accounts,
+	public static Response Run(PrintWriter outPrinter, PrintWriter errPrinter,
+	                                        PaymentRequest pr, ObjectOutput oo, Dictionary<Integer, Account> accounts,
 	                                        long sessionID) throws IOException {
 		File paymentFile = null;
-		Payment payment = null;
+		Payment payment;
 		try {
-			PaymentRequest pr = PaymentRequest.readArgs(oi);
 			if (pr.hoursDelay > 0 || pr.minutesDelay > 0){
 				DelayedPaymentThread thread = new DelayedPaymentThread(pr,
 						outPrinter, errPrinter, accounts, sessionID);
@@ -46,7 +45,7 @@ public class PaymentHandler {
 		} catch (IOException e) {
 			e.printStackTrace(errPrinter);
 			return new UnknownErrorResponse("I/O error: " + e.getMessage(), sessionID);
-		} catch (ClassNotFoundException | NullPointerException e) {
+		} catch (NullPointerException e) {
 			e.printStackTrace(errPrinter);
 			return new UnknownErrorResponse("Server error: " + e.getMessage(), sessionID);
 		}
@@ -127,10 +126,8 @@ public class PaymentHandler {
 		int year = yearMonth.getYear();
 		int month = yearMonth.getMonthValue();
 
-		File currMonthPaymentsSenderFile = new File(accountsFolderPath + MasterServerSession.FileSystemSeparator
-				+ senderAccountID + MasterServerSession.FileSystemSeparator + year + "_" + month);
-		File currMonthPaymentsReceiverFile = new File(accountsFolderPath + MasterServerSession.FileSystemSeparator
-				+ receiverAccountID + MasterServerSession.FileSystemSeparator + year + "_" + month);
+		File currMonthPaymentsSenderFile = Paths.get(accountsFolderPath,senderAccountID + "", (year + "_" + month)).toFile();
+		File currMonthPaymentsReceiverFile = Paths.get(accountsFolderPath,receiverAccountID + "", (year + "_" + month)).toFile();
 		currMonthPaymentsSenderFile.createNewFile(); // if not created, create new empty file
 		try (FileWriter fw = new FileWriter(currMonthPaymentsSenderFile.getAbsolutePath(), true)){
 			fw.write( paymentFileName + ":" + PaymentCategory.Other + "\n");
@@ -142,10 +139,8 @@ public class PaymentHandler {
 	}
 
 	private static synchronized File createPaymentFile(Payment payment, PrintWriter errPrinter) throws IOException {
-		String paymentFileName = MasterServerSession.PaymentsFolder.getAbsolutePath() + MasterServerSession.FileSystemSeparator
-				+ payment.senderAccountID + "_" + payment.receiverAccountID + "_"
-				+ Payment.stringify(payment.sendingDateTime) + "_" + Payment.stringify(payment.receivedDateTime) + ".payment";
-		File paymentFile = new File(paymentFileName);
+		Path paymentPath = Paths.get(MasterServerSession.PaymentsFolder.getAbsolutePath(), payment.GetFileName());
+		File paymentFile = paymentPath.toFile();
 		if (paymentFile.createNewFile()){
 			try(PrintWriter pw = new PrintWriter(paymentFile)){
 				pw.println(payment.amount);
@@ -223,9 +218,8 @@ public class PaymentHandler {
 
 	private static synchronized void modifyValueFiles(Account Account, PrintWriter errPrinter) throws IOException {
 		Dictionary<CurrencyType, Long> Values = Account.Values;
-		try( var bw = new BufferedWriter( new FileWriter(MasterServerSession.AccountsFolder.getAbsolutePath()
-		+ MasterServerSession.FileSystemSeparator + Account.accountID + MasterServerSession.FileSystemSeparator
-		+ ".curr"))){
+		try( var bw = new BufferedWriter( new FileWriter( Paths.get(MasterServerSession.AccountsFolder.getAbsolutePath(),
+				Account.accountID + "", ".curr").toFile()))){
 			Set<CurrencyType> keySet = Collections.synchronizedSet(new HashSet(Collections.list(Values.keys())) );
 			for ( CurrencyType curr: keySet) {
 				bw.write( curr.name() + ":" + Values.get(curr) + "\n");

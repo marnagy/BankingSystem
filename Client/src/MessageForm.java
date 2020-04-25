@@ -20,7 +20,7 @@ public class MessageForm {
 		this.button1.addActionListener(closeActionListener);
 	}
 
-	public static void show(String msg) {
+	public static void Show(String msg) {
 
 		MessageForm msgForm = new MessageForm();
 		msgForm.label.setText(msg);
@@ -34,7 +34,7 @@ public class MessageForm {
 
 
 	public static void main(String[] args) {
-		show(args[0]);
+		Show(args[0]);
 	}
 
 	{

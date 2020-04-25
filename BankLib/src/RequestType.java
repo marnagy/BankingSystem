@@ -3,6 +3,7 @@ public enum RequestType {
     Login,
     Payment,
     PaymentWithDelay,
+    PaymentCategoryChange,
     AccountHistory,
     Logout,
     End

@@ -79,7 +79,7 @@ public class LoggedInForm {
 				try {
 					updateHistoryPanel();
 				} catch (IOException e) {
-					MessageForm.show("IO Error occurred");
+					MessageForm.Show("IO Error occurred");
 				}
 			}
 		});
@@ -92,7 +92,7 @@ public class LoggedInForm {
 					req.send(oo);
 					ResponseType respType = ResponseType.values()[oi.readInt()];
 					if (respType != ResponseType.Success) {
-						MessageForm.show("Error occurred during exiting out.");
+						MessageForm.Show("Error occurred during exiting out.");
 						return;
 					} else {
 						Response resp = SuccessResponse.readArgs(oi);
@@ -161,7 +161,7 @@ public class LoggedInForm {
 				} else {
 					msg = "Incorrect format of number.";
 				}
-				MessageForm.show(msg);
+				MessageForm.Show(msg);
 			}
 		});
 		accountBalanceComboBox.addActionListener(new ActionListener() {
@@ -180,7 +180,7 @@ public class LoggedInForm {
 					req.send(oo);
 					ResponseType respType = ResponseType.values()[oi.readInt()];
 					if (respType != ResponseType.Success) {
-						MessageForm.show("Error occurred during logging out.");
+						MessageForm.Show("Error occurred during logging out.");
 						return;
 					} else {
 						Response resp = SuccessResponse.readArgs(oi);
@@ -197,7 +197,7 @@ public class LoggedInForm {
 				try {
 					updateHistoryPanel();
 				} catch (IOException e) {
-					MessageForm.show("IO Error occurred");
+					MessageForm.Show("IO Error occurred");
 				}
 			}
 		});
@@ -205,7 +205,7 @@ public class LoggedInForm {
 
 	private void updatePaymentHistory(SuccessPaymentResponse resp) {
 		if (resp.payment == null) {
-			MessageForm.show("This payment is delayed. Please, restart your account after sending to see effect.");
+			MessageForm.Show("This payment is delayed. Please, restart your account after sending to see effect.");
 			return;
 		}
 		ZonedDateTime datetime = resp.payment.sendingDateTime;
@@ -239,7 +239,7 @@ public class LoggedInForm {
 				for (int j = resp.history.length - 1; j >= 0; j--) {
 					i++;
 					try {
-						JPanel subpanel = new PaymentHistorySubpanel(account.accountID, resp.history[j]);
+						JPanel subpanel = new PaymentHistorySubpanel(account.accountID, resp.history[j], oi, oo, sessionID);
 						monthHistoryPanel.add(subpanel);
 					} catch (InvalidFormatException e) {
 						System.err.println("Invalid payment received");
@@ -254,7 +254,7 @@ public class LoggedInForm {
 				break;
 		}
 		if (msg != null) { // problem
-			MessageForm.show(msg);
+			MessageForm.Show(msg);
 		} else {
 			monthHistoryPanel.revalidate();
 			monthHistoryPanel.repaint();
@@ -348,7 +348,7 @@ public class LoggedInForm {
 
 		loggedInForm.monthComboBox.setModel(new DefaultComboBoxModel(monthYearList.toArray()));
 
-		loggedInForm.accountIDLabel.setText("Your account ID -> " + account.accountID);
+		loggedInForm.accountIDLabel.setText("Your account ID: " + account.accountID);
 
 
 		frame.setContentPane(loggedInForm.panel1);
