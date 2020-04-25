@@ -70,7 +70,7 @@ public class CreateAccountHandler {
 				//currencies File
 				CurrencyType[] currs = CurrencyType.values();
 				for ( CurrencyType curr: currs ) {
-					bwCurrenciesFile.write(curr.name() + ":" + account.Values.get(curr) + "\n");
+					bwCurrenciesFile.write(curr.name() + ":" + account.getBalance(curr) + "\n");
 				}
 				bwCurrenciesFile.close();
 				return true;

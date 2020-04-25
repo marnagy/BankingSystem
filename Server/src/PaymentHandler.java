@@ -167,18 +167,18 @@ public class PaymentHandler {
 
 		synchronized (senderAccount){
 			synchronized (receiverAccount){
-				Long senderAmount = senderAccount.Values.get(pr.fromCurr);
+				Long senderAmount = senderAccount.getBalance(pr.fromCurr);
 				if (senderAmount <= pr.amount){
 					return null;
 				}
-				Long receiverAmount = senderAccount.Values.get(pr.toCurr);
+				Long receiverAmount = senderAccount.getBalance(pr.toCurr);
 				long amount = pr.amount;
 				if (pr.fromCurr != pr.toCurr){
 					amount = convert(amount, pr.fromCurr, pr.toCurr);
 				}
 				// because wrapper types are immutable
-				senderAccount.Values.put(pr.fromCurr, senderAmount - pr.amount);
-				receiverAccount.Values.put(pr.toCurr, receiverAmount + amount);
+				senderAccount.trySubtract(pr.fromCurr, pr.amount);
+				receiverAccount.tryAdd(pr.toCurr, amount);
 				modifyValueFiles(senderAccount,errPrinter);
 				modifyValueFiles(receiverAccount, errPrinter);
 			}
@@ -216,13 +216,12 @@ public class PaymentHandler {
 		return -1;
 	}
 
-	private static synchronized void modifyValueFiles(Account Account, PrintWriter errPrinter) throws IOException {
-		Dictionary<CurrencyType, Long> Values = Account.Values;
+	private static synchronized void modifyValueFiles(Account account, PrintWriter errPrinter) throws IOException {
+		//Dictionary<CurrencyType, Long> Values = Account.Values;
 		try( var bw = new BufferedWriter( new FileWriter( Paths.get(MasterServerSession.AccountsFolder.getAbsolutePath(),
-				Account.accountID + "", ".curr").toFile()))){
-			Set<CurrencyType> keySet = Collections.synchronizedSet(new HashSet(Collections.list(Values.keys())) );
-			for ( CurrencyType curr: keySet) {
-				bw.write( curr.name() + ":" + Values.get(curr) + "\n");
+				account.accountID + "", ".curr").toFile()))){
+			for ( CurrencyType curr: CurrencyType.values()) {
+				bw.write( curr.name() + ":" + account.getBalance(curr) + "\n");
 			}
 		}
 

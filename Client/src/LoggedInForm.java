@@ -134,8 +134,8 @@ public class LoggedInForm {
 										break;
 									case SuccessPaymentResponse:
 										SuccessPaymentResponse resp = SuccessPaymentResponse.readArgs(oi);
-										long valBefore = account.Values.get(fromCurr);
-										account.Values.put(fromCurr, valBefore - amount);
+										long valBefore = account.getBalance(fromCurr);
+										account.trySubtract(fromCurr, amount);
 										msg = "Payment sent and processed.";
 										updateBalance(account, balanceLabel, accountBalanceComboBox);
 										//UpdatePaymentHistory(resp);
@@ -167,7 +167,7 @@ public class LoggedInForm {
 		accountBalanceComboBox.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent actionEvent) {
-				double val = account.Values.get(accountBalanceComboBox.getSelectedItem()) / 100D;
+				double val = account.getBalance((CurrencyType) accountBalanceComboBox.getSelectedItem()) / 100D;
 				balanceLabel.setText(String.format("%.2f", val));
 			}
 		});
@@ -210,13 +210,13 @@ public class LoggedInForm {
 		}
 		ZonedDateTime datetime = resp.payment.sendingDateTime;
 		YearMonth now = YearMonth.of(datetime.getYear(), datetime.getMonth());
-		Payment[] gotArr = account.History.get(now);
+		List<Payment> gotArr = account.getPaymentHistory(now);
 		Payment[] arr;
 		if (gotArr == null) {
 			arr = new Payment[1];
 		} else {
-			arr = new Payment[gotArr.length + 1];
-			System.arraycopy(gotArr, 0, arr, 1, gotArr.length);
+			arr = new Payment[gotArr.size() + 1];
+			System.arraycopy(gotArr, 0, arr, 1, gotArr.size());
 		}
 		arr[0] = resp.payment;
 		account.History.put(now, arr);
@@ -512,7 +512,7 @@ public class LoggedInForm {
 		homePanel.add(label12, new com.intellij.uiDesigner.core.GridConstraints(0, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_NONE, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
 		accountBalancePanel = new JPanel();
 		accountBalancePanel.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(3, 5, new Insets(0, 0, 0, 0), -1, -1));
-		panel1.add(accountBalancePanel, new com.intellij.uiDesigner.core.GridConstraints(0, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+		panel1.add(accountBalancePanel, new com.intellij.uiDesigner.core.GridConstraints(0, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, new Dimension(500, -1), null, null, 0, false));
 		final com.intellij.uiDesigner.core.Spacer spacer2 = new com.intellij.uiDesigner.core.Spacer();
 		accountBalancePanel.add(spacer2, new com.intellij.uiDesigner.core.GridConstraints(1, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_VERTICAL, 1, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(-1, 50), null, 0, false));
 		AccountHeader = new JLabel();

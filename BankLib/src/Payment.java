@@ -51,6 +51,13 @@ public class Payment {
 		oo.writeInt(category.ordinal());
 		oo.flush();
 	}
+
+	/**
+	 * @param paymentFile
+	 * @return
+	 * @throws IOException
+	 * @throws InvalidFormatException
+	 */
 	public static Payment fromFile(File paymentFile) throws IOException, InvalidFormatException {
 		if (!paymentFile.getName().endsWith(".payment")){
 			throw new InvalidFormatException("Payment file doesn't end with '.payment'");

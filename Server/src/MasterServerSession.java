@@ -126,30 +126,12 @@ public class MasterServerSession {
 	}
 
 	private static void loadAccountFromDir(File accountsDir, Dictionary<Integer,Account> accounts) {
-		int accountID = Integer.parseInt(accountsDir.getName());
-		File infoFile = new File(accountsDir.getAbsolutePath() + FileSystemSeparator
-		+ ".info");
-		File currFile = new File(accountsDir.getAbsolutePath() + FileSystemSeparator
-				+ ".curr");
-		try {
-			final Map<CurrencyType, Long> Values = new Hashtable<CurrencyType, Long>();
-			String email;
-			try (BufferedReader br = new BufferedReader(new FileReader(infoFile))) {
-				email = br.readLine();
-			}
-			Account account = new Account(email);
-			try (BufferedReader br = new BufferedReader(new FileReader(currFile))) {
-				String line;
-				String[] lineParts;
-				while ( (line = br.readLine()) != null ) {
-					lineParts = line.split(":");
-					account.Values.put( CurrencyType.valueOf(lineParts[0]) , Long.parseLong(lineParts[1]));
-				}
-			}
-			accounts.put(email.hashCode(), account);
+		try{
+			Account account = Account.fromDir(accountsDir);
+			accounts.put(account.accountID, account);
 		}
 		catch (IOException e) {
-			throw new Error("Invalid Account " + accountID + " state");
+			throw new Error("Invalid Account state for " + accountsDir.getName() + ".");
 		}
 	}
 	private static void initFolders() throws InitException, IOException {
