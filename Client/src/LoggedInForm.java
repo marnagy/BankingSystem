@@ -219,7 +219,7 @@ public class LoggedInForm {
 			System.arraycopy(gotArr, 0, arr, 1, gotArr.size());
 		}
 		arr[0] = resp.payment;
-		account.History.put(now, arr);
+		account.updatePaymentHistory(now, arr);
 	}
 
 	private void updateHistoryPanel() throws IOException {
@@ -233,7 +233,7 @@ public class LoggedInForm {
 		switch (respType) {
 			case PaymentHistoryResponse:
 				PaymentHistoryResponse resp = PaymentHistoryResponse.readArgs(oi);
-				account.History.put(selectedMonth, resp.history);
+				account.updatePaymentHistory(selectedMonth, resp.history);
 				monthHistoryPanel.setLayout(new GridLayout(resp.history.length, 1));
 				int i = 0;
 				for (int j = resp.history.length - 1; j >= 0; j--) {
@@ -262,7 +262,7 @@ public class LoggedInForm {
 	}
 
 	private void updateBalance(Account account, JLabel balanceLabel, JComboBox accountBalanceComboBox) {
-		double val = account.Values.get(accountBalanceComboBox.getSelectedItem()) / 100D;
+		double val = account.getBalance((CurrencyType) accountBalanceComboBox.getSelectedItem()) / 100D;
 		balanceLabel.setText(String.format("%.2f", val));
 	}
 
@@ -292,7 +292,7 @@ public class LoggedInForm {
 	}
 
 	private boolean hasEnoughMoney(Account account, long amount, CurrencyType curr) {
-		return account.Values.get(curr) - amount > 0;
+		return account.getBalance(curr) - amount > 0;
 	}
 
 	private boolean checkAmount(String text) {
@@ -316,7 +316,7 @@ public class LoggedInForm {
 		//set combo boxes values
 		loggedInForm.accountBalanceComboBox.setModel(new DefaultComboBoxModel(CurrencyType.values()));
 		loggedInForm.accountBalanceComboBox.setSelectedItem(CurrencyType.EUR);
-		loggedInForm.balanceLabel.setText(String.format("%.2f", account.Values.get(CurrencyType.EUR) / 100D));
+		loggedInForm.balanceLabel.setText(String.format("%.2f", account.getBalance(CurrencyType.EUR) / 100D));
 
 		loggedInForm.fromCurrencyComboBox.setModel(new DefaultComboBoxModel(CurrencyType.values()));
 		//loggedInForm.fromCurrencyComboBox.setSelectedItem(null);

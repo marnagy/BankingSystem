@@ -12,6 +12,74 @@ import java.util.concurrent.*;
 // Continue with payments
 
 public class MasterServerSession {
+	private static int defaultPort = 5000;
+	private static MasterServerSession instance = null;
+	final String FileSystemSeparator = FileSystems.getDefault().getSeparator();
+	final String RootFolderName = "ServerFiles";
+	final String AccountsFolderName = "Accounts";
+	final String PaymentsFolderName = "Payments";
+	final String ServerConfFileName = "server.conf";
+
+	final PrintWriter errWriter = new PrintWriter(new OutputStreamWriter(System.err));
+	final PrintWriter outWriter = new PrintWriter(new OutputStreamWriter(System.out));
+	final Reader inReader = new BufferedReader(new InputStreamReader(System.in));
+
+	final File RootFolder = Paths.get(RootFolderName).toFile();
+	final File AccountsFolder = Paths.get(RootFolderName + FileSystemSeparator + AccountsFolderName).toFile();
+	final File PaymentsFolder = Paths.get(RootFolderName + FileSystemSeparator + PaymentsFolderName).toFile();
+	final File ConfFile = Paths.get(RootFolderName + FileSystemSeparator + ServerConfFileName).toFile();
+	final Set<Integer> loggedUsers = Collections.synchronizedSet(new HashSet<Integer>());
+
+	// insert account ID, get ServerSession or null if the user is logged in currently
+	final Dictionary<Integer, ServerSession> threads = new Hashtable<Integer, ServerSession>();
+
+	// for unique ID for each thread/session
+	// used for authentication
+	final Set<Long> threadIDs = Collections.synchronizedSet(new HashSet<Long>());
+
+	// all valid account IDs, loaded from appropriate folder
+	// new are added
+	final Dictionary<Integer, Account> accounts = new Hashtable<Integer, Account>();
+
+	// random variable
+	final Random rand = new Random(System.nanoTime());
+
+	public static MasterServerSession getDefault(){
+		if (instance == null){
+			var master = MasterServerSession.getDefault(defaultPort);
+			instance = master;
+
+			return master;
+		}
+		else{
+			return instance;
+		}
+
+	}
+	public static MasterServerSession getDefault(int port){
+		if (instance == null){
+			var master = new MasterServerSession(port);
+			instance = master;
+			return master;
+		}
+		else{
+			return instance;
+		}
+	}
+
+	private MasterServerSession(int port){
+
+	}
+	public void run(String arg, char[] passwd) {
+		emailAddr = arg;
+		emailPasswd = passwd;
+
+		if (IsTest && RootFolder.exists()){
+			deleteDirectory(RootFolder);
+			outWriter.println("Root folder reset.");
+			outWriter.flush();
+		}
+	}
 	static final String FileSystemSeparator = FileSystems.getDefault().getSeparator();
 	static final String RootFolderName = "ServerFiles";
 	static final String AccountsFolderName = "Accounts";
@@ -158,4 +226,6 @@ public class MasterServerSession {
 		}
 		return directoryToBeDeleted.delete();
 	}
+
+
 }

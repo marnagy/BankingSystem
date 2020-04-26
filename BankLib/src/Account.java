@@ -55,6 +55,9 @@ public class Account {
 	public List<Payment> getPaymentHistory(YearMonth yearMonth){
 		return Collections.unmodifiableList( Arrays.asList(History.get(yearMonth)));
 	}
+	public void updatePaymentHistory(YearMonth yearMonth, Payment[] payments){
+		History.put(yearMonth, payments);
+	}
 
 	public static Account fromAccountInfoResponse(AccountInfoResponse air){
 		return new Account(air);

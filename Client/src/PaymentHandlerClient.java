@@ -33,7 +33,7 @@ public class PaymentHandlerClient {
 				amount = Long.parseLong("200");
 				isValid = true;
 			}
-			if (account.Values.get(curr) >= amount){
+			if (account.getBalance(curr) >= amount){
 				canSend = true;
 			}
 		} while (!(isValid && canSend));
@@ -48,8 +48,8 @@ public class PaymentHandlerClient {
 				pw.println("Invalid receiver ID.");
 				break;
 			case Success:
-				long valBefore = account.Values.get(curr);
-				account.Values.put(curr, valBefore - amount);
+				long valBefore = account.getBalance(curr);
+				account.trySubtract(curr, amount);
 				pw.println("Payment sent and processed.");
 				break;
 			default:
