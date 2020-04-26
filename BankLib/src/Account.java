@@ -1,4 +1,7 @@
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.YearMonth;
 import java.time.ZonedDateTime;
@@ -22,11 +25,6 @@ public class Account {
 		accountID = air.accountID;
 		this.Values = air.Values;
 		this.created = air.created;
-	}
-	private Account(int accountID, ZonedDateTime created){
-		this.accountID = accountID;
-		Values = new Hashtable<CurrencyType, Long>();
-		this.created = created;
 	}
 	public boolean tryAdd(CurrencyType currencyType, long amount){
 		long currVal = Values.get(currencyType);
@@ -63,10 +61,8 @@ public class Account {
 		return new Account(air);
 	}
 	public static Account fromDir(File accountDir) throws IOException {
-		int accountID = Integer.parseInt(accountDir.getName());
 		File infoFile = Paths.get(accountDir.getAbsolutePath(), ".info").toFile();
 		File currFile = Paths.get(accountDir.getAbsolutePath(), ".curr").toFile();
-		final Map<CurrencyType, Long> Values = new Hashtable<CurrencyType, Long>();
 		String email;
 		try (BufferedReader br = new BufferedReader(new FileReader(infoFile))) {
 			email = br.readLine();

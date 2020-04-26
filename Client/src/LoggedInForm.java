@@ -1,7 +1,5 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -12,7 +10,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class LoggedInForm {
-	private static final Pattern amountPattern = Pattern.compile("(([1-9][0-9]*)|0)(\\.[0-9]{2})?");
+	private static final Pattern amountPattern = Pattern.compile("(([1-9][0-9]*)|0)([.,][0-9]{2})?");
 
 	// generated
 	private JPanel panel1;
@@ -59,150 +57,129 @@ public class LoggedInForm {
 		this.frame = frame;
 		this.session = session;
 		this.sessionID = sessionID;
-		makePaymentButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent actionEvent) {
-				//ClearTextBoxes();
-				parentPanel.removeAll();
-				parentPanel.add(paymentPanel);
-				parentPanel.repaint();
-				parentPanel.revalidate();
+		makePaymentButton.addActionListener(actionEvent -> {
+			//ClearTextBoxes();
+			parentPanel.removeAll();
+			parentPanel.add(paymentPanel);
+			parentPanel.repaint();
+			parentPanel.revalidate();
+		});
+		paymentHistoryButton.addActionListener(actionEvent -> {
+			parentPanel.removeAll();
+			parentPanel.add(historyPanel);
+			parentPanel.repaint();
+			parentPanel.revalidate();
+			try {
+				updateHistoryPanel();
+			} catch (IOException e) {
+				MessageForm.Show("IO Error occurred");
 			}
 		});
-		paymentHistoryButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent actionEvent) {
-				parentPanel.removeAll();
-				parentPanel.add(historyPanel);
-				parentPanel.repaint();
-				parentPanel.revalidate();
-				try {
-					updateHistoryPanel();
-				} catch (IOException e) {
-					MessageForm.Show("IO Error occurred");
+		exitButton.addActionListener(actionEvent -> {
+			// close connection
+			try {
+				Request req = new EndRequest(sessionID);
+				req.send(oo);
+				ResponseType respType = ResponseType.values()[oi.readInt()];
+				if (respType != ResponseType.Success) {
+					MessageForm.Show("Error occurred during exiting out.");
+					return;
+				} else {
+					Response resp = SuccessResponse.readArgs(oi);
+					session.close();
 				}
+			} catch (IOException e) {
 			}
+
+			// close window
+			frame.dispose();
 		});
-		exitButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent actionEvent) {
-				// close connection
-				try {
-					Request req = new EndRequest(sessionID);
-					req.send(oo);
-					ResponseType respType = ResponseType.values()[oi.readInt()];
-					if (respType != ResponseType.Success) {
-						MessageForm.Show("Error occurred during exiting out.");
-						return;
-					} else {
-						Response resp = SuccessResponse.readArgs(oi);
-						session.close();
-					}
-				} catch (IOException e) {
-				}
+		sendPaymentButton.addActionListener(actionEvent -> {
+			String msg = null;
+			String amountText = amountTextField.getText();
+			if (checkAmount(amountText)) {
+				long amount = amountToLong(amountText);
+				if (isValidID(receiverSIDTextField.getText())) {
+					int receiverID = Integer.parseInt(receiverSIDTextField.getText());
 
-				// close window
-				frame.dispose();
-			}
-		});
-		sendPaymentButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent actionEvent) {
-				String msg = null;
-				String amountText = amountTextField.getText();
-				if (checkAmount(amountText)) {
-					long amount = amountToLong(amountText);
-					if (isValidID(receiverSIDTextField.getText())) {
-						int receiverID = Integer.parseInt(receiverSIDTextField.getText());
+					CurrencyType fromCurr = (CurrencyType) fromCurrencyComboBox.getSelectedItem();
+					CurrencyType toCurr = (CurrencyType) toCurrencyComboBox.getSelectedItem();
 
-						CurrencyType fromCurr = (CurrencyType) fromCurrencyComboBox.getSelectedItem();
-						CurrencyType toCurr = (CurrencyType) toCurrencyComboBox.getSelectedItem();
-
-						if (hasEnoughMoney(account, amount, fromCurr)) {
-							try {
-								ZonedDateTime dateTime = ZonedDateTime.now();
-								String[] symbols = {variableSymbolTextField.getText(), specificSymbolTextField.getText()};
-								int hoursDelay = (int) hoursDelayBox.getSelectedItem();
-								int minutesDelay = (int) minutesDelayBox.getSelectedItem();
-								Request req = new PaymentRequest(account.accountID, receiverID, amount, hoursDelay, minutesDelay,
-										fromCurr, toCurr, symbols, typeHereTextField.getText(), sessionID);
-								req.send(oo);
-								ResponseType respType = ResponseType.values()[oi.readInt()];
-								switch (respType) {
-									case InvalidReceiverIDResponse:
-										msg = "Invalid receiver ID.";
-										break;
-									case SuccessPaymentResponse:
-										SuccessPaymentResponse resp = SuccessPaymentResponse.readArgs(oi);
-										long valBefore = account.getBalance(fromCurr);
-										account.trySubtract(fromCurr, amount);
-										msg = "Payment sent and processed.";
-										updateBalance(account, balanceLabel, accountBalanceComboBox);
-										//UpdatePaymentHistory(resp);
-										break;
-									case Success:
-										SuccessResponse temp = SuccessResponse.readArgs(oi);
-										msg = "Payment is about to be processed in the given time.";
-										break;
-									default:
-										msg = "Unknown response error occurred.";
-										break;
-								}
-
-							} catch (IOException e) {
-								msg = "Network error occurred.";
+					if (hasEnoughMoney(account, amount, fromCurr)) {
+						try {
+							ZonedDateTime dateTime = ZonedDateTime.now();
+							String[] symbols = {variableSymbolTextField.getText(), specificSymbolTextField.getText()};
+							int hoursDelay = (int) hoursDelayBox.getSelectedItem();
+							int minutesDelay = (int) minutesDelayBox.getSelectedItem();
+							Request req = new PaymentRequest(account.accountID, receiverID, amount, hoursDelay, minutesDelay,
+									fromCurr, toCurr, symbols, typeHereTextField.getText(), sessionID);
+							req.send(oo);
+							ResponseType respType = ResponseType.values()[oi.readInt()];
+							switch (respType) {
+								case InvalidReceiverIDResponse:
+									msg = "Invalid receiver ID.";
+									break;
+								case SuccessPaymentResponse:
+									SuccessPaymentResponse resp = SuccessPaymentResponse.readArgs(oi);
+									account.trySubtract(fromCurr, amount);
+									msg = "Payment sent and processed.";
+									updateBalance(account, balanceLabel, accountBalanceComboBox);
+									break;
+								case Success:
+									SuccessResponse temp = SuccessResponse.readArgs(oi);
+									msg = "Payment is about to be processed in the given time.";
+									break;
+								default:
+									msg = "Unknown response error occurred.";
+									break;
 							}
-						} else {
-							msg = "Not enough money in account.";
+
+						} catch (IOException e) {
+							msg = "Network error occurred.";
 						}
 					} else {
-						msg = "Incorrect format of receiver's ID.";
+						msg = "Not enough money in account.";
 					}
 				} else {
-					msg = "Incorrect format of number.";
+					msg = "Incorrect format of receiver's ID.";
 				}
-				MessageForm.Show(msg);
+			} else {
+				msg = "Incorrect format of number.";
 			}
+			MessageForm.Show(msg);
 		});
-		accountBalanceComboBox.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent actionEvent) {
-				double val = account.getBalance((CurrencyType) accountBalanceComboBox.getSelectedItem()) / 100D;
-				balanceLabel.setText(String.format("%.2f", val));
-			}
+		accountBalanceComboBox.addActionListener(actionEvent -> {
+			double val = account.getBalance((CurrencyType) accountBalanceComboBox.getSelectedItem()) / 100D;
+			balanceLabel.setText(String.format("%.2f", val));
 		});
-		logOutButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent actionEvent) {
+		logOutButton.addActionListener(actionEvent -> {
 // close connection
-				try {
-					Request req = new LogOutRequest(sessionID);
-					req.send(oo);
-					ResponseType respType = ResponseType.values()[oi.readInt()];
-					if (respType != ResponseType.Success) {
-						MessageForm.Show("Error occurred during logging out.");
-						return;
-					} else {
-						Response resp = SuccessResponse.readArgs(oi);
-						ClientGUI.Open(session, oi, oo);
-						frame.dispose();
-					}
-				} catch (IOException e) {
+			try {
+				Request req = new LogOutRequest(sessionID);
+				req.send(oo);
+				ResponseType respType = ResponseType.values()[oi.readInt()];
+				if (respType != ResponseType.Success) {
+					IllegalRequestResponse resp = IllegalRequestResponse.readArgs(oi);
+					MessageForm.Show("Error occurred during logging out.");
+					return;
+				} else {
+					Response resp = SuccessResponse.readArgs(oi);
+					ClientGUI.Open(session, oi, oo);
+					frame.dispose();
 				}
+			} catch (IOException e) {
 			}
 		});
-		monthComboBox.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent actionEvent) {
-				try {
-					updateHistoryPanel();
-				} catch (IOException e) {
-					MessageForm.Show("IO Error occurred");
-				}
+		monthComboBox.addActionListener(actionEvent -> {
+			try {
+				updateHistoryPanel();
+			} catch (IOException e) {
+				MessageForm.Show("IO Error occurred");
 			}
 		});
 	}
 
+	// not useful now, can be in future where can be added real-time communication with the server
 	private void updatePaymentHistory(SuccessPaymentResponse resp) {
 		if (resp.payment == null) {
 			MessageForm.Show("This payment is delayed. Please, restart your account after sending to see effect.");
@@ -253,7 +230,7 @@ public class LoggedInForm {
 				msg = "Unknown response from server";
 				break;
 		}
-		if (msg != null) { // problem
+		if (msg != null) { // true, when problem occurs
 			MessageForm.Show(msg);
 		} else {
 			monthHistoryPanel.revalidate();
@@ -319,10 +296,8 @@ public class LoggedInForm {
 		loggedInForm.balanceLabel.setText(String.format("%.2f", account.getBalance(CurrencyType.EUR) / 100D));
 
 		loggedInForm.fromCurrencyComboBox.setModel(new DefaultComboBoxModel(CurrencyType.values()));
-		//loggedInForm.fromCurrencyComboBox.setSelectedItem(null);
 
 		loggedInForm.toCurrencyComboBox.setModel(new DefaultComboBoxModel(CurrencyType.values()));
-		//loggedInForm.toCurrencyComboBox.setSelectedItem(null);
 
 		List<Integer> list = new ArrayList<>();
 		for (int i = 0; i < 24; i++) {
@@ -342,7 +317,6 @@ public class LoggedInForm {
 		while (!monthYear.equals(created)) {
 			monthYearList.add(monthYear);
 			monthYear = monthYear.minusMonths(1);
-			//monthYear = monthYear.getOneSooner();
 		}
 		monthYearList.add(created);
 
@@ -352,7 +326,8 @@ public class LoggedInForm {
 
 
 		frame.setContentPane(loggedInForm.panel1);
-		//frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		// when GUI uses exit, it kills process resulting in Exception on server
+		// don't know how to launch custom method on dispose/exit, so this is the solution
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.pack();
 		frame.setVisible(true);

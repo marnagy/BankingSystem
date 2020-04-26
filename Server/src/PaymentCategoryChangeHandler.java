@@ -1,14 +1,12 @@
 import java.io.*;
 import java.nio.file.Paths;
-import java.time.YearMonth;
 import java.time.ZonedDateTime;
 
 public class PaymentCategoryChangeHandler {
 	public static Response Run(Integer userID, PaymentCategoryChangeRequest pcChReq, File accountsFolder,
-	                           File paymentsFolder, ObjectOutput oo, long sessionID) {
-		YearMonth yearMonth = null;
+	                           long sessionID) {
 		ZonedDateTime dt = null;
-		String paymentFileName = null;
+		String paymentFileName;
 		if (userID == pcChReq.toChange.senderAccountID){
 			dt = pcChReq.toChange.sendingDateTime;
 		}
@@ -27,7 +25,7 @@ public class PaymentCategoryChangeHandler {
 			try (BufferedReader br = new BufferedReader(new FileReader(monthHistory))){
 				while ( (line = br.readLine()) != null ){
 					lineParts = line.split(":");
-					if (paymentFileName.equals(lineParts[0])){
+					if (paymentFileName.equals(lineParts[0]) && !changed){
 						sb.append(lineParts[0] + ":" + pcChReq.newCategory);
 						changed = true;
 					}

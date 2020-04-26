@@ -8,7 +8,6 @@ public class LoginRequest extends Request {
 	public LoginRequest(String email, char[] passwd, long sessionID){
 		super(RequestType.Login, sessionID);
 		this.email = email;
-		// make copy
 		this.passwd = passwd;
 	}
 	@Override

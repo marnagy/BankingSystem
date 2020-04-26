@@ -1,8 +1,9 @@
 import java.io.*;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Dictionary;
+import java.util.Random;
 
 public class CreateAccountHandler {
 	static AccountCreateRequest req;
@@ -14,7 +15,7 @@ public class CreateAccountHandler {
 		try {
 			if (req != null) {
 				AccountCreateRequest acr = req;
-				Account account = null;
+				Account account;
 				//check if email is already registered
 				if (accounts.get(acr.email.hashCode()) == null &&
 						(account = createAccount(acr.email, acr.passwd, accountsFolder, rand)) != null) {
@@ -56,15 +57,19 @@ public class CreateAccountHandler {
 			try (BufferedWriter bwInfoFile = new BufferedWriter(new FileWriter(infoFile));
 			     BufferedWriter bwCurrenciesFile = new BufferedWriter(new FileWriter(currenciesFile))){
 				//hash of email will be accountID
-					bwInfoFile.write(email + "\n");
+				bwInfoFile.write(email + "\n");
+
+				// random salt for case of security breach
 				int salt = rand.nextInt();
-					bwInfoFile.write(salt + "\n");
+				bwInfoFile.write(salt + "\n");
+
 				int passwdHash = Arrays.hashCode(passwd);
+
+				// THIS HASH IS CHECK WHEN USERS TRY TO LOG IN
 				int checkHash = email.hashCode() + salt + passwdHash;
-					bwInfoFile.write(checkHash + "\n");
-				ZonedDateTime creationDateTime = ZonedDateTime.now();
-					bwInfoFile.write(Payment.stringify(creationDateTime) + "\n");
-				//bwInfoFile.close();
+				bwInfoFile.write(checkHash + "\n");
+				// save creation datetime to file
+				bwInfoFile.write(Payment.stringify(ZonedDateTime.now()) + "\n");
 
 				//currencies File
 				CurrencyType[] currs = CurrencyType.values();

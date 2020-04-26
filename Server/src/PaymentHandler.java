@@ -1,16 +1,19 @@
+import javax.mail.*;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.YearMonth;
-import java.util.*;
+import java.util.Dictionary;
+import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.mail.*;
-import javax.mail.internet.*;
 
 public class PaymentHandler {
 	static Set<Integer> accountIDs;
@@ -19,9 +22,8 @@ public class PaymentHandler {
 
 	static Pattern exchangePattern = Pattern.compile("[1-9]*[0-9](\\.[0-9]+)");
 	public static Response Run(PrintWriter outPrinter, PrintWriter errPrinter, File accountsFolder, File paymentsFolder,
-	                           PaymentRequest pr, ObjectOutput oo, Dictionary<Integer, Account> accounts,
-	                           String emailAddr, char[] emailPasswd, long sessionID) throws IOException {
-		File paymentFile = null;
+	                           PaymentRequest pr, Dictionary<Integer, Account> accounts,
+	                           String emailAddr, char[] emailPasswd, long sessionID) {
 		Payment payment;
 		try {
 			if (pr.hoursDelay > 0 || pr.minutesDelay > 0){
@@ -29,8 +31,6 @@ public class PaymentHandler {
 						accountsFolder, paymentsFolder, emailAddr, emailPasswd, sessionID);
 				if (thread.isValid()){
 					pool.schedule(thread,(long)pr.hoursDelay * 60 + (long)pr.minutesDelay, TimeUnit.MINUTES);
-					//pool.execute(thread);
-					//thread.start();
 					return new SuccessResponse(sessionID);
 				}
 				else{
@@ -145,7 +145,6 @@ public class PaymentHandler {
 				pw.println("from:" + payment.fromCurr.name());
 				pw.println("to:" + payment.toCurr.name());
 				// each account can set different category in their history
-				//pw.println("category:" + payment.category.name());
 			}
 		}
 		return paymentFile;
@@ -177,8 +176,8 @@ public class PaymentHandler {
 				// because wrapper types are immutable
 				senderAccount.trySubtract(pr.fromCurr, pr.amount);
 				receiverAccount.tryAdd(pr.toCurr, amount);
-				modifyValueFiles(senderAccount, accountsFolder, errPrinter);
-				modifyValueFiles(receiverAccount, accountsFolder, errPrinter);
+				modifyValueFiles(senderAccount, accountsFolder);
+				modifyValueFiles(receiverAccount, accountsFolder);
 			}
 		}
 		return new Payment(pr);
@@ -193,8 +192,6 @@ public class PaymentHandler {
 			StringBuffer sb = new StringBuffer();
 			try (BufferedReader reader = new BufferedReader(new InputStreamReader( url.openStream() )) ){
 				reader.lines().forEach(x -> sb.append(x + "\n"));
-//				System.out.println(sb);
-//				return -1;
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -214,8 +211,7 @@ public class PaymentHandler {
 		return -1;
 	}
 
-	private static synchronized void modifyValueFiles(Account account, File accountsFolder, PrintWriter errPrinter) throws IOException {
-		//Dictionary<CurrencyType, Long> Values = Account.Values;
+	private static synchronized void modifyValueFiles(Account account, File accountsFolder) throws IOException {
 		try( var bw = new BufferedWriter( new FileWriter( Paths.get(accountsFolder.getAbsolutePath(),
 				account.accountID + "", ".curr").toFile()))){
 			for ( CurrencyType curr: CurrencyType.values()) {

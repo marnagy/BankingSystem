@@ -1,10 +1,14 @@
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.FileSystems;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 // TO-DO:
 // Change naming of subdirectories
@@ -26,7 +30,6 @@ public class MasterServerSession {
 
 	final PrintWriter errWriter = new PrintWriter(new OutputStreamWriter(System.err));
 	final PrintWriter outWriter = new PrintWriter(new OutputStreamWriter(System.out));
-	final Reader inReader = new BufferedReader(new InputStreamReader(System.in));
 
 	final File rootFolder = Paths.get(rootFolderName).toFile();
 	final File accountsFolder = Paths.get(rootFolderName, accountsFolderName).toFile();
@@ -116,7 +119,6 @@ public class MasterServerSession {
 		outWriter.flush();
 
 		try {
-			//ServerSocket ss = SSLServerSocketFactory.getDefault().createServerSocket(5000);
 			ss = new ServerSocket(port);
 		} catch (IOException e) {
 			errWriter.println("IOException while starting ServerSocket");
@@ -143,7 +145,6 @@ public class MasterServerSession {
 				session.setName(sessionID + "");
 				threadIDs.add(sessionID);
 				pool.execute(session);
-				//session.start();
 			}
 			catch (IOException e) {
 				errWriter.println("IOException while running ServerSocket");

@@ -1,7 +1,5 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -39,37 +37,33 @@ public class PaymentHistorySubpanel extends JPanel {
 					" is not sender neither receiver.");
 		}
 		this.add(new JLabel(payment.fromCurr.name() + " -> " + payment.toCurr.name()));
-		//this.add(new JLabel("Category: " + payment.category));
 		var comboBox = new JComboBox(new DefaultComboBoxModel(PaymentCategory.values()));
 		comboBox.setSelectedItem(payment.category);
-		comboBox.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent actionEvent) {
-				if (comboBox.getSelectedItem() != payment.category){
-					Request req = new PaymentCategoryChangeRequest(payment, (PaymentCategory) comboBox.getSelectedItem(), sessionID);
-					try {
-						req.send(oo);
-						ResponseType respType = ResponseType.values()[oi.readInt()];
-						String msg = "!Serious error occured!";
-						Response resp;
-						switch (respType){
-							case Success:
-								resp = SuccessResponse.readArgs(oi);
-								msg = "Category changed successfully.";
-								break;
-							case UnknownErrorResponse:
-								UnknownErrorResponse UEResponse = UnknownErrorResponse.readArgs(oi);
-								msg = UEResponse.msg;
-								break;
-						}
-						MessageForm.Show(msg);
-					} catch (IOException e) {
-						String msg = "Category failed to change due to network error.";
-						comboBox.setSelectedItem(payment.category);
-						MessageForm.Show(msg);
+		comboBox.addActionListener(actionEvent -> {
+			if (comboBox.getSelectedItem() != payment.category){
+				Request req = new PaymentCategoryChangeRequest(payment, (PaymentCategory) comboBox.getSelectedItem(), sessionID);
+				try {
+					req.send(oo);
+					ResponseType respType = ResponseType.values()[oi.readInt()];
+					String msg = "!Serious error occured!";
+					Response resp;
+					switch (respType){
+						case Success:
+							resp = SuccessResponse.readArgs(oi);
+							msg = "Category changed successfully.";
+							break;
+						case UnknownErrorResponse:
+							UnknownErrorResponse UEResponse = UnknownErrorResponse.readArgs(oi);
+							msg = UEResponse.msg;
+							break;
 					}
-
+					MessageForm.Show(msg);
+				} catch (IOException e) {
+					String msg = "Category failed to change due to network error.";
+					comboBox.setSelectedItem(payment.category);
+					MessageForm.Show(msg);
 				}
+
 			}
 		});
 		this.add(comboBox);
@@ -80,18 +74,4 @@ public class PaymentHistorySubpanel extends JPanel {
 				datetime.getHour(), datetime.getMinute(), datetime.getSecond(),
 				datetime.getDayOfMonth(), datetime.getMonthValue(), datetime.getYear());
 	}
-
-	// for test
-//	public PaymentHistorySubpanel(LayoutManager layout, String msg) {
-//		super(layout);
-//
-//		this.add(new JLabel("TestLeft"));
-//		JLabel label = new JLabel("msg");
-//		label.setHorizontalAlignment(SwingConstants.CENTER);
-//		this.add(label);
-//		label = new JLabel("TestRight");
-//		label.setHorizontalAlignment(SwingConstants.RIGHT);
-//		this.add(label);
-//	}
-
 }

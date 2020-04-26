@@ -1,13 +1,11 @@
 import java.io.*;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Dictionary;
 import java.util.List;
 
 public class AccountHistoryHandler {
-	public static Response run(PrintWriter outPrinter, PrintWriter errPrinter, File accountsFolder, File paymentFolder,
-	                           ObjectInput oi, ObjectOutput oo,
-	                           Dictionary<Integer, Account> accounts, long sessionID) {
+	public static Response run(PrintWriter errPrinter, File accountsFolder, File paymentFolder,
+	                           ObjectInput oi, long sessionID) {
 		try {
 			PaymentHistoryRequest req = PaymentHistoryRequest.readArgs(oi);
 			final List<Payment> history = new ArrayList<Payment>();

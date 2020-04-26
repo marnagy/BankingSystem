@@ -1,7 +1,10 @@
 import java.io.*;
 import java.net.Socket;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Dictionary;
+import java.util.Random;
+import java.util.Set;
 
 public class ServerSession extends Thread {
 	final Socket socket;
@@ -50,16 +53,13 @@ public class ServerSession extends Thread {
 
 	@Override
 	public void run() {
-		Integer accountCreated;
 		boolean loggedIn = false, endSession = false, logout = false;
 		try{
 			setInputOutput(socket);
 			sendSessionID(socket);
 			outPrinter.println("Thread " + sessionID + " running");
 			outPrinter.flush();
-			//loggedIn = false;
 			while (true){
-				accountCreated = null;
 
 				RequestType reqType = RequestType.values()[oi.readInt()];
 				//long retSessionID = oi.readLong();
@@ -81,7 +81,7 @@ public class ServerSession extends Thread {
 								LoginRequest LoginReq = (LoginRequest) req;
 								if (accountCheck(LoginReq)) {
 									// accountDir has to exist (AccountCheck checks it)
-									resp = new AccountInfoResponse(Paths.get(accountsFolder.getCanonicalPath(),
+									resp = new AccountInfoResponse(Paths.get(accountsFolder.getAbsolutePath(),
 											LoginReq.email.hashCode() + "").toFile(), sessionID);
 									loggedUsers.add(LoginReq.email.hashCode());
 									this.userID = LoginReq.email.hashCode();
@@ -98,7 +98,7 @@ public class ServerSession extends Thread {
 							if (!loggedIn) {
 								resp = new UnknownErrorResponse("You are not logged in.", sessionID);
 							}
-							resp = PaymentHandler.Run(outPrinter, errPrinter, accountsFolder, paymentsFolder, pr, oo,
+							resp = PaymentHandler.Run(outPrinter, errPrinter, accountsFolder, paymentsFolder, pr,
 									accounts, emailAddr, emailPasswd, sessionID);
 							break;
 						case PaymentCategoryChange:
@@ -106,15 +106,14 @@ public class ServerSession extends Thread {
 							if (!loggedIn) {
 								resp = new UnknownErrorResponse("You are not logged in.", sessionID);
 							}
-							resp = PaymentCategoryChangeHandler.Run(userID, PCChReq, accountsFolder, paymentsFolder, oo,
-									sessionID);
+							resp = PaymentCategoryChangeHandler.Run(userID, PCChReq, accountsFolder, sessionID);
 							break;
 						case AccountHistory:
 							if (!loggedIn) {
 								resp = new UnknownErrorResponse("You are not logged in.", sessionID);
 							}
-							resp = AccountHistoryHandler.run(outPrinter, errPrinter, accountsFolder, paymentsFolder,
-									oi, oo, accounts, sessionID);
+							resp = AccountHistoryHandler.run(errPrinter, accountsFolder, paymentsFolder,
+									oi, sessionID);
 							break;
 						case End:
 							EndRequest eReq = EndRequest.readArgs(oi);
@@ -146,11 +145,6 @@ public class ServerSession extends Thread {
 
 				resp.send(oo);
 				resp = null;
-				if (accountCreated != null){
-					outPrinter.println("Thread " + this.getName() + " has created account number " + accountCreated + ".");
-					outPrinter.flush();
-					accountCreated = null;
-				}
 				if (logout){
 					logout = false;
 					userID = null;

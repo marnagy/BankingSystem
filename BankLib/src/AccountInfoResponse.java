@@ -1,9 +1,8 @@
 import java.io.*;
-import java.net.FileNameMap;
-import java.nio.file.FileSystems;
+import java.nio.file.Paths;
 import java.time.ZonedDateTime;
-import java.util.*;
-import java.util.regex.Pattern;
+import java.util.Dictionary;
+import java.util.Hashtable;
 
 
 public class AccountInfoResponse extends Response {
@@ -27,8 +26,8 @@ public class AccountInfoResponse extends Response {
 	public AccountInfoResponse(File accountDir, long sessionID) throws IOException {
 		super(ResponseType.AccountInfo, sessionID);
 		accountID = Integer.parseInt(accountDir.getName());
-		File currFile = new File(accountDir.getAbsolutePath() + FileSystems.getDefault().getSeparator() + ".curr");
-		File infoFile = new File(accountDir.getAbsolutePath() + FileSystems.getDefault().getSeparator() + ".info");
+		File currFile = Paths.get(accountDir.getAbsolutePath(), ".curr").toFile();
+		File infoFile = Paths.get(accountDir.getAbsolutePath(), ".info").toFile();
 		try( BufferedReader brCurr = new BufferedReader(new FileReader(currFile));
 		     BufferedReader brInfo = new BufferedReader(new FileReader(infoFile))) {
 			String line;

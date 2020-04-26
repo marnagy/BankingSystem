@@ -1,7 +1,5 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.*;
 import java.util.regex.Pattern;
 
@@ -27,93 +25,82 @@ public class ClientGUI {
 		this.sessionID = session.sessionID;
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 		frame.setLocation(dim.width / 2 - frame.getSize().width / 2, dim.height / 2 - frame.getSize().height / 2);
-		createAccountButton.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent actionEvent) {
-				String msg = null;
-				try {
-					if (!CheckEmail(emailTextField.getText())) {
-						MessageForm.Show("Incorrect email format.");
-						return;
-					}
-					Request req = new AccountCreateRequest(emailTextField.getText(), passwordPasswordField.getPassword(), sessionID);
-					req.send(oo);
-					ResponseType respType = ResponseType.values()[oi.readInt()];
-
-					switch (respType) {
-						case AccountCreateFailResponse:
-							msg = "Failed to create account.";
-							break;
-						case Success:
-							SuccessResponse sr = SuccessResponse.readArgs(oi);
-							msg = "Account created.";
-							break;
-						case EmailAlreadySignedUp:
-							Response resp = EmailAlreadySignedUpResponse.readArgs(oi);
-							msg = "Email already exists.";
-							break;
-						default:
-							msg = "Unexpected response from server.";
-							break;
-					}
-				} catch (IOException e) {
-					msg = "Network error occured.";
+		createAccountButton.addActionListener(actionEvent -> {
+			String msg = null;
+			try {
+				if (!CheckEmail(emailTextField.getText())) {
+					MessageForm.Show("Incorrect email format.");
+					return;
 				}
-				MessageForm.Show(msg);
+				Request req = new AccountCreateRequest(emailTextField.getText(), passwordPasswordField.getPassword(), sessionID);
+				req.send(oo);
+				ResponseType respType = ResponseType.values()[oi.readInt()];
+
+				switch (respType) {
+					case AccountCreateFailResponse:
+						msg = "Failed to create account.";
+						break;
+					case Success:
+						SuccessResponse sr = SuccessResponse.readArgs(oi);
+						msg = "Account created.";
+						break;
+					case EmailAlreadySignedUp:
+						Response resp = EmailAlreadySignedUpResponse.readArgs(oi);
+						msg = "Email already exists.";
+						break;
+					default:
+						msg = "Unexpected response from server.";
+						break;
+				}
+			} catch (IOException e) {
+				msg = "Network error occured.";
 			}
+			MessageForm.Show(msg);
 		});
-		logInButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent actionEvent) {
-				String msg = null;
-				boolean fatalError = false;
-				try {
-					Response resp;
-					Request req = new LoginRequest(emailTextField.getText(), passwordPasswordField.getPassword(), sessionID);
-					req.send(oo);
-					int val = oi.readInt();
-					ResponseType respType = ResponseType.values()[val];
-					switch (respType) {
-						case AccountInfo:
-							try {
-								resp = AccountInfoResponse.readArgs(oi);
-								account = Account.fromAccountInfoResponse((AccountInfoResponse) resp);
-							} catch (ClassNotFoundException e) {
-								msg = "Received incorrect format of payment history.";
-							}
-							break;
-						case IncorrectLoginError:
-							msg = "Email or password are not correct. Try again.";
-							IncorrectLoginResponse.readArgs(oi);
-							break;
-						default:
-							msg = "Unexpected response from server.";
-							fatalError = true;
-							break;
-					}
-				} catch (IOException e) {
-					msg = "Network error occured.";
+		logInButton.addActionListener(actionEvent -> {
+			String msg = null;
+			boolean fatalError = false;
+			try {
+				Response resp;
+				Request req = new LoginRequest(emailTextField.getText(), passwordPasswordField.getPassword(), sessionID);
+				req.send(oo);
+				int val = oi.readInt();
+				ResponseType respType = ResponseType.values()[val];
+				switch (respType) {
+					case AccountInfo:
+						try {
+							resp = AccountInfoResponse.readArgs(oi);
+							account = Account.fromAccountInfoResponse((AccountInfoResponse) resp);
+						} catch (ClassNotFoundException e) {
+							msg = "Received incorrect format of payment history.";
+						}
+						break;
+					case IncorrectLoginError:
+						msg = "Email or password are not correct. Try again.";
+						IncorrectLoginResponse.readArgs(oi);
+						break;
+					default:
+						msg = "Unexpected response from server.";
+						fatalError = true;
+						break;
 				}
-				if (msg != null) { // error
-					MessageForm.Show(msg);
-					if (fatalError) {
-						frame.dispose();
-					}
-				} else { // successful login
+			} catch (IOException e) {
+				msg = "Network error occured.";
+			}
+			if (msg != null) { // error
+				MessageForm.Show(msg);
+				if (fatalError) {
 					frame.dispose();
-					LoggedInForm.open(account, oi, oo, session, sessionID);
 				}
+			} else { // successful login
+				frame.dispose();
+				LoggedInForm.open(account, oi, oo, session, sessionID);
 			}
 		});
 	}
 
 	private boolean CheckEmail(String text) {
 		return emailPattern.matcher(text).matches();
-	}
-
-	private long GetSessionID(ObjectInput oi) throws IOException {
-		return oi.readLong();
 	}
 
 	public static void main(String[] args) throws IOException {

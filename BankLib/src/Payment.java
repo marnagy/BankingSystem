@@ -1,8 +1,5 @@
-import javax.naming.InvalidNameException;
 import java.io.*;
 import java.time.ZonedDateTime;
-import java.util.Date;
-import java.util.regex.Pattern;
 
 public class Payment {
 	public final int senderAccountID, receiverAccountID;
@@ -52,12 +49,6 @@ public class Payment {
 		oo.flush();
 	}
 
-	/**
-	 * @param paymentFile
-	 * @return
-	 * @throws IOException
-	 * @throws InvalidFormatException
-	 */
 	public static Payment fromFile(File paymentFile) throws IOException, InvalidFormatException {
 		if (!paymentFile.getName().endsWith(".payment")){
 			throw new InvalidFormatException("Payment file doesn't end with '.payment'");

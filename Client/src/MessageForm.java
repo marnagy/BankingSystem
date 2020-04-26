@@ -31,8 +31,6 @@ public class MessageForm {
 	}
 
 	// for testing ONLY
-
-
 	public static void main(String[] args) {
 		Show(args[0]);
 	}
