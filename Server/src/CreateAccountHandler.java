@@ -1,15 +1,14 @@
 import java.io.*;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.Dictionary;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class CreateAccountHandler {
 	static AccountCreateRequest req;
 	static Response resp;
-	public static Response run(final ObjectInput oi, final Dictionary<Integer, Account> accounts, long sessionID) {
+	public static Response run(final ObjectInput oi, final Dictionary<Integer, Account> accounts,
+	                           File accountsFolder, Random rand, long sessionID) {
 		req = AccountCreateRequest.readArgs(oi);
 
 		try {
@@ -18,7 +17,7 @@ public class CreateAccountHandler {
 				Account account = null;
 				//check if email is already registered
 				if (accounts.get(acr.email.hashCode()) == null &&
-						(account = createAccount(acr.email, acr.passwd)) != null) {
+						(account = createAccount(acr.email, acr.passwd, accountsFolder, rand)) != null) {
 					int accountCreated = acr.email.hashCode();
 					assert accountCreated == account.accountID;
 					accounts.put(accountCreated, account );
@@ -35,11 +34,11 @@ public class CreateAccountHandler {
 			return new AccountCreateFailResponse("Account already exists.", sessionID);
 		}
 	}
-	private static Account createAccount(String email, char[] passwd) throws IOException {
-		File newAccountFolder = new File(MasterServerSession.AccountsFolder.getAbsolutePath() + MasterServerSession.FileSystemSeparator + email.hashCode());
+	private static Account createAccount(String email, char[] passwd, File accountsFolder, Random rand) throws IOException {
+		File newAccountFolder = Paths.get(accountsFolder.getAbsolutePath(), email.hashCode() + "").toFile();
 		Account account = new Account(email);
 		if ( newAccountFolder.mkdir() ) {
-			if ( createAccountInfoFile( newAccountFolder, account, email, passwd) ){
+			if ( createAccountInfoFile( newAccountFolder, account, email, passwd, rand) ){
 				return account;
 			}
 			else {
@@ -50,15 +49,15 @@ public class CreateAccountHandler {
 			return null;
 		}
 	}
-	private static boolean createAccountInfoFile(File accountFolderFile, Account account, String email, char[] passwd) throws IOException {
-		File infoFile = new File(accountFolderFile.getAbsolutePath() + MasterServerSession.FileSystemSeparator + ".info");
-		File currenciesFile = new File(accountFolderFile.getAbsolutePath() + MasterServerSession.FileSystemSeparator + ".curr");
+	private static boolean createAccountInfoFile(File accountFolderFile, Account account, String email, char[] passwd, Random rand) throws IOException {
+		File infoFile = Paths.get(accountFolderFile.getAbsolutePath(),".info").toFile();
+		File currenciesFile = Paths.get(accountFolderFile.getAbsolutePath(),".curr").toFile();
 		if (infoFile.createNewFile() && currenciesFile.createNewFile()){
 			try (BufferedWriter bwInfoFile = new BufferedWriter(new FileWriter(infoFile));
 			     BufferedWriter bwCurrenciesFile = new BufferedWriter(new FileWriter(currenciesFile))){
 				//hash of email will be accountID
 					bwInfoFile.write(email + "\n");
-				int salt = MasterServerSession.rand.nextInt();
+				int salt = rand.nextInt();
 					bwInfoFile.write(salt + "\n");
 				int passwdHash = Arrays.hashCode(passwd);
 				int checkHash = email.hashCode() + salt + passwdHash;

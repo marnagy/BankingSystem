@@ -18,15 +18,15 @@ public class PaymentHandler {
 	private static ScheduledThreadPoolExecutor pool = new ScheduledThreadPoolExecutor(Thread.activeCount());
 
 	static Pattern exchangePattern = Pattern.compile("[1-9]*[0-9](\\.[0-9]+)");
-	public static Response Run(PrintWriter outPrinter, PrintWriter errPrinter,
-	                                        PaymentRequest pr, ObjectOutput oo, Dictionary<Integer, Account> accounts,
-	                                        long sessionID) throws IOException {
+	public static Response Run(PrintWriter outPrinter, PrintWriter errPrinter, File accountsFolder, File paymentsFolder,
+	                           PaymentRequest pr, ObjectOutput oo, Dictionary<Integer, Account> accounts,
+	                           String emailAddr, char[] emailPasswd, long sessionID) throws IOException {
 		File paymentFile = null;
 		Payment payment;
 		try {
 			if (pr.hoursDelay > 0 || pr.minutesDelay > 0){
-				DelayedPaymentThread thread = new DelayedPaymentThread(pr,
-						outPrinter, errPrinter, accounts, sessionID);
+				DelayedPaymentThread thread = new DelayedPaymentThread(pr, outPrinter, errPrinter, accounts,
+						accountsFolder, paymentsFolder, emailAddr, emailPasswd, sessionID);
 				if (thread.isValid()){
 					pool.schedule(thread,(long)pr.hoursDelay * 60 + (long)pr.minutesDelay, TimeUnit.MINUTES);
 					//pool.execute(thread);
@@ -38,7 +38,8 @@ public class PaymentHandler {
 				}
 			}
 			else{
-				payment = run(outPrinter, errPrinter, pr, accounts, sessionID);
+				payment = run(outPrinter, errPrinter,accountsFolder, paymentsFolder,
+						 pr, accounts, emailAddr, emailPasswd,sessionID);
 				return new SuccessPaymentResponse( payment, sessionID);
 			}
 
@@ -50,11 +51,11 @@ public class PaymentHandler {
 			return new UnknownErrorResponse("Server error: " + e.getMessage(), sessionID);
 		}
 	}
-	public static Payment run(PrintWriter outPrinter, PrintWriter errPrinter,
-	                  PaymentRequest req, Dictionary<Integer, Account> accounts,
-	                  long sessionID) throws IOException {
+	public static Payment run(PrintWriter outPrinter, PrintWriter errPrinter, File accountsFolder, File paymentsFolder,
+	                          PaymentRequest req, Dictionary<Integer, Account> accounts,
+	                          String emailAddr, char[] emailPasswd, long sessionID) throws IOException {
 		File paymentFile;
-		Payment payment = makePayment(req, accounts, errPrinter);
+		Payment payment = makePayment(req, accountsFolder, accounts, errPrinter);
 		if ( payment == null ){
 			// TO-DO
 			outPrinter.println("Check receiver's ID and amount.");
@@ -64,34 +65,32 @@ public class PaymentHandler {
 		else{
 			outPrinter.println("Payment made.");
 			outPrinter.println("Creating file for payment...");
-			paymentFile = createPaymentFile(payment, errPrinter);
-			savePaymentToAccounts(payment, paymentFile.getName(), MasterServerSession.AccountsFolder.getAbsolutePath());
-			sendEmail(payment);
+			paymentFile = createPaymentFile(payment, paymentsFolder, errPrinter);
+			savePaymentToAccounts(payment, paymentFile.getName(), accountsFolder.getAbsolutePath());
+			sendEmail(payment, accountsFolder, emailAddr, emailPasswd);
 		}
 		return payment;
 	}
 
-	private static void sendEmail(Payment payment) {
+	private static void sendEmail(Payment payment, File accountsFolder, String emailAddr, char[] myPasswd) {
 		Properties prop = new Properties();
 		prop.put("mail.smtp.auth", true);
 		prop.put("mail.smtp.starttls.enable", "true");
 		prop.put("mail.smtp.host", "smtp.gmail.com");
 		prop.put("mail.smtp.port", "587");
 
-		String myAccount = MasterServerSession.emailAddr;
-		String myPasswd = new String(MasterServerSession.emailPasswd);
-		String recipientAddr = getRecipientAddr(payment);
+		String recipientAddr = getRecipientAddr(payment, accountsFolder);
 
 		Session session = Session.getDefaultInstance(prop, new Authenticator() {
 			@Override
 			protected PasswordAuthentication getPasswordAuthentication() {
-				return new PasswordAuthentication(myAccount, myPasswd);
+				return new PasswordAuthentication(emailAddr, myPasswd.toString());
 			}
 		});
 
 		Message msg = new MimeMessage(session);
 		try {
-			msg.setFrom(new InternetAddress(myAccount));
+			msg.setFrom(new InternetAddress(emailAddr));
 			msg.setRecipient(Message.RecipientType.TO, new InternetAddress(recipientAddr));
 			msg.setSubject("Payment received");
 			msg.setText( createEmailText(payment) );
@@ -106,10 +105,9 @@ public class PaymentHandler {
 				payment.toCurr + ".\n\nYour BankingApp";
 	}
 
-	private static String getRecipientAddr(Payment payment) {
-		try(BufferedReader br = new BufferedReader(new FileReader(MasterServerSession.AccountsFolder.getAbsolutePath() +
-				MasterServerSession.FileSystemSeparator + payment.receiverAccountID + MasterServerSession.FileSystemSeparator +
-				".info"))){
+	private static String getRecipientAddr(Payment payment, File accountsFolder) {
+		try(BufferedReader br = new BufferedReader(new FileReader(Paths.get(accountsFolder.getAbsolutePath(),
+				payment.receiverAccountID + "", ".info").toFile()))){
 			return br.readLine();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -138,8 +136,8 @@ public class PaymentHandler {
 		}
 	}
 
-	private static synchronized File createPaymentFile(Payment payment, PrintWriter errPrinter) throws IOException {
-		Path paymentPath = Paths.get(MasterServerSession.PaymentsFolder.getAbsolutePath(), payment.GetFileName());
+	private static synchronized File createPaymentFile(Payment payment, File paymentsFolder, PrintWriter errPrinter) throws IOException {
+		Path paymentPath = Paths.get(paymentsFolder.getAbsolutePath(), payment.GetFileName());
 		File paymentFile = paymentPath.toFile();
 		if (paymentFile.createNewFile()){
 			try(PrintWriter pw = new PrintWriter(paymentFile)){
@@ -153,7 +151,7 @@ public class PaymentHandler {
 		return paymentFile;
 	}
 
-	private static synchronized Payment makePayment(PaymentRequest pr, Dictionary<Integer, Account> accounts, PrintWriter errPrinter) throws IOException {
+	private static synchronized Payment makePayment(PaymentRequest pr, File accountsFolder, Dictionary<Integer, Account> accounts, PrintWriter errPrinter) throws IOException {
 		int senderID = pr.senderAccountID;
 		int receiverID = pr.receiverAccountID;
 
@@ -179,8 +177,8 @@ public class PaymentHandler {
 				// because wrapper types are immutable
 				senderAccount.trySubtract(pr.fromCurr, pr.amount);
 				receiverAccount.tryAdd(pr.toCurr, amount);
-				modifyValueFiles(senderAccount,errPrinter);
-				modifyValueFiles(receiverAccount, errPrinter);
+				modifyValueFiles(senderAccount, accountsFolder, errPrinter);
+				modifyValueFiles(receiverAccount, accountsFolder, errPrinter);
 			}
 		}
 		return new Payment(pr);
@@ -216,9 +214,9 @@ public class PaymentHandler {
 		return -1;
 	}
 
-	private static synchronized void modifyValueFiles(Account account, PrintWriter errPrinter) throws IOException {
+	private static synchronized void modifyValueFiles(Account account, File accountsFolder, PrintWriter errPrinter) throws IOException {
 		//Dictionary<CurrencyType, Long> Values = Account.Values;
-		try( var bw = new BufferedWriter( new FileWriter( Paths.get(MasterServerSession.AccountsFolder.getAbsolutePath(),
+		try( var bw = new BufferedWriter( new FileWriter( Paths.get(accountsFolder.getAbsolutePath(),
 				account.accountID + "", ".curr").toFile()))){
 			for ( CurrencyType curr: CurrencyType.values()) {
 				bw.write( curr.name() + ":" + account.getBalance(curr) + "\n");

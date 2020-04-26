@@ -1,17 +1,18 @@
 import java.io.*;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.List;
 
 public class AccountHistoryHandler {
-	public static Response run(PrintWriter outPrinter, PrintWriter errPrinter,
+	public static Response run(PrintWriter outPrinter, PrintWriter errPrinter, File accountsFolder, File paymentFolder,
 	                           ObjectInput oi, ObjectOutput oo,
 	                           Dictionary<Integer, Account> accounts, long sessionID) {
 		try {
 			PaymentHistoryRequest req = PaymentHistoryRequest.readArgs(oi);
 			final List<Payment> history = new ArrayList<Payment>();
-			File monthHistoryFile = new File( MasterServerSession.AccountsFolder.getAbsolutePath() + MasterServerSession.FileSystemSeparator
-			+ req.accountID + MasterServerSession.FileSystemSeparator + req.monthYear.getYear() + "_" + req.monthYear.getMonthValue());
+			File monthHistoryFile = Paths.get(accountsFolder.getAbsolutePath(),req.accountID + "",
+					req.monthYear.getYear() + "_" + req.monthYear.getMonthValue()).toFile();
 			if ( monthHistoryFile.exists() ) {
 				String[] lineParts;
 				String line;
@@ -19,8 +20,7 @@ public class AccountHistoryHandler {
 				try(BufferedReader br = new BufferedReader( new FileReader(monthHistoryFile.getAbsolutePath()))){
 					while( (line = br.readLine()) != null ) {
 						lineParts = line.split(":");
-						temp = Payment.fromFile(new File(MasterServerSession.PaymentsFolder.getAbsolutePath() +
-								MasterServerSession.FileSystemSeparator + lineParts[0]));
+						temp = Payment.fromFile(Paths.get(paymentFolder.getAbsolutePath(), lineParts[0]).toFile());
 						temp.category = PaymentCategory.valueOf(lineParts[1]);
 						history.add(temp);
 					}

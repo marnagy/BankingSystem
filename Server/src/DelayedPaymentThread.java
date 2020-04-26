@@ -1,7 +1,4 @@
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.Dictionary;
 
 public class DelayedPaymentThread implements Runnable {
@@ -10,13 +7,26 @@ public class DelayedPaymentThread implements Runnable {
 	final Dictionary<Integer, Account> accounts;
 	final PrintWriter outPrinter;
 	final PrintWriter errWriter;
+
+	final File accountsFolder;
+	final File paymentsFolder;
+
+	final String emailAddr;
+	final char[] emailPasswd;
 	public DelayedPaymentThread(PaymentRequest paymentRequest, PrintWriter outPrinter, PrintWriter errWriter,
-	                            Dictionary<Integer, Account> accounts, long sessionID){
+	                            Dictionary<Integer, Account> accounts, File accountsFolder, File paymentsFolder,
+	                            String emailAddr, char[] emailPasswd, long sessionID){
 		this.sessionID = sessionID;
 		this.req = paymentRequest;
 		this.outPrinter = outPrinter;
 		this.errWriter = errWriter;
 		this.accounts = accounts;
+
+		this.accountsFolder = accountsFolder;
+		this.paymentsFolder = paymentsFolder;
+
+		this.emailAddr = emailAddr;
+		this.emailPasswd = emailPasswd;
 	}
 	public boolean isValid(){
 		return accounts.get(req.senderAccountID) != null &&
@@ -26,7 +36,8 @@ public class DelayedPaymentThread implements Runnable {
 	@Override
 	public void run(){
 		try {
-			PaymentHandler.run(outPrinter, errWriter, req, accounts, sessionID);
+			PaymentHandler.run(outPrinter, errWriter, accountsFolder, paymentsFolder, req, accounts,
+					emailAddr, emailPasswd, sessionID);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

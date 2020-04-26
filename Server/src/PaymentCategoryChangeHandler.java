@@ -4,8 +4,8 @@ import java.time.YearMonth;
 import java.time.ZonedDateTime;
 
 public class PaymentCategoryChangeHandler {
-	public static Response Run(Integer userID, PaymentCategoryChangeRequest pcChReq, File paymentsFolder,
-	                       ObjectOutput oo, long sessionID) {
+	public static Response Run(Integer userID, PaymentCategoryChangeRequest pcChReq, File accountsFolder,
+	                           File paymentsFolder, ObjectOutput oo, long sessionID) {
 		YearMonth yearMonth = null;
 		ZonedDateTime dt = null;
 		String paymentFileName = null;
@@ -17,7 +17,7 @@ public class PaymentCategoryChangeHandler {
 		}
 		try{
 			String name = dt.getYear() + "_" + dt.getMonthValue();
-			File monthHistory = Paths.get(MasterServerSession.AccountsFolder.getAbsolutePath(),
+			File monthHistory = Paths.get(accountsFolder.getAbsolutePath(),
 					userID + "", name).toFile();
 			paymentFileName = pcChReq.toChange.GetFileName();
 			StringBuilder sb = new StringBuilder();

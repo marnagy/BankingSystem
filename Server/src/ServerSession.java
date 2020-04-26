@@ -1,9 +1,7 @@
 import java.io.*;
 import java.net.Socket;
-import java.util.Arrays;
-import java.util.Dictionary;
-import java.util.Map;
-import java.util.Set;
+import java.nio.file.Paths;
+import java.util.*;
 
 public class ServerSession extends Thread {
 	final Socket socket;
@@ -21,11 +19,19 @@ public class ServerSession extends Thread {
 	final PrintWriter outPrinter;
 	final PrintWriter errPrinter;
 
+	final Random rand;
+	final File accountsFolder;
+	final File paymentsFolder;
+
+	final String emailAddr;
+	final char[] emailPasswd;
+
 	ObjectInput oi;
 	ObjectOutput oo;
 
 	public ServerSession(Socket socket, Set<Integer> loggedUsers, Dictionary<Integer, Account> accounts,
-	                     Dictionary<Integer, ServerSession> accountToThread, long sessionID,
+	                     Dictionary<Integer, ServerSession> accountToThread, File accountsFolder, File paymentsFolder,
+	                     String emailAddr, char[] emailPasswd, long sessionID, Random rand,
 	                     PrintWriter outWriter, PrintWriter errWriter, Set<Long> threadIDs) throws IOException {
 		this.socket = socket;
 		this.accounts = accounts;
@@ -35,6 +41,11 @@ public class ServerSession extends Thread {
 		this.errPrinter = errWriter;
 		this.threadMap = accountToThread;
 		this.threadIDs = threadIDs;
+		this.accountsFolder = accountsFolder;
+		this.paymentsFolder = paymentsFolder;
+		this.emailAddr = emailAddr;
+		this.emailPasswd = emailPasswd;
+		this.rand = rand;
 	}
 
 	@Override
@@ -60,7 +71,7 @@ public class ServerSession extends Thread {
 						case CreateAccount:
 							// read args
 							synchronized (accounts) {
-								resp = CreateAccountHandler.run(oi, accounts, sessionID);
+								resp = CreateAccountHandler.run(oi, accounts, accountsFolder, rand, sessionID);
 							}
 							break;
 						case Login:
@@ -70,8 +81,8 @@ public class ServerSession extends Thread {
 								LoginRequest LoginReq = (LoginRequest) req;
 								if (accountCheck(LoginReq)) {
 									// accountDir has to exist (AccountCheck checks it)
-									resp = new AccountInfoResponse(new File(MasterServerSession.AccountsFolder.getCanonicalPath() +
-											MasterServerSession.FileSystemSeparator + LoginReq.email.hashCode()), sessionID);
+									resp = new AccountInfoResponse(Paths.get(accountsFolder.getCanonicalPath(),
+											LoginReq.email.hashCode() + "").toFile(), sessionID);
 									loggedUsers.add(LoginReq.email.hashCode());
 									this.userID = LoginReq.email.hashCode();
 									loggedIn = true;
@@ -87,21 +98,23 @@ public class ServerSession extends Thread {
 							if (!loggedIn) {
 								resp = new UnknownErrorResponse("You are not logged in.", sessionID);
 							}
-							resp = PaymentHandler.Run(outPrinter, errPrinter, pr, oo, accounts, sessionID);
+							resp = PaymentHandler.Run(outPrinter, errPrinter, accountsFolder, paymentsFolder, pr, oo,
+									accounts, emailAddr, emailPasswd, sessionID);
 							break;
 						case PaymentCategoryChange:
 							PaymentCategoryChangeRequest PCChReq = PaymentCategoryChangeRequest.ReadArgs(oi);
 							if (!loggedIn) {
 								resp = new UnknownErrorResponse("You are not logged in.", sessionID);
 							}
-							resp = PaymentCategoryChangeHandler.Run(userID, PCChReq, MasterServerSession.PaymentsFolder, oo,
+							resp = PaymentCategoryChangeHandler.Run(userID, PCChReq, accountsFolder, paymentsFolder, oo,
 									sessionID);
 							break;
 						case AccountHistory:
 							if (!loggedIn) {
 								resp = new UnknownErrorResponse("You are not logged in.", sessionID);
 							}
-							resp = AccountHistoryHandler.run(outPrinter, errPrinter, oi, oo, accounts, sessionID);
+							resp = AccountHistoryHandler.run(outPrinter, errPrinter, accountsFolder, paymentsFolder,
+									oi, oo, accounts, sessionID);
 							break;
 						case End:
 							EndRequest eReq = EndRequest.readArgs(oi);
@@ -191,8 +204,8 @@ public class ServerSession extends Thread {
 	}
 
 	private boolean accountCheck(LoginRequest loginReq) {
-		File accountDir = new File(MasterServerSession.AccountsFolder.getAbsolutePath() + MasterServerSession.FileSystemSeparator + loginReq.email.hashCode());
-		File infoFile = new File(accountDir.getAbsolutePath() + MasterServerSession.FileSystemSeparator + ".info");
+		File accountDir = Paths.get(accountsFolder.getAbsolutePath(), loginReq.email.hashCode() + "").toFile();
+		File infoFile = Paths.get(accountDir.getAbsolutePath(), ".info").toFile();
 		try (BufferedReader br = new BufferedReader(new FileReader(infoFile))){
 			String email = br.readLine();
 			// for safety, check if email is same

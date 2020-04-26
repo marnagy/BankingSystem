@@ -14,20 +14,24 @@ import java.util.concurrent.*;
 public class MasterServerSession {
 	private static int defaultPort = 5000;
 	private static MasterServerSession instance = null;
+	private String emailAddr;
+	private char[] emailPasswd;
+
+	final int port;
 	final String FileSystemSeparator = FileSystems.getDefault().getSeparator();
-	final String RootFolderName = "ServerFiles";
-	final String AccountsFolderName = "Accounts";
-	final String PaymentsFolderName = "Payments";
-	final String ServerConfFileName = "server.conf";
+	final String rootFolderName = "ServerFiles";
+	final String accountsFolderName = "Accounts";
+	final String paymentsFolderName = "Payments";
+	final String serverConfFileName = "server.conf";
 
 	final PrintWriter errWriter = new PrintWriter(new OutputStreamWriter(System.err));
 	final PrintWriter outWriter = new PrintWriter(new OutputStreamWriter(System.out));
 	final Reader inReader = new BufferedReader(new InputStreamReader(System.in));
 
-	final File RootFolder = Paths.get(RootFolderName).toFile();
-	final File AccountsFolder = Paths.get(RootFolderName + FileSystemSeparator + AccountsFolderName).toFile();
-	final File PaymentsFolder = Paths.get(RootFolderName + FileSystemSeparator + PaymentsFolderName).toFile();
-	final File ConfFile = Paths.get(RootFolderName + FileSystemSeparator + ServerConfFileName).toFile();
+	final File rootFolder = Paths.get(rootFolderName).toFile();
+	final File accountsFolder = Paths.get(rootFolderName, accountsFolderName).toFile();
+	final File paymentsFolder = Paths.get(rootFolderName, paymentsFolderName).toFile();
+	final File confFile = Paths.get(rootFolderName, serverConfFileName).toFile();
 	final Set<Integer> loggedUsers = Collections.synchronizedSet(new HashSet<Integer>());
 
 	// insert account ID, get ServerSession or null if the user is logged in currently
@@ -43,6 +47,8 @@ public class MasterServerSession {
 
 	// random variable
 	final Random rand = new Random(System.nanoTime());
+
+	private boolean IsTest = true;
 
 	public static MasterServerSession getDefault(){
 		if (instance == null){
@@ -68,64 +74,17 @@ public class MasterServerSession {
 	}
 
 	private MasterServerSession(int port){
-
+		this.port = port;
 	}
 	public void run(String arg, char[] passwd) {
 		emailAddr = arg;
 		emailPasswd = passwd;
 
-		if (IsTest && RootFolder.exists()){
-			deleteDirectory(RootFolder);
+		if (IsTest && rootFolder.exists()){
+			deleteDirectory(rootFolder);
 			outWriter.println("Root folder reset.");
 			outWriter.flush();
 		}
-	}
-	static final String FileSystemSeparator = FileSystems.getDefault().getSeparator();
-	static final String RootFolderName = "ServerFiles";
-	static final String AccountsFolderName = "Accounts";
-	static final String PaymentsFolderName = "Payments";
-	static final String ServerConfFileName = "server.conf";
-
-	static final PrintWriter errWriter = new PrintWriter(new OutputStreamWriter(System.err));
-	static final PrintWriter outWriter = new PrintWriter(new OutputStreamWriter(System.out));
-	static final Reader inReader = new BufferedReader(new InputStreamReader(System.in));
-
-	static final File RootFolder = Paths.get(RootFolderName).toFile();
-	static final File AccountsFolder = Paths.get(RootFolderName + FileSystemSeparator + AccountsFolderName).toFile();
-	static final File PaymentsFolder = Paths.get(RootFolderName + FileSystemSeparator + PaymentsFolderName).toFile();
-	static final File ConfFile = Paths.get(RootFolderName + FileSystemSeparator + ServerConfFileName).toFile();
-
-	static final Set<Integer> loggedUsers = Collections.synchronizedSet(new HashSet<Integer>());
-
-	// insert account ID, get ServerSession or null if the user is logged in currently
-	static final Dictionary<Integer, ServerSession> threads = new Hashtable<Integer, ServerSession>();
-
-	// for unique ID for each thread/session
-	// used for authentication
-	static final Set<Long> threadIDs = Collections.synchronizedSet(new HashSet<Long>());
-
-	// all valid account IDs, loaded from appropriate folder
-	// new are added
-	static final Dictionary<Integer, Account> accounts = new Hashtable<Integer, Account>();
-
-	// random variable
-	static final Random rand = new Random(System.nanoTime());
-
-	public static String emailAddr;
-	public static char[] emailPasswd;
-
-	// used for testing
-	static final boolean IsTest = false;
-	public static void Run(String addr, char[] passwd){
-		emailAddr = addr;
-		emailPasswd = passwd;
-
-		if (IsTest && RootFolder.exists()){
-			deleteDirectory(RootFolder);
-			outWriter.println("Root folder reset.");
-			outWriter.flush();
-		}
-
 
 		//Init folders for accounts and payments
 		try {
@@ -144,7 +103,7 @@ public class MasterServerSession {
 		}
 
 		//load accounts from dirictories
-		File[] accountsDirs = AccountsFolder.listFiles();
+		File[] accountsDirs = accountsFolder.listFiles();
 		for (int i = 0; i < accountsDirs.length; i++){
 			loadAccountFromDir(accountsDirs[i], accounts);
 		}
@@ -158,7 +117,7 @@ public class MasterServerSession {
 
 		try {
 			//ServerSocket ss = SSLServerSocketFactory.getDefault().createServerSocket(5000);
-			ss = new ServerSocket(5000);
+			ss = new ServerSocket(port);
 		} catch (IOException e) {
 			errWriter.println("IOException while starting ServerSocket");
 			errWriter.flush();
@@ -179,8 +138,8 @@ public class MasterServerSession {
 				do {
 					sessionID = rand.nextLong();
 				} while (threadIDs.contains(sessionID));
-				ServerSession session = new ServerSession(s, loggedUsers, accounts, threads,
-						sessionID, outWriter, errWriter, threadIDs);
+				ServerSession session = new ServerSession(s, loggedUsers, accounts, threads, accountsFolder,
+						paymentsFolder, emailAddr, emailPasswd, sessionID, rand, outWriter, errWriter, threadIDs);
 				session.setName(sessionID + "");
 				threadIDs.add(sessionID);
 				pool.execute(session);
@@ -192,8 +151,7 @@ public class MasterServerSession {
 			}
 		}
 	}
-
-	private static void loadAccountFromDir(File accountsDir, Dictionary<Integer,Account> accounts) {
+	private void loadAccountFromDir(File accountsDir, Dictionary<Integer,Account> accounts) {
 		try{
 			Account account = Account.fromDir(accountsDir);
 			accounts.put(account.accountID, account);
@@ -202,19 +160,19 @@ public class MasterServerSession {
 			throw new Error("Invalid Account state for " + accountsDir.getName() + ".");
 		}
 	}
-	private static void initFolders() throws InitException, IOException {
-		if(!RootFolder.mkdir()){
+	private void initFolders() throws InitException, IOException {
+		if(!rootFolder.mkdir()){
 			return;
 		}
-		boolean accountsRes = AccountsFolder.mkdir();
-		boolean paymentsRes = PaymentsFolder.mkdir();
-		boolean confRes = ConfFile.createNewFile();
+		boolean accountsRes = accountsFolder.mkdir();
+		boolean paymentsRes = paymentsFolder.mkdir();
+		boolean confRes = confFile.createNewFile();
 
-		if ( !(RootFolder.exists() && AccountsFolder.exists() && PaymentsFolder.exists() && ConfFile.exists())){
+		if ( !(rootFolder.exists() && accountsFolder.exists() && paymentsFolder.exists() && confFile.exists())){
 			throw new InitException();
 		}
 	}
-	private static boolean deleteDirectory(File directoryToBeDeleted){
+	private boolean deleteDirectory(File directoryToBeDeleted){
 		if (!directoryToBeDeleted.exists()){
 			return true;
 		}
