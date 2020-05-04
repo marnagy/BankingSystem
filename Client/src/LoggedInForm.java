@@ -105,7 +105,9 @@ public class LoggedInForm {
 					CurrencyType fromCurr = (CurrencyType) fromCurrencyComboBox.getSelectedItem();
 					CurrencyType toCurr = (CurrencyType) toCurrencyComboBox.getSelectedItem();
 
-					if (hasEnoughMoney(account, amount, fromCurr)) {
+					if (receiverID == account.accountID && fromCurr == toCurr) {
+						msg = "You can't send yourself money to same currency. Nothing will change.";
+					} else if (hasEnoughMoney(account, amount, fromCurr)) {
 						try {
 							ZonedDateTime dateTime = ZonedDateTime.now();
 							String[] symbols = {variableSymbolTextField.getText(), specificSymbolTextField.getText()};
@@ -114,22 +116,30 @@ public class LoggedInForm {
 							Request req = new PaymentRequest(account.accountID, receiverID, amount, hoursDelay, minutesDelay,
 									fromCurr, toCurr, symbols, typeHereTextField.getText(), sessionID);
 							req.send(oo);
+							SuccessPaymentResponse spresp;
+							Response resp;
 							ResponseType respType = ResponseType.values()[oi.readInt()];
 							switch (respType) {
 								case InvalidReceiverIDResponse:
 									msg = "Invalid receiver ID.";
 									break;
 								case SuccessPaymentResponse:
-									SuccessPaymentResponse resp = SuccessPaymentResponse.readArgs(oi);
+									spresp = SuccessPaymentResponse.readArgs(oi);
 									account.trySubtract(fromCurr, amount);
 									msg = "Payment sent and processed.";
-									updateBalance(account, balanceLabel, accountBalanceComboBox);
+									if (receiverID == account.accountID) {
+										account.trySubtract(fromCurr, amount);
+										account.tryAdd(toCurr, (long) (spresp.payment.convRate * amount));
+									} else {
+										updateBalance(account, balanceLabel, accountBalanceComboBox);
+									}
 									break;
 								case Success:
 									SuccessResponse temp = SuccessResponse.readArgs(oi);
 									msg = "Payment is about to be processed in the given time.";
 									break;
-								default:
+								case UnknownErrorResponse:
+									resp = UnknownErrorResponse.readArgs(oi);
 									msg = "Unknown response error occurred.";
 									break;
 							}
@@ -212,9 +222,7 @@ public class LoggedInForm {
 				PaymentHistoryResponse resp = PaymentHistoryResponse.readArgs(oi);
 				account.updatePaymentHistory(selectedMonth, resp.history);
 				monthHistoryPanel.setLayout(new GridLayout(resp.history.length, 1));
-				int i = 0;
 				for (int j = resp.history.length - 1; j >= 0; j--) {
-					i++;
 					try {
 						JPanel subpanel = new PaymentHistorySubpanel(account.accountID, resp.history[j], oi, oo, sessionID);
 						monthHistoryPanel.add(subpanel);

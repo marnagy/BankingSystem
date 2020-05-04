@@ -4,7 +4,6 @@ import javax.mail.internet.MimeMessage;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.YearMonth;
 import java.util.Map;
@@ -137,22 +136,14 @@ public class PaymentHandler {
 	}
 
 	private static synchronized File createPaymentFile(Payment payment, File paymentsFolder, PrintWriter errPrinter) throws IOException {
-		Path paymentPath = Paths.get(paymentsFolder.getAbsolutePath(), payment.GetFileName());
-		File paymentFile = paymentPath.toFile();
-		if (paymentFile.createNewFile()){
-			try(PrintWriter pw = new PrintWriter(paymentFile)){
-				pw.println(payment.amount);
-				pw.println("from:" + payment.fromCurr.name());
-				pw.println("to:" + payment.toCurr.name());
-				// each account can set different category in their history
-			}
-		}
-		return paymentFile;
+		File paymentFile = Paths.get(paymentsFolder.getAbsolutePath(), payment.GetFileName()).toFile();
+		return payment.toFile(paymentFile);
 	}
 
 	private static synchronized Payment makePayment(PaymentRequest pr, File accountsFolder, Map<Integer, Account> accounts, PrintWriter errPrinter) throws IOException {
 		int senderID = pr.senderAccountID;
 		int receiverID = pr.receiverAccountID;
+		Double rate = 1D;
 
 		// wrong IDs
 		if ( accounts.get(senderID) == null || accounts.get(receiverID) == null){
@@ -171,19 +162,24 @@ public class PaymentHandler {
 				Long receiverAmount = senderAccount.getBalance(pr.toCurr);
 				long amount = pr.amount;
 				if (pr.fromCurr != pr.toCurr){
-					amount = convert(amount, pr.fromCurr, pr.toCurr);
+					rate = convert(pr.fromCurr, pr.toCurr);
 				}
 				// because wrapper types are immutable
 				senderAccount.trySubtract(pr.fromCurr, pr.amount);
-				receiverAccount.tryAdd(pr.toCurr, amount);
+				receiverAccount.tryAdd(pr.toCurr, (long)Math.floor(rate * amount));
 				modifyValueFiles(senderAccount, accountsFolder);
 				modifyValueFiles(receiverAccount, accountsFolder);
 			}
 		}
-		return new Payment(pr);
+		if (rate == null){
+			return new Payment(pr);
+		}
+		else{
+			return new Payment(pr, rate);
+		}
 	}
 
-	private static long convert(long amount, CurrencyType from, CurrencyType to) throws IOException {
+	private static Double convert(CurrencyType from, CurrencyType to) throws IOException {
 		String apiKey = "3fa4ba21d24d7294d6a9";
 		try {
 
@@ -198,9 +194,7 @@ public class PaymentHandler {
 			Matcher matcher = exchangePattern.matcher(sb.toString());
 			if (matcher.find()){
 				String matched = matcher.group();
-				double rate = Double.valueOf(matched);
-				long result = (long) (amount * rate);
-				return result;
+				return Double.valueOf(matched);
 			}
 			else{
 				throw new IOException("API malfunction.");
@@ -208,7 +202,7 @@ public class PaymentHandler {
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
-		return -1;
+		return -1D;
 	}
 
 	private static synchronized void modifyValueFiles(Account account, File accountsFolder) throws IOException {
