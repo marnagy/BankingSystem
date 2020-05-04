@@ -124,14 +124,17 @@ public class PaymentHandler {
 		int month = yearMonth.getMonthValue();
 
 		File currMonthPaymentsSenderFile = Paths.get(accountsFolderPath,senderAccountID + "", (year + "_" + month)).toFile();
-		File currMonthPaymentsReceiverFile = Paths.get(accountsFolderPath,receiverAccountID + "", (year + "_" + month)).toFile();
+
 		currMonthPaymentsSenderFile.createNewFile(); // if not created, create new empty file
 		try (FileWriter fw = new FileWriter(currMonthPaymentsSenderFile.getAbsolutePath(), true)){
 			fw.write( paymentFileName + ":" + PaymentCategory.Other + "\n");
 		}
-		currMonthPaymentsReceiverFile.createNewFile(); // if not created, create new empty file
-		try (FileWriter fw = new FileWriter(currMonthPaymentsReceiverFile.getAbsolutePath(), true)){
-			fw.write( paymentFileName + ":" + PaymentCategory.Other + "\n");
+		if (senderAccountID != receiverAccountID) {
+			File currMonthPaymentsReceiverFile = Paths.get(accountsFolderPath,receiverAccountID + "", (year + "_" + month)).toFile();
+			currMonthPaymentsReceiverFile.createNewFile(); // if not created, create new empty file
+			try (FileWriter fw = new FileWriter(currMonthPaymentsReceiverFile.getAbsolutePath(), true)) {
+				fw.write(paymentFileName + ":" + PaymentCategory.Other + "\n");
+			}
 		}
 	}
 

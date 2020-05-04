@@ -24,7 +24,12 @@ public class PaymentHistorySubpanel extends JPanel {
 
 		if ( accountID == payment.senderAccountID){
 			this.add(new JLabel("Sent: " + dateTimeToString(payment.sendingDateTime)));
-			this.add(new JLabel("To: " + payment.receiverAccountID));
+			if (accountID == payment.receiverAccountID){
+				this.add(new JLabel("Self Payment"));
+			}
+			else{
+				this.add(new JLabel("To: " + payment.receiverAccountID));
+			}
 			this.add(new JLabel("Amount: " + String.format("%.2f", -payment.amount / 100D)));
 		}
 		else if ( accountID == payment.receiverAccountID){

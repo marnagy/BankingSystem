@@ -50,7 +50,7 @@ public class MasterServerSession {
 	// random variable
 	final Random rand = new Random(System.nanoTime());
 
-	private boolean IsTest = true;
+	private boolean IsTest = false;
 
 	public static MasterServerSession getDefault(){
 		return MasterServerSession.getDefault(defaultPort);

@@ -109,7 +109,6 @@ public class LoggedInForm {
 						msg = "You can't send yourself money to same currency. Nothing will change.";
 					} else if (hasEnoughMoney(account, amount, fromCurr)) {
 						try {
-							ZonedDateTime dateTime = ZonedDateTime.now();
 							String[] symbols = {variableSymbolTextField.getText(), specificSymbolTextField.getText()};
 							int hoursDelay = (int) hoursDelayBox.getSelectedItem();
 							int minutesDelay = (int) minutesDelayBox.getSelectedItem();
@@ -125,14 +124,12 @@ public class LoggedInForm {
 									break;
 								case SuccessPaymentResponse:
 									spresp = SuccessPaymentResponse.readArgs(oi);
-									account.trySubtract(fromCurr, amount);
 									msg = "Payment sent and processed.";
+									account.trySubtract(fromCurr, amount);
 									if (receiverID == account.accountID) {
-										account.trySubtract(fromCurr, amount);
 										account.tryAdd(toCurr, (long) (spresp.payment.convRate * amount));
-									} else {
-										updateBalance(account, balanceLabel, accountBalanceComboBox);
 									}
+									updateBalance(account, balanceLabel, accountBalanceComboBox);
 									break;
 								case Success:
 									SuccessResponse temp = SuccessResponse.readArgs(oi);
