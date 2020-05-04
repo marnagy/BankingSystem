@@ -30,7 +30,7 @@ public class PaymentHistorySubpanel extends JPanel {
 			else{
 				this.add(new JLabel("To: " + payment.receiverAccountID));
 			}
-			this.add(new JLabel("Amount: " + String.format("%.2f", -payment.amount / 100D)));
+			this.add(new JLabel("Amount sent: " + String.format("%.2f", -payment.amount / 100D)));
 		}
 		else if ( accountID == payment.receiverAccountID){
 			this.add(new JLabel("Received: " + dateTimeToString(payment.receivedDateTime)));
