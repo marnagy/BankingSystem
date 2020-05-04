@@ -3,6 +3,14 @@ import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 
 public class PaymentCategoryChangeHandler {
+	/**
+	 * Method to handle category change for a payment in history
+	 * @param userID ID of account
+	 * @param pcChReq PaymentCategoryChangeRequest object
+	 * @param accountsFolder Folder containing all accounts
+	 * @param sessionID Long identifier
+	 * @return Response
+	 */
 	public static Response Run(Integer userID, PaymentCategoryChangeRequest pcChReq, File accountsFolder,
 	                           long sessionID) {
 		ZonedDateTime dt = null;

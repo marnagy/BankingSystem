@@ -8,6 +8,16 @@ import java.util.Random;
 public class CreateAccountHandler {
 	static AccountCreateRequest req;
 	static Response resp;
+
+	/**
+	 * Method for handling creation of account including folders and files creation
+	 * @param oi Object Input object
+	 * @param accounts Map form accountID to Account object
+	 * @param accountsFolder Folder containing accounts
+	 * @param rand Random object
+	 * @param sessionID Long identifier of session
+	 * @return Response object. Can return SuccessResponse, EmailAlreadySignedUpResponse, AccountCreateFailResponse
+	 */
 	public static Response run(final ObjectInput oi, final Map<Integer, Account> accounts,
 	                           File accountsFolder, Random rand, long sessionID) {
 		req = AccountCreateRequest.readArgs(oi);
@@ -35,6 +45,16 @@ public class CreateAccountHandler {
 			return new AccountCreateFailResponse("Account already exists.", sessionID);
 		}
 	}
+
+	/**
+	 * Method to create Account object as well as files necessary
+	 * @param email Email linked to the account
+	 * @param passwd Password specific to this account
+	 * @param accountsFolder Folder of all accounts
+	 * @param rand Random object
+	 * @return Account object if success, otherwise null
+	 * @throws IOException Files creation error
+	 */
 	private static Account createAccount(String email, char[] passwd, File accountsFolder, Random rand) throws IOException {
 		File newAccountFolder = Paths.get(accountsFolder.getAbsolutePath(), email.hashCode() + "").toFile();
 		Account account = new Account(email);
@@ -50,6 +70,17 @@ public class CreateAccountHandler {
 			return null;
 		}
 	}
+
+	/**
+	 * Method handling creation of .info file for the account
+	 * @param accountFolderFile File object for folder that contains current account to create
+	 * @param account Account object that is being created
+	 * @param email Email for the account
+	 * @param passwd Password to the account
+	 * @param rand Random object
+	 * @return Returns success
+	 * @throws IOException File creation trouble
+	 */
 	private static boolean createAccountInfoFile(File accountFolderFile, Account account, String email, char[] passwd, Random rand) throws IOException {
 		File infoFile = Paths.get(accountFolderFile.getAbsolutePath(),".info").toFile();
 		File currenciesFile = Paths.get(accountFolderFile.getAbsolutePath(),".curr").toFile();

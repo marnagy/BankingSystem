@@ -4,6 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AccountHistoryHandler {
+	/**
+	 * Method for handling getting specific account history for month
+	 * @param errPrinter Writer for ERR
+	 * @param accountsFolder Folder containing accounts
+	 * @param paymentFolder Folder containing accounts
+	 * @param oi Object Input object
+	 * @param sessionID Long of sessionID
+	 * @return Response on this action. Can return PaymentHistoryResponse or IllegalRequestResponse
+	 */
 	public static Response run(PrintWriter errPrinter, File accountsFolder, File paymentFolder,
 	                           ObjectInput oi, long sessionID) {
 		try {

@@ -20,6 +20,20 @@ public class PaymentHandler {
 	private static ScheduledThreadPoolExecutor pool = new ScheduledThreadPoolExecutor(Thread.activeCount());
 
 	static Pattern exchangePattern = Pattern.compile("[1-9]*[0-9](\\.[0-9]+)");
+
+	/**
+	 * Method for handling payments
+	 * @param outPrinter Printer for OUT
+	 * @param errPrinter Printer for ERR
+	 * @param accountsFolder Folder containing all accounts
+	 * @param paymentsFolder Folder containing all payments
+	 * @param pr Payment request being handled
+	 * @param accounts Map from accountID to Account object
+	 * @param emailAddr Email address for sending confirmation email
+	 * @param emailPasswd Password to the address
+	 * @param sessionID Long identifier
+	 * @return Response: SuccessResponse(delayed), IllegalRequestResponse(error), SuccessPaymentResponse
+	 */
 	public static Response Run(PrintWriter outPrinter, PrintWriter errPrinter, File accountsFolder, File paymentsFolder,
 	                           PaymentRequest pr, Map<Integer, Account> accounts,
 	                           String emailAddr, char[] emailPasswd, long sessionID) {
@@ -50,6 +64,21 @@ public class PaymentHandler {
 			return new UnknownErrorResponse("Server error: " + e.getMessage(), sessionID);
 		}
 	}
+
+	/**
+	 * Method to actually pay immediately
+	 * @param outPrinter Printer for OUT
+	 * @param errPrinter Printer for ERR
+	 * @param accountsFolder Folder containing all accounts
+	 * @param paymentsFolder Folder containing all payments
+	 * @param req Payment Request being handled
+	 * @param accounts Map from accountID to Account object
+	 * @param emailAddr Email address for sending confirmation email
+	 * @param emailPasswd Password to the address
+	 * @param sessionID Long identifier
+	 * @return Payment object
+	 * @throws IOException Failed to create payment file and object
+	 */
 	public static Payment run(PrintWriter outPrinter, PrintWriter errPrinter, File accountsFolder, File paymentsFolder,
 	                          PaymentRequest req, Map<Integer, Account> accounts,
 	                          String emailAddr, char[] emailPasswd, long sessionID) throws IOException {
@@ -71,6 +100,13 @@ public class PaymentHandler {
 		return payment;
 	}
 
+	/**
+	 * Method for sending email from gmail to the receiver
+	 * @param payment Payment object
+	 * @param accountsFolder Folder containing all accounts
+	 * @param emailAddr Email address to send email from
+	 * @param myPasswd Password for the email
+	 */
 	private static void sendEmail(Payment payment, File accountsFolder, String emailAddr, char[] myPasswd) {
 		Properties prop = new Properties();
 		prop.put("mail.smtp.auth", true);
@@ -99,11 +135,22 @@ public class PaymentHandler {
 		}
 	}
 
+	/**
+	 * Helping method for creation of email text
+	 * @param payment Payment object
+	 * @return
+	 */
 	private static String createEmailText(Payment payment) {
 		return "To your account was sent " + String.format("%.2f",payment.amount / 100D) + " " + payment.fromCurr + " converted to " +
 				payment.toCurr + ".\n\nYour BankingApp";
 	}
 
+	/**
+	 * Helping method for getting email address from account folder
+	 * @param payment
+	 * @param accountsFolder
+	 * @return
+	 */
 	private static String getRecipientAddr(Payment payment, File accountsFolder) {
 		try(BufferedReader br = new BufferedReader(new FileReader(Paths.get(accountsFolder.getAbsolutePath(),
 				payment.receiverAccountID + "", ".info").toFile()))){
@@ -116,6 +163,13 @@ public class PaymentHandler {
 		return null;
 	}
 
+	/**
+	 * Method used for saving payments to the history of account
+	 * @param payment Payment object
+	 * @param paymentFileName Name of payment file in payments folder
+	 * @param accountsFolderPath Path of accountsFolder in String
+	 * @throws IOException File failure
+	 */
 	private static synchronized void savePaymentToAccounts(Payment payment, String paymentFileName, String accountsFolderPath) throws IOException {
 		int senderAccountID = payment.senderAccountID;
 		int receiverAccountID = payment.receiverAccountID;
@@ -138,11 +192,28 @@ public class PaymentHandler {
 		}
 	}
 
+	/**
+	 * Method to <i>create</i> file for payment
+	 * @param payment
+	 * @param paymentsFolder
+	 * @param errPrinter
+	 * @return
+	 * @throws IOException
+	 */
 	private static synchronized File createPaymentFile(Payment payment, File paymentsFolder, PrintWriter errPrinter) throws IOException {
 		File paymentFile = Paths.get(paymentsFolder.getAbsolutePath(), payment.GetFileName()).toFile();
 		return payment.toFile(paymentFile);
 	}
 
+	/**
+	 * Update values in balances for each account
+	 * @param pr Payment Request being handled
+	 * @param accountsFolder Folder containing all accounts
+	 * @param accounts Map from accountID to Account object
+	 * @param errPrinter Printer for ERR
+	 * @return Payment object
+	 * @throws IOException File failure
+	 */
 	private static synchronized Payment makePayment(PaymentRequest pr, File accountsFolder, Map<Integer, Account> accounts, PrintWriter errPrinter) throws IOException {
 		int senderID = pr.senderAccountID;
 		int receiverID = pr.receiverAccountID;
@@ -182,6 +253,13 @@ public class PaymentHandler {
 		}
 	}
 
+	/**
+	 * Method used to get current conversion rate from internet API
+	 * @param from Currency from
+	 * @param to Currency to
+	 * @return conversion rate in Double
+	 * @throws IOException Network failure
+	 */
 	private static Double convert(CurrencyType from, CurrencyType to) throws IOException {
 		String apiKey = "3fa4ba21d24d7294d6a9";
 		try {
@@ -208,6 +286,12 @@ public class PaymentHandler {
 		return -1D;
 	}
 
+	/**
+	 * Method used for modifying values in current balance in the account
+	 * @param account Account to update
+	 * @param accountsFolder Folder containing all accounts
+	 * @throws IOException File error
+	 */
 	private static synchronized void modifyValueFiles(Account account, File accountsFolder) throws IOException {
 		try( var bw = new BufferedWriter( new FileWriter( Paths.get(accountsFolder.getAbsolutePath(),
 				account.accountID + "", ".curr").toFile()))){

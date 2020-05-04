@@ -32,10 +32,26 @@ public class ServerSession extends Thread {
 	ObjectInput oi;
 	ObjectOutput oo;
 
+	/**
+	 *
+	 * @param socket Socket object that
+	 * @param loggedUsers Set of accountIDs for logged in users
+	 * @param accounts Map from accountID to Account
+	 * @param accountToThread Map from accountID to Account
+	 * @param accountsFolder Folder where accounts are stored
+	 * @param paymentsFolder Folder where payments are stored
+	 * @param emailAddr Your gmail address
+	 * @param emailPasswd Password to your gmail address
+	 * @param sessionID Session identifier
+	 * @param rand Random object
+	 * @param outWriter Writer object for OUT
+	 * @param errWriter Writer object for ERR
+	 * @param threadIDs Set of running sessions.
+	 */
 	public ServerSession(Socket socket, Set<Integer> loggedUsers, Map<Integer, Account> accounts,
 	                     Map<Integer, ServerSession> accountToThread, File accountsFolder, File paymentsFolder,
 	                     String emailAddr, char[] emailPasswd, long sessionID, Random rand,
-	                     PrintWriter outWriter, PrintWriter errWriter, Set<Long> threadIDs) throws IOException {
+	                     PrintWriter outWriter, PrintWriter errWriter, Set<Long> threadIDs) {
 		this.socket = socket;
 		this.accounts = accounts;
 		this.sessionID = sessionID;
@@ -52,6 +68,9 @@ public class ServerSession extends Thread {
 	}
 
 	@Override
+	/**
+	 * Method to call to start session
+	 */
 	public void run() {
 		boolean loggedIn = false, endSession = false, logout = false;
 		try{
@@ -180,6 +199,11 @@ public class ServerSession extends Thread {
 		outPrinter.flush();
 	}
 
+	/**
+	 * Method for recognizing whether request requires to be logged in
+	 * @param reqType Request type from request
+	 * @return Boolean whether login is needed
+	 */
 	private boolean NeedLogin(RequestType reqType) {
 		return reqType == RequestType.Logout ||
 				reqType == RequestType.Payment ||
@@ -187,16 +211,32 @@ public class ServerSession extends Thread {
 				reqType == RequestType.PaymentCategoryChange;
 	}
 
+	/**
+	 * Set Input&Ouput object stream for session
+	 * @param s Socket object
+	 * @throws IOException Network trouble
+	 */
 	private void setInputOutput(Socket s) throws IOException {
 		oo = new ObjectOutputStream(socket.getOutputStream());
 		oi = new ObjectInputStream(socket.getInputStream());
 	}
+
+	/**
+	 * For sending sessionID on the start of the session
+	 * @param socket Socket object
+	 * @throws IOException Network trouble
+	 */
 	private void sendSessionID(Socket socket) throws IOException {
 		long l = Long.parseLong(this.getName());
 		oo.writeLong(l);
 		oo.flush();
 	}
 
+	/**
+	 * Login check
+	 * @param loginReq Login request
+	 * @return Returns whether login is correct
+	 */
 	private boolean accountCheck(LoginRequest loginReq) {
 		File accountDir = Paths.get(accountsFolder.getAbsolutePath(), loginReq.email.hashCode() + "").toFile();
 		File infoFile = Paths.get(accountDir.getAbsolutePath(), ".info").toFile();

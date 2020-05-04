@@ -15,6 +15,9 @@ import java.util.concurrent.Executors;
 // Add checking for session ID
 // Continue with payments
 
+/**
+ * Object that creates sets up and accepts requests for new sessions
+ */
 public class MasterServerSession {
 	private static int defaultPort = 5000;
 	private String emailAddr;
@@ -52,9 +55,19 @@ public class MasterServerSession {
 
 	private boolean IsTest = false;
 
+	/**
+	 * Get default instance of MasterServerSession on port 5000
+	 * @return MasterServerSession
+	 */
 	public static MasterServerSession getDefault(){
 		return MasterServerSession.getDefault(defaultPort);
 	}
+
+	/**
+	 * special case of method getDefault
+	 * @param port Specify on what port should server run
+	 * @return MasterServerSession
+	 */
 	public static MasterServerSession getDefault(int port){
 		return new MasterServerSession(port);
 	}
@@ -62,8 +75,15 @@ public class MasterServerSession {
 	private MasterServerSession(int port){
 		this.port = port;
 	}
-	public void run(String arg, char[] passwd) {
-		emailAddr = arg;
+
+	/**
+	 * Main method which ends in while loop.
+	 * Includes loading accounts from folder Accounts and creation of necessary folders.
+	 * @param email email adress you want to send confirmation emails from
+	 * @param passwd password to the address
+	 */
+	public void run(String email, char[] passwd) {
+		emailAddr = email;
 		emailPasswd = passwd;
 
 		if (IsTest && rootFolder.exists()){
@@ -135,6 +155,12 @@ public class MasterServerSession {
 			}
 		}
 	}
+
+	/**
+	 * Loads accounts from Accounts folder
+	 * @param accountsDir Account Folder
+	 * @param accounts Map from Integer(accountID) to Account.
+	 */
 	private void loadAccountFromDir(File accountsDir, Map<Integer,Account> accounts) {
 		try{
 			Account account = Account.fromDir(accountsDir);
@@ -144,6 +170,12 @@ public class MasterServerSession {
 			throw new Error("Invalid Account state for " + accountsDir.getName() + ".");
 		}
 	}
+
+	/**
+	 * Method for initialization of necessary folders
+	 * @throws InitException Folders already initialized
+	 * @throws IOException Exception during creating files
+	 */
 	private void initFolders() throws InitException, IOException {
 		if(!rootFolder.mkdir()){
 			return;
@@ -156,6 +188,12 @@ public class MasterServerSession {
 			throw new InitException();
 		}
 	}
+
+	/**
+	 * Used for testing for deletion of ServerFiles folder
+	 * @param directoryToBeDeleted
+	 * @return True if success
+	 */
 	private boolean deleteDirectory(File directoryToBeDeleted){
 		if (!directoryToBeDeleted.exists()){
 			return true;
