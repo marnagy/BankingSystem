@@ -17,7 +17,6 @@ import java.util.concurrent.Executors;
 
 public class MasterServerSession {
 	private static int defaultPort = 5000;
-	private static MasterServerSession instance = null;
 	private String emailAddr;
 	private char[] emailPasswd;
 
@@ -54,26 +53,10 @@ public class MasterServerSession {
 	private boolean IsTest = true;
 
 	public static MasterServerSession getDefault(){
-		if (instance == null){
-			var master = MasterServerSession.getDefault(defaultPort);
-			instance = master;
-
-			return master;
-		}
-		else{
-			return instance;
-		}
-
+		return MasterServerSession.getDefault(defaultPort);
 	}
 	public static MasterServerSession getDefault(int port){
-		if (instance == null){
-			var master = new MasterServerSession(port);
-			instance = master;
-			return master;
-		}
-		else{
-			return instance;
-		}
+		return new MasterServerSession(port);
 	}
 
 	private MasterServerSession(int port){
