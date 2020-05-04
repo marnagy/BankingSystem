@@ -19,6 +19,13 @@ public class ClientGUI {
 
 	private static final Pattern emailPattern = Pattern.compile("^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$");
 
+	/**
+	 * Constructor for ClientGUI.
+	 * @param frame Used for disposing later
+	 * @param session Session object to use
+	 * @param oi Object input
+	 * @param oo Object output
+	 */
 	public ClientGUI(JFrame frame, ClientSession session, ObjectInput oi, ObjectOutput oo) {
 		this.frame = frame;
 		this.session = session;
@@ -99,10 +106,20 @@ public class ClientGUI {
 		});
 	}
 
+	/**
+	 * Helping method for checking if email is valid
+	 * @param text String containing email address to test
+	 * @return Valid status in boolean
+	 */
 	private boolean CheckEmail(String text) {
 		return emailPattern.matcher(text).matches();
 	}
 
+	/**
+	 * Starting method for client session to start
+	 * @param args Practically useless but needed for compiler to recognize
+	 * @throws IOException Network failure
+	 */
 	public static void main(String[] args) throws IOException {
 		JFrame frame = new JFrame("ClientGUI");
 		ClientSession session = new ClientSession();
@@ -115,6 +132,12 @@ public class ClientGUI {
 		frame.setVisible(true);
 	}
 
+	/**
+	 * Used when logging out.
+	 * @param session Session object
+	 * @param oi Object input
+	 * @param oo Object output
+	 */
 	public static void Open(ClientSession session, ObjectInput oi, ObjectOutput oo) {
 		JFrame frame = new JFrame("ClientGUI");
 		frame.setContentPane(new ClientGUI(frame, session, oi, oo).MyPanel);

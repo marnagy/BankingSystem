@@ -4,13 +4,12 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.time.YearMonth;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
 public class LoggedInForm {
-	private static final Pattern amountPattern = Pattern.compile("(([1-9][0-9]*)|0)([.,][0-9]{2})?");
+	private static final Pattern amountPattern = Pattern.compile("(([1-9][0-9]*)|0)(\\.[0-9]{2})?");
 
 	// generated
 	private JPanel panel1;
@@ -49,6 +48,15 @@ public class LoggedInForm {
 	private final long sessionID;
 	private final ClientSession session;
 
+	/**
+	 * Constructor of LoggedInForm
+	 * @param frame Used for disposing
+	 * @param account Logged in account
+	 * @param oi Object input
+	 * @param oo Object output
+	 * @param session ClientSession object
+	 * @param sessionID Long identifier of session
+	 */
 	private LoggedInForm(JFrame frame, Account account, ObjectInput oi, ObjectOutput oo,
 	                     ClientSession session, long sessionID) {
 		this.account = account;
@@ -186,26 +194,10 @@ public class LoggedInForm {
 		});
 	}
 
-	// not useful now, can be in future where can be added real-time communication with the server
-	private void updatePaymentHistory(SuccessPaymentResponse resp) {
-		if (resp.payment == null) {
-			MessageForm.Show("This payment is delayed. Please, restart your account after sending to see effect.");
-			return;
-		}
-		ZonedDateTime datetime = resp.payment.sendingDateTime;
-		YearMonth now = YearMonth.of(datetime.getYear(), datetime.getMonth());
-		List<Payment> gotArr = account.getPaymentHistory(now);
-		Payment[] arr;
-		if (gotArr == null) {
-			arr = new Payment[1];
-		} else {
-			arr = new Payment[gotArr.size() + 1];
-			System.arraycopy(gotArr, 0, arr, 1, gotArr.size());
-		}
-		arr[0] = resp.payment;
-		account.updatePaymentHistory(now, arr);
-	}
-
+	/**
+	 * Used for getting history of account for selected month
+	 * @throws IOException Network failure
+	 */
 	private void updateHistoryPanel() throws IOException {
 		YearMonth selectedMonth = (YearMonth) monthComboBox.getSelectedItem();
 		monthHistoryPanel.removeAll();
@@ -243,11 +235,22 @@ public class LoggedInForm {
 		}
 	}
 
+	/**
+	 * Used to update label showing balance after payment
+	 * @param account Logged in Account object
+	 * @param balanceLabel Label showing current balance for CurrencyType
+	 * @param accountBalanceComboBox ComboBox where currency is selected
+	 */
 	private void updateBalance(Account account, JLabel balanceLabel, JComboBox accountBalanceComboBox) {
 		double val = account.getBalance((CurrencyType) accountBalanceComboBox.getSelectedItem()) / 100D;
 		balanceLabel.setText(String.format("%.2f", val));
 	}
 
+	/**
+	 * Used when sending money so user can (but doesn't have to) specify decimal places
+	 * @param text String containing amount
+	 * @return Long representation of number with 2 decimal places
+	 */
 	private long amountToLong(String text) {
 		long res;
 		if (text.contains(".")) {
@@ -264,6 +267,11 @@ public class LoggedInForm {
 		return res;
 	}
 
+	/**
+	 * Used for checking if the amount to send isn't too big
+	 * @param text String containing number
+	 * @return
+	 */
 	private boolean isValidID(String text) {
 		try {
 			int temp = Integer.parseInt(text);
@@ -273,14 +281,34 @@ public class LoggedInForm {
 		}
 	}
 
+	/**
+	 * Check if enough money is in the bank so account won't go to negative numbers
+	 * @param account Account object
+	 * @param amount Amount to send in Long with 2 decimal places
+	 * @param curr CurrencyType to check
+	 * @return
+	 */
 	private boolean hasEnoughMoney(Account account, long amount, CurrencyType curr) {
 		return account.getBalance(curr) - amount > 0;
 	}
 
+	/**
+	 * Check if String satisfies amount format
+	 * @param text String to test
+	 * @return
+	 */
 	private boolean checkAmount(String text) {
 		return amountPattern.matcher(text).matches();
 	}
 
+	/**
+	 * Setup of the Form
+	 * @param account Account that is logged in
+	 * @param oi Object input
+	 * @param oo Object output
+	 * @param session ClientSession object
+	 * @param sessionID Long identifier of session
+	 */
 	public static void open(Account account, ObjectInput oi, ObjectOutput oo, ClientSession session, long sessionID) {
 		JFrame frame = new JFrame("LoggedInForm");
 
@@ -336,10 +364,6 @@ public class LoggedInForm {
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.pack();
 		frame.setVisible(true);
-	}
-
-	public static void main(String[] args) {
-		open(null, null, null, null, -1);
 	}
 
 	{

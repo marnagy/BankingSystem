@@ -9,7 +9,10 @@ public class MessageForm {
 	private JButton button1;
 	private String msg;
 
-	public MessageForm() {
+	/**
+	 * Constructor for MessageForm
+	 */
+	private MessageForm() {
 		this.frame = new JFrame("MessageForm");
 
 		// center frame
@@ -20,19 +23,17 @@ public class MessageForm {
 		this.button1.addActionListener(closeActionListener);
 	}
 
+	/**
+	 * Standart static method for showing massage to the user
+	 * @param msg Massage to show
+	 */
 	public static void Show(String msg) {
-
 		MessageForm msgForm = new MessageForm();
 		msgForm.label.setText(msg);
 		msgForm.frame.setContentPane(msgForm.panel1);
 		msgForm.frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		msgForm.frame.pack();
 		msgForm.frame.setVisible(true);
-	}
-
-	// for testing ONLY
-	public static void main(String[] args) {
-		Show(args[0]);
 	}
 
 	{

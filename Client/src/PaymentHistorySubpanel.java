@@ -11,6 +11,16 @@ public class PaymentHistorySubpanel extends JPanel {
 	final long sessionID;
 	final int accountID;
 	final Payment payment;
+
+	/**
+	 * Construct the subpanel
+	 * @param accountID ID of your account
+	 * @param payment Payment object
+	 * @param oi Object Input
+	 * @param oo Object Output
+	 * @param sessionID Long identifier of session
+	 * @throws InvalidFormatException Some failure
+	 */
 	public PaymentHistorySubpanel(int accountID, Payment payment, ObjectInput oi, ObjectOutput oo, long sessionID) throws InvalidFormatException {
 		super(new GridLayout(1, 5));
 		this.setPreferredSize(new Dimension(-1, 40));
@@ -74,6 +84,11 @@ public class PaymentHistorySubpanel extends JPanel {
 		this.add(comboBox);
 	}
 
+	/**
+	 * Method for constructing datetime String
+	 * @param datetime ZonedDateTime object
+	 * @return Formated DateTime String
+	 */
 	private String dateTimeToString(ZonedDateTime datetime){
 		return String.format("%02d:%02d:%02d %02d.%02d.%04d",
 				datetime.getHour(), datetime.getMinute(), datetime.getSecond(),
