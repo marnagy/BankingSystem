@@ -10,8 +10,8 @@ import java.util.*;
 public class Account {
 	public final int accountID;
 	public final ZonedDateTime created;
-	private final Dictionary<CurrencyType, Long> Values;
-	private final Dictionary<YearMonth, Payment[]> History = new Hashtable<YearMonth, Payment[]>();
+	private final Map<CurrencyType, Long> Values;
+	private final Map<YearMonth, Payment[]> History = new Hashtable<YearMonth, Payment[]>();
 	public Account(String email){
 		this.accountID = email.hashCode();
 		Values = new Hashtable<CurrencyType, Long>();

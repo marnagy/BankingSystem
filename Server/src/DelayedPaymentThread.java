@@ -1,10 +1,12 @@
-import java.io.*;
-import java.util.Dictionary;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Map;
 
 public class DelayedPaymentThread implements Runnable {
 	private PaymentRequest req;
 	public final long sessionID;
-	final Dictionary<Integer, Account> accounts;
+	final Map<Integer, Account> accounts;
 	final PrintWriter outPrinter;
 	final PrintWriter errWriter;
 
@@ -14,7 +16,7 @@ public class DelayedPaymentThread implements Runnable {
 	final String emailAddr;
 	final char[] emailPasswd;
 	public DelayedPaymentThread(PaymentRequest paymentRequest, PrintWriter outPrinter, PrintWriter errWriter,
-	                            Dictionary<Integer, Account> accounts, File accountsFolder, File paymentsFolder,
+	                            Map<Integer, Account> accounts, File accountsFolder, File paymentsFolder,
 	                            String emailAddr, char[] emailPasswd, long sessionID){
 		this.sessionID = sessionID;
 		this.req = paymentRequest;

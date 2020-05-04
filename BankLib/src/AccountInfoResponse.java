@@ -1,13 +1,13 @@
 import java.io.*;
 import java.nio.file.Paths;
 import java.time.ZonedDateTime;
-import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.Map;
 
 
 public class AccountInfoResponse extends Response {
 
-	public final Dictionary<CurrencyType, Long> Values = new Hashtable<CurrencyType, Long>();
+	public final Map<CurrencyType, Long> Values = new Hashtable<CurrencyType, Long>();
 	public final ZonedDateTime created;
 	//public final Dictionary<MonthYear, Payment[]> History = new Hashtable<MonthYear, Payment[]>();
 	public final int accountID;
@@ -56,7 +56,7 @@ public class AccountInfoResponse extends Response {
 		oo.writeObject(this.created);
 
 		oo.writeInt(Values.size());
-		Values.keys().asIterator().forEachRemaining((x) -> {
+		Values.keySet().iterator().forEachRemaining((x) -> {
 			try {
 				oo.writeInt(x.ordinal());
 				oo.writeLong(Values.get(x));

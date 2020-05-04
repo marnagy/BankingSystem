@@ -7,7 +7,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.YearMonth;
-import java.util.Dictionary;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -22,7 +22,7 @@ public class PaymentHandler {
 
 	static Pattern exchangePattern = Pattern.compile("[1-9]*[0-9](\\.[0-9]+)");
 	public static Response Run(PrintWriter outPrinter, PrintWriter errPrinter, File accountsFolder, File paymentsFolder,
-	                           PaymentRequest pr, Dictionary<Integer, Account> accounts,
+	                           PaymentRequest pr, Map<Integer, Account> accounts,
 	                           String emailAddr, char[] emailPasswd, long sessionID) {
 		Payment payment;
 		try {
@@ -52,7 +52,7 @@ public class PaymentHandler {
 		}
 	}
 	public static Payment run(PrintWriter outPrinter, PrintWriter errPrinter, File accountsFolder, File paymentsFolder,
-	                          PaymentRequest req, Dictionary<Integer, Account> accounts,
+	                          PaymentRequest req, Map<Integer, Account> accounts,
 	                          String emailAddr, char[] emailPasswd, long sessionID) throws IOException {
 		File paymentFile;
 		Payment payment = makePayment(req, accountsFolder, accounts, errPrinter);
@@ -150,7 +150,7 @@ public class PaymentHandler {
 		return paymentFile;
 	}
 
-	private static synchronized Payment makePayment(PaymentRequest pr, File accountsFolder, Dictionary<Integer, Account> accounts, PrintWriter errPrinter) throws IOException {
+	private static synchronized Payment makePayment(PaymentRequest pr, File accountsFolder, Map<Integer, Account> accounts, PrintWriter errPrinter) throws IOException {
 		int senderID = pr.senderAccountID;
 		int receiverID = pr.receiverAccountID;
 

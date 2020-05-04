@@ -2,13 +2,13 @@ import java.io.*;
 import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
-import java.util.Dictionary;
+import java.util.Map;
 import java.util.Random;
 
 public class CreateAccountHandler {
 	static AccountCreateRequest req;
 	static Response resp;
-	public static Response run(final ObjectInput oi, final Dictionary<Integer, Account> accounts,
+	public static Response run(final ObjectInput oi, final Map<Integer, Account> accounts,
 	                           File accountsFolder, Random rand, long sessionID) {
 		req = AccountCreateRequest.readArgs(oi);
 
