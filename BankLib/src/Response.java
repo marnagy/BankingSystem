@@ -5,6 +5,12 @@ import java.io.ObjectOutput;
 public abstract class Response {
 	public final ResponseType type;
 	public final long sessionID;
+
+	/**
+	 * Needed constructor
+	 * @param type ResponseType object
+	 * @param sessionID Long identifier of session
+	 */
 	protected Response(ResponseType type, long sessionID) {
 		this.type = type;
 		this.sessionID = sessionID;

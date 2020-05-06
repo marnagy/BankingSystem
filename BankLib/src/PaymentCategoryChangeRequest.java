@@ -5,11 +5,24 @@ import java.io.ObjectOutput;
 public class PaymentCategoryChangeRequest extends Request {
 	public final Payment toChange;
 	public final PaymentCategory newCategory;
+
+	/**
+	 * Constructor for PaymentCategoryChangeRequest object
+	 * @param toChange Payment to change category for
+	 * @param newCategory New category of the payment
+	 * @param sessionID Long identifier of session
+	 */
 	public PaymentCategoryChangeRequest(Payment toChange, PaymentCategory newCategory, long sessionID){
 		super(RequestType.PaymentCategoryChange, sessionID);
 		this.toChange = toChange;
 		this.newCategory = newCategory;
 	}
+
+	/**
+	 * Used to send this object to ObjectOutput
+	 * @param oo ObjectOutput object
+	 * @throws IOException Network failure
+	 */
 	@Override
 	public void send(ObjectOutput oo) throws IOException {
 		oo.writeInt(super.type.ordinal());
@@ -20,6 +33,13 @@ public class PaymentCategoryChangeRequest extends Request {
 
 		oo.flush();
 	}
+
+	/**
+	 * Used to load this object from ObjectInput
+	 * @param oi ObjectInput object
+	 * @return Request object
+	 * @throws IOException Network failure
+	 */
 	public static PaymentCategoryChangeRequest ReadArgs(ObjectInput oi) throws IOException{
 		long sessionID = oi.readLong();
 		Payment toChange = Payment.FromObjInput(oi);

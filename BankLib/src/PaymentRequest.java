@@ -2,7 +2,6 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.time.ZonedDateTime;
-import java.util.Set;
 
 public class PaymentRequest extends Request {
 	public final int senderAccountID, receiverAccountID;
@@ -13,7 +12,19 @@ public class PaymentRequest extends Request {
 	public final CurrencyType fromCurr, toCurr;
 	public final ZonedDateTime sendingDateTime;
 
-	// used by client
+	/**
+	 * Constructor used when creating PaymentRequest object
+	 * @param senderAccountID AccountID of sender
+	 * @param receiverAccountID AccountID of receiver
+	 * @param amount Amount to send with 2 decimal places
+	 * @param hoursDelay Delay for hours
+	 * @param minutesDelay Delay for minutes
+	 * @param fromCurr From CurrencyType
+	 * @param toCurr To CurrencyType
+	 * @param symbols Variable and specific symbols
+	 * @param information Information for receiver
+	 * @param sessionID Long identifier of session
+	 */
 	public PaymentRequest(int senderAccountID, int receiverAccountID, long amount, int hoursDelay, int minutesDelay,
 	                      CurrencyType fromCurr, CurrencyType toCurr,
 	                      String[] symbols, String information,
@@ -33,7 +44,21 @@ public class PaymentRequest extends Request {
 		this.information = information;
 		this.sendingDateTime = ZonedDateTime.now();
 	}
-	// used when reading request on server
+
+	/**
+	 * Constructor used when loading from ObjectInput
+	 * @param senderAccountID AccountID of sender
+	 * @param receiverAccountID AccountID of receiver
+	 * @param amount Amount to send with 2 decimal places
+	 * @param hoursDelay Delay for hours
+	 * @param minutesDelay Delay for minutes
+	 * @param fromCurr From CurrencyType
+	 * @param toCurr To CurrencyType
+	 * @param dateTime ZonedDateTime of creation
+	 * @param symbols Variable and specific symbols
+	 * @param information Information for receiver
+	 * @param sessionID Long identifier of session
+	 */
 	private PaymentRequest(int senderAccountID, int receiverAccountID, long amount, int hoursDelay, int minutesDelay,
 	                       CurrencyType fromCurr, CurrencyType toCurr, ZonedDateTime dateTime,
 	                       String[] symbols, String information, long sessionID){
@@ -52,6 +77,12 @@ public class PaymentRequest extends Request {
 		this.information = information;
 		this.sendingDateTime = dateTime;
 	}
+
+	/**
+	 * Used to send this object to ObjectOutput
+	 * @param oo ObjectOutput object
+	 * @throws IOException Network failure
+	 */
 	@Override
 	public void send(ObjectOutput oo) throws IOException {
 		oo.writeInt(super.type.ordinal());
@@ -75,6 +106,13 @@ public class PaymentRequest extends Request {
 		oo.flush();
 	}
 
+	/**
+	 * Used to load this object from ObjectInput
+	 * @param oi ObjectInput object
+	 * @return Request object
+	 * @throws IOException Network failure
+	 * @throws ClassNotFoundException LoadingClass failure
+	 */
 	public static PaymentRequest readArgs(ObjectInput oi) throws IOException, ClassNotFoundException {
 		// ADD reading
 		long sessionID = oi.readLong();

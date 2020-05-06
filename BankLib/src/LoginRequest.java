@@ -5,11 +5,24 @@ import java.io.ObjectOutput;
 public class LoginRequest extends Request {
 	public final String email;
 	public final char[] passwd;
+
+	/**
+	 * Constructor for LoginRequest object
+	 * @param email Identifing email
+	 * @param passwd Password to the email
+	 * @param sessionID Long identifier of session
+	 */
 	public LoginRequest(String email, char[] passwd, long sessionID){
 		super(RequestType.Login, sessionID);
 		this.email = email;
 		this.passwd = passwd;
 	}
+
+	/**
+	 * Used to send this object to ObjectOutput
+	 * @param oo ObjectOutput object
+	 * @throws IOException Network failure
+	 */
 	@Override
 	public void send(ObjectOutput oo) throws IOException {
 		oo.writeInt(super.type.ordinal());
@@ -19,6 +32,12 @@ public class LoginRequest extends Request {
 		oo.writeObject(passwd);
 		oo.flush();
 	}
+
+	/**
+	 * Used to load this object from ObjectInput
+	 * @param oi ObjectInput object
+	 * @return Request object
+	 */
 	public static Request readArgs(ObjectInput oi){
 		try {
 			long sessionID = oi.readLong();
