@@ -9,20 +9,26 @@ public class AccountInfoResponse extends Response {
 
 	public final Map<CurrencyType, Long> Values = new Hashtable<CurrencyType, Long>();
 	public final ZonedDateTime created;
-	//public final Dictionary<MonthYear, Payment[]> History = new Hashtable<MonthYear, Payment[]>();
 	public final int accountID;
 
-	private AccountInfoResponse(Account account, long sessionID){
-		super(ResponseType.AccountInfo, sessionID);
-		this.accountID = account.accountID;
-		this.created = account.created;
-	}
+	/**
+	 * Constructor used when loading from ObjectInput
+	 * @param accountID accountID
+	 * @param created ZonedDateTime object of creation of the account
+	 * @param sessionID Long identifier of session
+	 */
 	private AccountInfoResponse(int accountID, ZonedDateTime created, long sessionID){
 		super(ResponseType.AccountInfo, sessionID);
 		this.accountID = accountID;
 		this.created = created;
 	}
 
+	/**
+	 * Constructor for loading from account folder
+	 * @param accountDir account folder
+	 * @param sessionID Long identifier of session
+	 * @throws IOException Network failure
+	 */
 	public AccountInfoResponse(File accountDir, long sessionID) throws IOException {
 		super(ResponseType.AccountInfo, sessionID);
 		accountID = Integer.parseInt(accountDir.getName());
@@ -48,6 +54,11 @@ public class AccountInfoResponse extends Response {
 		}
 	}
 
+	/**
+	 * Method to send object to ObjectOutput
+	 * @param oo ObjectOutput to send the object through
+	 * @throws IOException Network failure
+	 */
 	@Override
 	void send(ObjectOutput oo) throws IOException {
 		oo.writeInt(super.type.ordinal());
@@ -66,6 +77,13 @@ public class AccountInfoResponse extends Response {
 		});
 		oo.flush();
 	}
+
+	/**
+	 * Load object from ObjectInput
+	 * @param oi ObjectInput object
+	 * @return AccountInfoResponse object
+	 * @throws IOException Network failure
+	 */
 	public static AccountInfoResponse readArgs(ObjectInput oi) throws IOException, ClassNotFoundException {
 		//String email = oi.readUTF();
 		long sessionID = oi.readLong();

@@ -9,12 +9,22 @@ public abstract class Response {
 		this.type = type;
 		this.sessionID = sessionID;
 	}
-	// used for sending object
-	// used by server
+
+	/**
+	 * Method used for sending this object using ObjectOutput
+	 * @param oo ObjectOutput to send the object through
+	 * @throws IOException Network failure
+	 */
 	abstract void send(ObjectOutput oo) throws IOException;
-	// used for reading arguments of the response
-	// used by client
-	public static Response readArgs(ObjectInput oi) throws IOException, ArgsException, InvalidFormatException, ClassNotFoundException {
+
+	/**
+	 * Used for loading this object from ObjectInput
+	 * @param oi ObjectInput object
+	 * @return Response object
+	 * @ClassNotFoundException LoadingClass failure
+	 * @IOException Network failure
+	 */
+	public static Response readArgs(ObjectInput oi) throws IOException, ClassNotFoundException {
 		assert false;
 		return null;
 	}
