@@ -5,6 +5,9 @@ import java.util.Hashtable;
 import java.util.Map;
 
 
+/**
+ * Used to send informations about account on log in from server to client
+ */
 public class AccountInfoResponse extends Response {
 
 	public final Map<CurrencyType, Long> Values = new Hashtable<CurrencyType, Long>();

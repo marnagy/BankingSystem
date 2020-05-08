@@ -2,10 +2,13 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
+/**
+ * Used when client is logging out and ending connection to the server
+ */
 public class EndRequest extends Request {
 	/**
 	 * Constructor for EndRequest object
-	 * @param sessionID Lond identifier of session
+	 * @param sessionID Long identifier of session
 	 */
 	public EndRequest(long sessionID){
 		super(RequestType.End, sessionID);

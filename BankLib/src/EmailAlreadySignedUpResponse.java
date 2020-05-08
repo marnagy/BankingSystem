@@ -2,6 +2,10 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
+/**
+ * Used as response from server to client in case there already is email
+ * signed up with SAME HASHCODE, not same email address
+ */
 public class EmailAlreadySignedUpResponse extends Response {
 	/**
 	 * Constructor of EmailAlreadySignedUpResponse object

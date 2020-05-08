@@ -2,6 +2,9 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
+/**
+ * Used as error message on client (not logged in before request that needs log in, etc.)
+ */
 public class IllegalRequestResponse extends Response {
 	/**
 	 * Constructor of IllegalRequestResponse object

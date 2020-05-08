@@ -2,6 +2,9 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
+/**
+ * Used when client tries to log out
+ */
 public class LogOutRequest extends Request {
 	/**
 	 * Constructor for LogOutRequest object

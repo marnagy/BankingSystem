@@ -2,6 +2,9 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
+/**
+ * Used when client tries to log in
+ */
 public class LoginRequest extends Request {
 	public final String email;
 	public final char[] passwd;

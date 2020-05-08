@@ -8,6 +8,10 @@ import java.time.ZonedDateTime;
 import java.util.Hashtable;
 import java.util.Map;
 
+/**
+ * Used for storing information about bank account after log in.
+ * Stores accountID, datetime of creation/registration, current balance and history of payments.
+ */
 public class Account {
 	public final int accountID;
 	public final ZonedDateTime created;

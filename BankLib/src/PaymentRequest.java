@@ -3,6 +3,9 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.time.ZonedDateTime;
 
+/**
+ * Used for sending request for payment from client to server.
+ */
 public class PaymentRequest extends Request {
 	public final int senderAccountID, receiverAccountID;
 	public final int hoursDelay, minutesDelay;
@@ -21,7 +24,8 @@ public class PaymentRequest extends Request {
 	 * @param minutesDelay Delay for minutes
 	 * @param fromCurr From CurrencyType
 	 * @param toCurr To CurrencyType
-	 * @param symbols Variable and specific symbols
+	 * @param symbols Variable and specific symbols of the payment
+	 *                Both are of type String
 	 * @param information Information for receiver
 	 * @param sessionID Long identifier of session
 	 */

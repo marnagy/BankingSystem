@@ -2,6 +2,9 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
+/**
+ * Used for sending request for creation of new account from client to server
+ */
 public class AccountCreateRequest extends Request {
 	public final String email;
 	public final char[] passwd;

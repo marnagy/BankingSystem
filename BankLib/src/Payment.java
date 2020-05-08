@@ -1,6 +1,9 @@
 import java.io.*;
 import java.time.ZonedDateTime;
 
+/**
+ * Used to store information about payment
+ */
 public class Payment {
 	public final int senderAccountID, receiverAccountID;
 	public final long amount;
@@ -9,14 +12,37 @@ public class Payment {
 	public final Double convRate;
 	public PaymentCategory category;
 
+	/**
+	 * Used when loading payment from Payment request object
+	 * @param pr Payment request
+	 */
 	public Payment(PaymentRequest pr) {
 		this(pr.senderAccountID, pr.receiverAccountID, pr.amount, pr.fromCurr, pr.toCurr, null,
 				pr.sendingDateTime, ZonedDateTime.now(), PaymentCategory.Other);
 	}
+
+	/**
+	 * Used when loading payment from Payment request object with a conversion rate
+	 * @param pr Payment request
+	 * @param convRate Conversion rate in double
+	 */
 	public Payment(PaymentRequest pr, Double convRate){
 		this(pr.senderAccountID, pr.receiverAccountID, pr.amount, pr.fromCurr, pr.toCurr, convRate,
 				pr.sendingDateTime, ZonedDateTime.now(), PaymentCategory.Other);
 	}
+
+	/**
+	 * Constructor full of attributes
+	 * @param senderID AccountID of sender
+	 * @param receiverID AccountID of receiver
+	 * @param amount Amount to send with 2 decimal places
+	 * @param fromCurr From CurrencyType
+	 * @param toCurr To CurrencyType
+	 * @param rate Conversion rate
+	 * @param sendingDateTime Datetime of sending
+	 * @param receivedDateTime Datetime of receiving
+	 * @param category PaymentCategory object
+	 */
 	private Payment(int senderID, int receiverID, long amount, CurrencyType fromCurr, CurrencyType toCurr, Double rate,
 	                ZonedDateTime sendingDateTime, ZonedDateTime receivedDateTime, PaymentCategory category){
 		this.receivedDateTime = receivedDateTime;
@@ -57,6 +83,13 @@ public class Payment {
 		oo.flush();
 	}
 
+	/**
+	 * Used when loading Payment from file
+	 * @param paymentFile Payment File
+	 * @return Payment object
+	 * @throws IOException Files failure
+	 * @throws InvalidFormatException File name not satisfying format
+	 */
 	public static Payment fromFile(File paymentFile) throws IOException, InvalidFormatException {
 		if (!paymentFile.getName().endsWith(".payment")){
 			throw new InvalidFormatException("Payment file doesn't end with '.payment'");
@@ -84,6 +117,13 @@ public class Payment {
 			throw new IOException("Illegal name of file: " + paymentFile.getAbsolutePath());
 		}
 	}
+
+	/**
+	 * Used to save payment to file
+	 * @param paymentFile File where payment will be saved to
+	 * @return File containing payment
+	 * @throws IOException Files failure
+	 */
 	public File toFile(File paymentFile) throws IOException {
 		if (paymentFile.createNewFile()) {
 			try (PrintWriter pw = new PrintWriter(paymentFile)) {
@@ -99,6 +139,12 @@ public class Payment {
 			throw new IOException("Failed to create payment file.");
 		}
 	}
+
+	/**
+	 * Custom method for loading ZonedDateTime from String
+	 * @param text String to be processed
+	 * @return ZonedDateTime object
+	 */
 	public static ZonedDateTime destringify(String text){
 		ZonedDateTime datetime = ZonedDateTime.now();
 		String[] textPart = text.split("-");
@@ -117,15 +163,31 @@ public class Payment {
 				withYear(year).withMonth(month).withDayOfMonth(day);
 	}
 
+	/**
+	 * Custom method for saving ZonedDateTime to String
+	 * @param datetime ZonedDateTime object
+	 * @return Formatted String
+	 */
 	public static String stringify(ZonedDateTime datetime){
 		return String.format("%02d%02d%04d-%02d%02d%02d", datetime.getDayOfMonth(), datetime.getMonthValue(),
 				datetime.getYear(), datetime.getHour(), datetime.getMinute(), datetime.getSecond());
 	}
 
+	/**
+	 * Used for changing category of payment.
+	 * Creates new Payment object
+	 * @param cat PaymentCategory object
+	 * @return new Payment object with given category
+	 */
 	public Payment WithCategory(PaymentCategory cat){
 		return new Payment(senderAccountID, receiverAccountID, amount, fromCurr, toCurr, convRate,
 				sendingDateTime, receivedDateTime, cat);
 	}
+
+	/**
+	 * Custom method for creating filename specific for the payment
+	 * @return Formatted String
+	 */
 	public String GetFileName(){
 		return this.senderAccountID + "_" + this.receiverAccountID + "_"
 				+ Payment.stringify(this.sendingDateTime) + "_" + Payment.stringify(this.receivedDateTime) + ".payment";

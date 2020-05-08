@@ -2,6 +2,9 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
+/**
+ * Used when client tries to log in and sent information doesn't match with those in database
+ */
 public class IncorrectLoginResponse extends Response {
 	/**
 	 * Constructor of IncorrectLoginResponse object

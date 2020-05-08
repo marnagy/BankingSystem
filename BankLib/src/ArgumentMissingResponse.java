@@ -2,6 +2,9 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
+/**
+ * Used to send information about missing arguments from server to client
+ */
 public class ArgumentMissingResponse extends Response {
 	/**
 	 * Constructor of ArgumentMissingResponse object

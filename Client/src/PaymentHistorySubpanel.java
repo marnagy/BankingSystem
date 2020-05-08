@@ -55,14 +55,14 @@ public class PaymentHistorySubpanel extends JPanel {
 		var comboBox = new JComboBox(new DefaultComboBoxModel(PaymentCategory.values()));
 		comboBox.setSelectedItem(payment.category);
 		comboBox.addActionListener(actionEvent -> {
-			if (comboBox.getSelectedItem() != payment.category){
+			if (comboBox.getSelectedItem() != payment.category) {
 				Request req = new PaymentCategoryChangeRequest(payment, (PaymentCategory) comboBox.getSelectedItem(), sessionID);
 				try {
 					req.send(oo);
 					ResponseType respType = ResponseType.values()[oi.readInt()];
 					String msg = "!Serious error occured!";
 					Response resp;
-					switch (respType){
+					switch (respType) {
 						case Success:
 							resp = SuccessResponse.readArgs(oi);
 							msg = "Category changed successfully.";
