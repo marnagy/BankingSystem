@@ -6,6 +6,9 @@ import java.io.ObjectOutput;
  * Used for confirmation of payment being processed
  */
 public class SuccessPaymentResponse extends Response {
+	/**
+	 * Payment successfully processed
+	 */
 	public final Payment payment;
 
 	/**

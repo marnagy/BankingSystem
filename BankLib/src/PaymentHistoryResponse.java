@@ -7,6 +7,9 @@ import java.util.List;
  * Used for sending payment history for requested month
  */
 public class PaymentHistoryResponse extends Response {
+	/**
+	 * Payment history in form of array
+	 */
 	public final Payment[] history;
 
 	/**

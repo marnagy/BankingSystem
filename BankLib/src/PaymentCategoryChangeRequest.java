@@ -6,7 +6,13 @@ import java.io.ObjectOutput;
  * Used for sending request to change category of payment in history
  */
 public class PaymentCategoryChangeRequest extends Request {
+	/**
+	 * Payment to be changed
+	 */
 	public final Payment toChange;
+	/**
+	 * New category for the payment
+	 */
 	public final PaymentCategory newCategory;
 
 	/**

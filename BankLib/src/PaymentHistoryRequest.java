@@ -7,7 +7,13 @@ import java.time.YearMonth;
  * Used for request of payment history of given month
  */
 public class PaymentHistoryRequest extends Request {
+	/**
+	 * Month for which payment history is requested
+	 */
 	public final YearMonth monthYear;
+	/**
+	 * Account's ID to identify account
+	 */
 	public final int accountID;
 
 	/**

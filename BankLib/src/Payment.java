@@ -5,11 +5,42 @@ import java.time.ZonedDateTime;
  * Used to store information about payment
  */
 public class Payment {
-	public final int senderAccountID, receiverAccountID;
+	/**
+	 * Sender's accountID
+	 */
+	public final int senderAccountID;
+	/**
+	 * Receiver's accountID
+	 */
+	public final int receiverAccountID;
+	/**
+	 * Amount of money to send with 2 decimal places
+	 */
 	public final long amount;
-	public final CurrencyType fromCurr, toCurr;
-	public final ZonedDateTime sendingDateTime, receivedDateTime;
+	/**
+	 * Currency from the amount is being taken
+	 */
+	public final CurrencyType fromCurr;
+	/**
+	 * Final currency of the payment
+	 */
+	public final CurrencyType toCurr;
+	/**
+	 * ZonedDateTime of sending payment
+	 */
+	public final ZonedDateTime sendingDateTime;
+	/**
+	 * ZonedDateTime of receiving and processing payment
+	 */
+	public final ZonedDateTime receivedDateTime;
+	/**
+	 * Rate for conversion in case of different currencies.
+	 * If not needed, it is set to null,
+	 */
 	public final Double convRate;
+	/**
+	 * Category of payment
+	 */
 	public PaymentCategory category;
 
 	/**

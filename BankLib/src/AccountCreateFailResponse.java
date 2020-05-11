@@ -6,6 +6,9 @@ import java.io.ObjectOutput;
  * Class used for sending failed response from server to client.
  */
 public class AccountCreateFailResponse extends Response {
+	/**
+	 * Error message
+	 */
 	public final String mssg;
 
 	/**

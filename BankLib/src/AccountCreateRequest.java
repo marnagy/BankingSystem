@@ -6,7 +6,13 @@ import java.io.ObjectOutput;
  * Used for sending request for creation of new account from client to server
  */
 public class AccountCreateRequest extends Request {
+	/**
+	 * Email to register
+	 */
 	public final String email;
+	/**
+	 * Password to be used with given email
+	 */
 	public final char[] passwd;
 
 	/**
@@ -17,6 +23,9 @@ public class AccountCreateRequest extends Request {
 	 */
 	public AccountCreateRequest(String email, char[] passwd, long sessionID){
 		super(RequestType.CreateAccount, sessionID);
+		if (email == null || passwd == null){
+			throw new Error("Invalid argument: NULL");
+		}
 		this.email = email;
 		this.passwd = passwd;
 	}

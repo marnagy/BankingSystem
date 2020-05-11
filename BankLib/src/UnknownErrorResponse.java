@@ -6,6 +6,9 @@ import java.io.ObjectOutput;
  * Used if unknown error occurs on server-side
  */
 public class UnknownErrorResponse extends Response {
+	/**
+	 * Error message
+	 */
 	public final String msg;
 
 	/**

@@ -6,7 +6,13 @@ import java.io.ObjectOutput;
  * Abstract class used for response classes
  */
 public abstract class Response {
+	/**
+	 * Type of response
+	 */
 	public final ResponseType type;
+	/**
+	 * Long identifier of session
+	 */
 	public final long sessionID;
 
 	/**

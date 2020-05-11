@@ -7,12 +7,45 @@ import java.time.ZonedDateTime;
  * Used for sending request for payment from client to server.
  */
 public class PaymentRequest extends Request {
-	public final int senderAccountID, receiverAccountID;
-	public final int hoursDelay, minutesDelay;
+	/**
+	 * Sender's accountID
+	 */
+	public final int senderAccountID;
+	/**
+	 * Receiver's accountID
+	 */
+	public final int receiverAccountID;
+	/**
+	 * Amount of hours to delay the payment
+	 */
+	public final int hoursDelay;
+	/**
+	 * Amount of minutes to delay the payment
+	 */
+	public final int minutesDelay;
+	/**
+	 * Amount of money to send with 2 decimal places
+	 */
 	public final long amount;
+	/**
+	 * Containing 2 Strings: Variable and Specific symbols for the payment
+	 */
 	public final String[] symbols;
+	/**
+	 * Information about the payment
+	 */
 	public final String information;
-	public final CurrencyType fromCurr, toCurr;
+	/**
+	 * Currency from the amount is being taken
+	 */
+	public final CurrencyType fromCurr;
+	/**
+	 * Final currency of the payment
+	 */
+	public final CurrencyType toCurr;
+	/**
+	 * ZonedDateTime of receiving and processing payment
+	 */
 	public final ZonedDateTime sendingDateTime;
 
 	/**

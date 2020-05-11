@@ -9,9 +9,17 @@ import java.util.Map;
  * Used to send informations about account on log in from server to client
  */
 public class AccountInfoResponse extends Response {
-
+	/**
+	 * Current balance of the account
+	 */
 	public final Map<CurrencyType, Long> Values = new Hashtable<CurrencyType, Long>();
+	/**
+	 * ZonedDateTime of creation
+	 */
 	public final ZonedDateTime created;
+	/**
+	 * ID of the account
+	 */
 	public final int accountID;
 
 	/**

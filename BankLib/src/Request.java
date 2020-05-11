@@ -6,7 +6,13 @@ import java.io.ObjectOutput;
  * Abstract class used for request classes
  */
 public abstract class Request {
+	/**
+	 * Type of request
+	 */
 	public final RequestType type;
+	/**
+	 * Long identifier of session
+	 */
 	public final long sessionID;
 
 	/**

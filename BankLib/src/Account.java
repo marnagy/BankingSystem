@@ -13,9 +13,21 @@ import java.util.Map;
  * Stores accountID, datetime of creation/registration, current balance and history of payments.
  */
 public class Account {
+	/**
+	 * Account ID of the account
+	 */
 	public final int accountID;
+	/**
+	 * ZonedDateTime of creation of the account
+	 */
 	public final ZonedDateTime created;
+	/**
+	 * Current balance of different currencies
+	 */
 	private final Map<CurrencyType, Long> Values;
+	/**
+	 * Loaded history of payments
+	 */
 	private final Map<YearMonth, Payment[]> History = new Hashtable<YearMonth, Payment[]>();
 
 	/**

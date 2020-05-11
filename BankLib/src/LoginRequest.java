@@ -6,7 +6,13 @@ import java.io.ObjectOutput;
  * Used when client tries to log in
  */
 public class LoginRequest extends Request {
+	/**
+	 * Email to be checked
+	 */
 	public final String email;
+	/**
+	 * Password corresponding to the email
+	 */
 	public final char[] passwd;
 
 	/**
