@@ -2,6 +2,9 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
+/**
+ * Used for confirmation of payment being processed
+ */
 public class SuccessPaymentResponse extends Response {
 	public final Payment payment;
 

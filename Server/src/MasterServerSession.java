@@ -16,7 +16,7 @@ import java.util.concurrent.Executors;
 // Continue with payments
 
 /**
- * Object that creates sets up and accepts requests for new sessions
+ * Class that creates file structure, sets up and accepts requests for new sessions
  */
 public class MasterServerSession {
 	private static int defaultPort = 5000;

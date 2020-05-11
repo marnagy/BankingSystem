@@ -86,6 +86,7 @@ public class AccountInfoResponse extends Response {
 	 * @param oi ObjectInput object
 	 * @return AccountInfoResponse object
 	 * @throws IOException Network failure
+	 * @throws ClassNotFoundException Class loading failure
 	 */
 	public static AccountInfoResponse readArgs(ObjectInput oi) throws IOException, ClassNotFoundException {
 		//String email = oi.readUTF();

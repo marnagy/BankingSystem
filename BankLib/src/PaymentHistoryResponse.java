@@ -3,6 +3,9 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.List;
 
+/**
+ * Used for sending payment history for requested month
+ */
 public class PaymentHistoryResponse extends Response {
 	public final Payment[] history;
 

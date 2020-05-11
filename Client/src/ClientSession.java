@@ -4,6 +4,9 @@ import java.io.ObjectInput;
 import java.io.OutputStream;
 import java.net.Socket;
 
+/**
+ * Used as wrapper for socket on client-side
+ */
 public final class ClientSession {
 	private static int defaultPort = 5000;
 	private final Socket socket;
@@ -23,7 +26,7 @@ public final class ClientSession {
 
 	/**
 	 * Constructor to use when specifying port number
-	 * @param port
+	 * @param port Port number to connect to
 	 * @throws IOException Network failure
 	 */
 	public ClientSession(int port) throws IOException {
@@ -34,8 +37,8 @@ public final class ClientSession {
 
 	/**
 	 * Used for getting output stream from socket
-	 * @return
-	 * @throws IOException
+	 * @return Output stream from socket
+	 * @throws IOException Network failure
 	 */
 	public OutputStream getOutputStream() throws IOException {
 		return socket.getOutputStream();
@@ -43,8 +46,8 @@ public final class ClientSession {
 
 	/**
 	 * Used for getting input stream from socket
-	 * @return
-	 * @throws IOException
+	 * @return Input stream from socket
+	 * @throws IOException Network failure
 	 */
 	public InputStream getInputStream() throws IOException {
 		return socket.getInputStream();
@@ -52,7 +55,7 @@ public final class ClientSession {
 
 	/**
 	 * Method for closing the socket
-	 * @throws IOException
+	 * @throws IOException Network failure
 	 */
 	public void close() throws IOException {
 		socket.close();
@@ -62,7 +65,7 @@ public final class ClientSession {
 	 * Method for getting sessionID. Used in the beginning of connection
 	 * @param oi Object Input to read from
 	 * @return long object of sessionID
-	 * @throws IOException
+	 * @throws IOException Network failure
 	 */
 	public long getID(ObjectInput oi) throws IOException {
 		sessionID = oi.readLong();

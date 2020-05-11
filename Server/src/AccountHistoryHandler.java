@@ -3,6 +3,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Used for handling requests for account's payment history for month specified in PaymentHistoryRequest
+ */
 public class AccountHistoryHandler {
 	/**
 	 * Method for handling getting specific account history for month

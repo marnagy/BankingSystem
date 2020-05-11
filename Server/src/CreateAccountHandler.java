@@ -5,6 +5,9 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Random;
 
+/**
+ * Used for handling requests for creating an account
+ */
 public class CreateAccountHandler {
 	static AccountCreateRequest req;
 	static Response resp;

@@ -2,6 +2,9 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
+/**
+ * Used if unknown error occurs on server-side
+ */
 public class UnknownErrorResponse extends Response {
 	public final String msg;
 

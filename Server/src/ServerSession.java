@@ -6,6 +6,9 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+/**
+ * Session created for each connection.
+ */
 public class ServerSession extends Thread {
 	final Socket socket;
 	public final long sessionID;

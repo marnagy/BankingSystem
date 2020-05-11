@@ -1,3 +1,6 @@
+/**
+ * Used for recognizing type of request sent from client to server
+ */
 public enum RequestType {
     CreateAccount,
     Login,

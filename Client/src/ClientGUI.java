@@ -3,6 +3,9 @@ import java.awt.*;
 import java.io.*;
 import java.util.regex.Pattern;
 
+/**
+ * GUI class used as starting point for client
+ */
 public class ClientGUI {
 	private JPanel MyPanel;
 	private JTextField emailTextField;

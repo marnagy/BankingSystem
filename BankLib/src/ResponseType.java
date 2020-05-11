@@ -1,3 +1,6 @@
+/**
+ * Used for recognizing type of response sent from server to client
+ */
 public enum ResponseType {
     Success,
     EmailAlreadySignedUp,

@@ -2,6 +2,9 @@ import java.io.*;
 import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 
+/**
+ * Handler of changinf category of payment in history of an account
+ */
 public class PaymentCategoryChangeHandler {
 	/**
 	 * Method to handle category change for a payment in history

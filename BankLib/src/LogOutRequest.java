@@ -31,6 +31,7 @@ public class LogOutRequest extends Request {
 	 * Used to load this object from ObjectInput
 	 * @param oi ObjectInput object
 	 * @return Request object
+	 * @throws IOException Network failure
 	 */
 	public static LogOutRequest readArgs(ObjectInput oi) throws IOException {
 		long sessionID = oi.readLong();

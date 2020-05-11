@@ -1,6 +1,9 @@
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * Class used for displaying message to the user.
+ */
 public class MessageForm {
 	private JFrame frame;
 	private JPanel panel1;
@@ -24,7 +27,7 @@ public class MessageForm {
 	}
 
 	/**
-	 * Standart static method for showing massage to the user
+	 * Standard static method for showing massage to the user
 	 * @param msg Massage to show
 	 */
 	public static void Show(String msg) {

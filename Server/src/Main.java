@@ -1,5 +1,8 @@
 import java.util.regex.Pattern;
 
+/**
+ * Main class for starting server
+ */
 public class Main {
     public static void main(String[] args) {
     	if (args.length == 2 &&

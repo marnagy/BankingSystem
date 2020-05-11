@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+/**
+ * Main window containing payment screen, payment history, log out and exit(includes log out).
+ */
 public class LoggedInForm {
 	private static final Pattern amountPattern = Pattern.compile("(([1-9][0-9]*)|0)(\\.[0-9]{2})?");
 

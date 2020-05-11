@@ -5,6 +5,9 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.time.ZonedDateTime;
 
+/**
+ * Subpanel dynamically created on recieving of payment history
+ */
 public class PaymentHistorySubpanel extends JPanel {
 	final ObjectInput oi;
 	final ObjectOutput oo;
@@ -23,6 +26,11 @@ public class PaymentHistorySubpanel extends JPanel {
 	 */
 	public PaymentHistorySubpanel(int accountID, Payment payment, ObjectInput oi, ObjectOutput oo, long sessionID) throws InvalidFormatException {
 		super(new GridLayout(1, 5));
+
+		if (payment == null || oi == null || oo == null)
+		{
+			throw new Error("An argument is null");
+		}
 		this.setPreferredSize(new Dimension(-1, 40));
 		this.setMaximumSize(new Dimension(-1, 40));
 		this.setMinimumSize(new Dimension(-1, 40));

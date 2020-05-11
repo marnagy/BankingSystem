@@ -11,9 +11,9 @@ public class AccountCreateRequest extends Request {
 
 	/**
 	 * Constructor for AccountCreateRequest
-	 * @param email
-	 * @param passwd
-	 * @param sessionID
+	 * @param email Email to register
+	 * @param passwd Password to go along with the email
+	 * @param sessionID Long identifier of session
 	 */
 	public AccountCreateRequest(String email, char[] passwd, long sessionID){
 		super(RequestType.CreateAccount, sessionID);
@@ -37,6 +37,7 @@ public class AccountCreateRequest extends Request {
 
 	/**
 	 * Method for getting AccountCreateRequest object from ObjectInput
+	 * In case of failure, returns null
 	 * @param oi ObjectInput object
 	 * @return AccountCreateRequest object
 	 */

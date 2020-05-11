@@ -2,6 +2,9 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
+/**
+ * Used for sending request to change category of payment in history
+ */
 public class PaymentCategoryChangeRequest extends Request {
 	public final Payment toChange;
 	public final PaymentCategory newCategory;

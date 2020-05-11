@@ -3,6 +3,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Map;
 
+/**
+ * Runnable object for delaying payment
+ */
 public class DelayedPaymentThread implements Runnable {
 	private PaymentRequest req;
 	public final long sessionID;

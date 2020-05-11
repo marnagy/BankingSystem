@@ -2,6 +2,9 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
+/**
+ * Used as confirmation in various scenarios
+ */
 public class SuccessResponse extends Response {
 	/**
 	 * Constructor of SuccessResponse object

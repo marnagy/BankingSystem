@@ -2,6 +2,9 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
+/**
+ * Abstract class used for response classes
+ */
 public abstract class Response {
 	public final ResponseType type;
 	public final long sessionID;
@@ -27,8 +30,8 @@ public abstract class Response {
 	 * Used for loading this object from ObjectInput
 	 * @param oi ObjectInput object
 	 * @return Response object
-	 * @ClassNotFoundException LoadingClass failure
-	 * @IOException Network failure
+	 * @throws IOException Network failure
+	 * @throws ClassNotFoundException LoadingClass failure
 	 */
 	public static Response readArgs(ObjectInput oi) throws IOException, ClassNotFoundException {
 		assert false;

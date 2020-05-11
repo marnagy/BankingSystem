@@ -3,6 +3,9 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.time.YearMonth;
 
+/**
+ * Used for request of payment history of given month
+ */
 public class PaymentHistoryRequest extends Request {
 	public final YearMonth monthYear;
 	public final int accountID;

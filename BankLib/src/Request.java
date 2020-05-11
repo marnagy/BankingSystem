@@ -2,6 +2,9 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
+/**
+ * Abstract class used for request classes
+ */
 public abstract class Request {
 	public final RequestType type;
 	public final long sessionID;
