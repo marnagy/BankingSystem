@@ -3,7 +3,7 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 /**
- * Used for confirmation of payment being processed
+ * Sends success response for payment
  */
 public class SuccessPaymentResponse extends Response {
 	/**
@@ -12,7 +12,7 @@ public class SuccessPaymentResponse extends Response {
 	public final Payment payment;
 
 	/**
-	 * Constructor of SuccessPaymentResponse object
+	 * Creates a SuccessPaymentResponse object
 	 * @param payment Payment object
 	 * @param sessionID Long identifier of session
 	 */
@@ -22,7 +22,7 @@ public class SuccessPaymentResponse extends Response {
 	}
 
 	/**
-	 * Method used for sending this object using ObjectOutput
+	 * Sends this object using ObjectOutput
 	 * @param oo ObjectOutput to send the object through
 	 * @throws IOException Network failure
 	 */
@@ -39,7 +39,7 @@ public class SuccessPaymentResponse extends Response {
 	}
 
 	/**
-	 * Used for loading this object from ObjectInput
+	 * Loads this object from ObjectInput
 	 * @param oi ObjectInput object
 	 * @return SuccessPaymentResponse object
 	 * @throws IOException Network failure

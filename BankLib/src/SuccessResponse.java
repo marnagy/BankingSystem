@@ -3,11 +3,11 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 /**
- * Used as confirmation in various scenarios
+ * Sends success response
  */
 public class SuccessResponse extends Response {
 	/**
-	 * Constructor of SuccessResponse object
+	 * Creates a SuccessResponse object
 	 * @param sessionID Long identifier of session
 	 */
 	public SuccessResponse(long  sessionID) {
@@ -15,7 +15,7 @@ public class SuccessResponse extends Response {
 	}
 
 	/**
-	 * Method used for sending this object using ObjectOutput
+	 * Sends this object using ObjectOutput
 	 * @param oo ObjectOutput to send the object through
 	 * @throws IOException Network failure
 	 */
@@ -27,7 +27,7 @@ public class SuccessResponse extends Response {
 	}
 
 	/**
-	 * Used for loading this object from ObjectInput
+	 * Loads this object from ObjectInput
 	 * @param oi ObjectInput object
 	 * @return SuccessResponse object
 	 * @throws IOException Network failure

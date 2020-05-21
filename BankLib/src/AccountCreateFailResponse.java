@@ -3,7 +3,7 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 /**
- * Class used for sending failed response from server to client.
+ * Sends failed response from server to client.
  */
 public class AccountCreateFailResponse extends Response {
 	/**
@@ -12,7 +12,7 @@ public class AccountCreateFailResponse extends Response {
 	public final String mssg;
 
 	/**
-	 * Constructor of AccountCreateFailResponse object
+	 * Stores message of failure
 	 * @param errMssg Massage to store
 	 * @param sessionID Long identifier of session
 	 */
@@ -22,7 +22,7 @@ public class AccountCreateFailResponse extends Response {
 	}
 
 	/**
-	 * Method to send object to ObjectOutput
+	 * Sends object to ObjectOutput
 	 * @param oo ObjectOutput to send the object through
 	 * @throws IOException Network failure
 	 */
@@ -36,7 +36,7 @@ public class AccountCreateFailResponse extends Response {
 	}
 
 	/**
-	 * Load object from ObjectInput
+	 * Loads object from ObjectInput
 	 * @param oi ObjectInput object
 	 * @return AccountCreateFailResponse object
 	 * @throws IOException Network failure

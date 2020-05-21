@@ -1,5 +1,5 @@
 /**
- * Used for identifying category of payment
+ * Identifies category of payment
  */
 public enum PaymentCategory {
 	Shopping,

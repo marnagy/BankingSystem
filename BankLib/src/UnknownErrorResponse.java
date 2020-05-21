@@ -3,7 +3,7 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 /**
- * Used if unknown error occurs on server-side
+ * Sends history of payment for a month
  */
 public class UnknownErrorResponse extends Response {
 	/**
@@ -12,7 +12,7 @@ public class UnknownErrorResponse extends Response {
 	public final String msg;
 
 	/**
-	 * Constructor of UnknownErrorResponse object
+	 * Creates an UnknownErrorResponse object
 	 * @param msg Error message
 	 * @param sessionID Long identifier of session
 	 */
@@ -22,7 +22,7 @@ public class UnknownErrorResponse extends Response {
 	}
 
 	/**
-	 * Method used for sending this object using ObjectOutput
+	 * Sends this object using ObjectOutput
 	 * @param oo ObjectOutput to send the object through
 	 * @throws IOException Network failure
 	 */
@@ -36,7 +36,7 @@ public class UnknownErrorResponse extends Response {
 	}
 
 	/**
-	 * Used for loading this object from ObjectInput
+	 * Loads this object from ObjectInput
 	 * @param oi ObjectInput object
 	 * @return UnknownErrorResponse object
 	 * @throws IOException Network failure

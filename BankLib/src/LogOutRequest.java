@@ -3,11 +3,11 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 /**
- * Used when client tries to log out
+ * Sends a logout request
  */
 public class LogOutRequest extends Request {
 	/**
-	 * Constructor for LogOutRequest object
+	 * Creates LogOutRequest object
 	 * @param sessionID Long identifier of session
 	 */
 	public LogOutRequest(long sessionID){
@@ -15,7 +15,7 @@ public class LogOutRequest extends Request {
 	}
 
 	/**
-	 * Used to send this object to ObjectOutput
+	 * Sends this object to ObjectOutput
 	 * @param oo ObjectOutput object
 	 * @throws IOException Network failure
 	 */
@@ -28,7 +28,7 @@ public class LogOutRequest extends Request {
 	}
 
 	/**
-	 * Used to load this object from ObjectInput
+	 * Loads this object from ObjectInput
 	 * @param oi ObjectInput object
 	 * @return Request object
 	 * @throws IOException Network failure

@@ -4,7 +4,7 @@ import java.io.ObjectOutput;
 import java.util.List;
 
 /**
- * Used for sending payment history for requested month
+ * Sends history of payment for a month
  */
 public class PaymentHistoryResponse extends Response {
 	/**
@@ -24,7 +24,7 @@ public class PaymentHistoryResponse extends Response {
 	}
 
 	/**
-	 * Constructor used when loading from ObjectInput
+	 * Loads this object from ObjectInput
 	 * @param history Payment[] in requested YearMonth
 	 * @param sessionID Long identifier of session
 	 */
@@ -34,7 +34,7 @@ public class PaymentHistoryResponse extends Response {
 	}
 
 	/**
-	 * Method used for sending this object using ObjectOutput
+	 * Sends this object using ObjectOutput
 	 * @param oo ObjectOutput to send the object through
 	 * @throws IOException Network failure
 	 */
@@ -52,7 +52,7 @@ public class PaymentHistoryResponse extends Response {
 	}
 
 	/**
-	 * Used for loading this object from ObjectInput
+	 * Loads this object from ObjectInput
 	 * @param oi ObjectInput object
 	 * @return Response object
 	 * @throws IOException Network failure

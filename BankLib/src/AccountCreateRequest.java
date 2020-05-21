@@ -3,7 +3,7 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 /**
- * Used for sending request for creation of new account from client to server
+ * Sends request for creation of new account from client to server
  */
 public class AccountCreateRequest extends Request {
 	/**
@@ -16,7 +16,7 @@ public class AccountCreateRequest extends Request {
 	public final char[] passwd;
 
 	/**
-	 * Constructor for AccountCreateRequest
+	 * Create a new request fot account
 	 * @param email Email to register
 	 * @param passwd Password to go along with the email
 	 * @param sessionID Long identifier of session
@@ -31,7 +31,7 @@ public class AccountCreateRequest extends Request {
 	}
 
 	/**
-	 * Send object to ObjectOutput
+	 * Sends object to ObjectOutput
 	 * @param oo ObjectOutput object
 	 * @throws IOException Network failure
 	 */
@@ -45,7 +45,7 @@ public class AccountCreateRequest extends Request {
 	}
 
 	/**
-	 * Method for getting AccountCreateRequest object from ObjectInput
+	 * Gets AccountCreateRequest object from ObjectInput
 	 * In case of failure, returns null
 	 * @param oi ObjectInput object
 	 * @return AccountCreateRequest object

@@ -2,7 +2,7 @@ import java.io.*;
 import java.time.ZonedDateTime;
 
 /**
- * Used to store information about payment
+ * Stores information about payment
  */
 public class Payment {
 	/**
@@ -53,7 +53,7 @@ public class Payment {
 	}
 
 	/**
-	 * Used when loading payment from Payment request object with a conversion rate
+	 * Loads payment from Payment request object with a conversion rate
 	 * @param pr Payment request
 	 * @param convRate Conversion rate in double
 	 */
@@ -63,7 +63,7 @@ public class Payment {
 	}
 
 	/**
-	 * Constructor full of attributes
+	 *
 	 * @param senderID AccountID of sender
 	 * @param receiverID AccountID of receiver
 	 * @param amount Amount to send with 2 decimal places
@@ -87,6 +87,12 @@ public class Payment {
 		convRate = rate;
 	}
 
+	/**
+	 * Loads a payment object from ObjectInput
+	 * @param oi ObjectInput object
+	 * @return Loaded Payment
+	 * @throws IOException Network failure
+	 */
 	public static Payment FromObjInput(ObjectInput oi) throws IOException {
 		int senderAccountID = oi.readInt();
 		int receiverAccountID = oi.readInt();
@@ -101,6 +107,11 @@ public class Payment {
 				sendingDateTime, receivedDateTime, category);
 	}
 
+	/**
+	 * Sends this object to ObjectOutput
+	 * @param oo ObjectOutput object
+	 * @throws IOException Network failure
+	 */
 	public void send(ObjectOutput oo) throws IOException {
 		oo.writeInt(senderAccountID);
 		oo.writeInt(receiverAccountID);
@@ -115,7 +126,7 @@ public class Payment {
 	}
 
 	/**
-	 * Used when loading Payment from file
+	 * Loads a payment from file
 	 * @param paymentFile Payment File
 	 * @return Payment object
 	 * @throws IOException Files failure
@@ -150,7 +161,7 @@ public class Payment {
 	}
 
 	/**
-	 * Used to save payment to file
+	 * Saves payment to file
 	 * @param paymentFile File where payment will be saved to
 	 * @return File containing payment
 	 * @throws IOException Files failure
@@ -172,7 +183,7 @@ public class Payment {
 	}
 
 	/**
-	 * Custom method for loading ZonedDateTime from String
+	 * Loads ZonedDateTime from custom formatted String
 	 * @param text String to be processed
 	 * @return ZonedDateTime object
 	 */
@@ -195,7 +206,7 @@ public class Payment {
 	}
 
 	/**
-	 * Custom method for saving ZonedDateTime to String
+	 * Saves ZonedDateTime to custom formatted String
 	 * @param datetime ZonedDateTime object
 	 * @return Formatted String
 	 */
@@ -205,7 +216,7 @@ public class Payment {
 	}
 
 	/**
-	 * Used for changing category of payment.
+	 * Changes category of payment.
 	 * Creates new Payment object
 	 * @param cat PaymentCategory object
 	 * @return new Payment object with given category
@@ -216,7 +227,7 @@ public class Payment {
 	}
 
 	/**
-	 * Custom method for creating filename specific for the payment
+	 * Creating custom filename specific for the payment object
 	 * @return Formatted String
 	 */
 	public String GetFileName(){

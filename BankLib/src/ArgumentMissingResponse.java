@@ -3,11 +3,11 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 /**
- * Used to send information about missing arguments from server to client
+ * Sends information about missing arguments from server to client
  */
 public class ArgumentMissingResponse extends Response {
 	/**
-	 * Constructor of ArgumentMissingResponse object
+	 * Creates an ArgumentMissingResponse object
 	 * @param sessionID Long identifier of session
 	 */
 	public ArgumentMissingResponse(long sessionID){
@@ -15,7 +15,7 @@ public class ArgumentMissingResponse extends Response {
 	}
 
 	/**
-	 * Method used for sending this object using ObjectOutput
+	 * Sends this object using ObjectOutput
 	 * @param oo ObjectOutput to send the object through
 	 * @throws IOException Network failure
 	 */
@@ -27,7 +27,7 @@ public class ArgumentMissingResponse extends Response {
 	}
 
 	/**
-	 * Used for loading ArgumentMissingResponse from ObjectInput
+	 * Loads ArgumentMissingResponse from ObjectInput
 	 * @param oi ObjectInput object
 	 * @return ArgumentMissingResponse object
 	 * @throws IOException Network failure

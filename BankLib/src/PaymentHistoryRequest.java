@@ -4,7 +4,7 @@ import java.io.ObjectOutput;
 import java.time.YearMonth;
 
 /**
- * Used for request of payment history of given month
+ * Sends request for payment history in given month
  */
 public class PaymentHistoryRequest extends Request {
 	/**
@@ -17,7 +17,7 @@ public class PaymentHistoryRequest extends Request {
 	public final int accountID;
 
 	/**
-	 * Constructor used when loading from ObjectInput
+	 * Loads this object from ObjectInput
 	 * @param accountID accountID
 	 * @param date YearMonth of the history
 	 * @param sessionID Long identifier of session
@@ -32,7 +32,7 @@ public class PaymentHistoryRequest extends Request {
 	}
 
 	/**
-	 * Used to send this object to ObjectOutput
+	 * Sends this object to ObjectOutput
 	 * @param oo ObjectOutput object
 	 * @throws IOException Network failure
 	 */
@@ -49,7 +49,7 @@ public class PaymentHistoryRequest extends Request {
 	}
 
 	/**
-	 * Used to load this object from ObjectInput
+	 * Loads this object from ObjectInput
 	 * @param oi ObjectInput object
 	 * @return Request object
 	 * @throws IOException Network failure

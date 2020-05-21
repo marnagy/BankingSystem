@@ -3,7 +3,7 @@
  */
 public class InvalidFormatException extends Exception {
 	/**
-	 * Constructor including messagee
+	 * Creates object including message
 	 * @param msg Message
 	 */
 	public InvalidFormatException(String msg){

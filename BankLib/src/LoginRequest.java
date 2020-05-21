@@ -3,7 +3,7 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 /**
- * Used when client tries to log in
+ * Sends login request
  */
 public class LoginRequest extends Request {
 	/**
@@ -16,7 +16,7 @@ public class LoginRequest extends Request {
 	public final char[] passwd;
 
 	/**
-	 * Constructor for LoginRequest object
+	 * Creates LoginRequest object
 	 * @param email Identifing email
 	 * @param passwd Password to the email
 	 * @param sessionID Long identifier of session
@@ -28,7 +28,7 @@ public class LoginRequest extends Request {
 	}
 
 	/**
-	 * Used to send this object to ObjectOutput
+	 * Sends this object to ObjectOutput
 	 * @param oo ObjectOutput object
 	 * @throws IOException Network failure
 	 */
@@ -43,7 +43,7 @@ public class LoginRequest extends Request {
 	}
 
 	/**
-	 * Used to load this object from ObjectInput
+	 * Loads this object from ObjectInput
 	 * @param oi ObjectInput object
 	 * @return Request object
 	 */

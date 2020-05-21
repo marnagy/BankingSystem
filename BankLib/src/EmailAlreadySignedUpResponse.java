@@ -3,12 +3,12 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 /**
- * Used as response from server to client in case there already is email
+ * Sends response in case there already is email
  * signed up with SAME HASHCODE, not same email address
  */
 public class EmailAlreadySignedUpResponse extends Response {
 	/**
-	 * Constructor of EmailAlreadySignedUpResponse object
+	 * Creates an EmailAlreadySignedUpResponse object
 	 * @param sessionID Long identifier of session
 	 */
 	public EmailAlreadySignedUpResponse(long sessionID){
@@ -16,7 +16,7 @@ public class EmailAlreadySignedUpResponse extends Response {
 	}
 
 	/**
-	 * Method used for sending this object using ObjectOutput
+	 * Sends this object using ObjectOutput
 	 * @param oo ObjectOutput to send the object through
 	 * @throws IOException Network failure
 	 */
@@ -28,7 +28,7 @@ public class EmailAlreadySignedUpResponse extends Response {
 	}
 
 	/**
-	 * Used for loading this object from ObjectInput
+	 * Loads this object from ObjectInput
 	 * @param oi ObjectInput object
 	 * @return EmailAlreadySignedUpResponse object
 	 * @throws IOException Network failure

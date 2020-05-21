@@ -3,11 +3,11 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 /**
- * Used as error message on client (not logged in before request that needs log in, etc.)
+ * Sends response as reaction to invalid request
  */
 public class IllegalRequestResponse extends Response {
 	/**
-	 * Constructor of IllegalRequestResponse object
+	 * Creates an IllegalRequestResponse object
 	 * @param sessionID Long identifier of session
 	 */
 	public IllegalRequestResponse(long sessionID) {
@@ -15,7 +15,7 @@ public class IllegalRequestResponse extends Response {
 	}
 
 	/**
-	 * Method used for sending this object using ObjectOutput
+	 * Sends this object using ObjectOutput
 	 * @param oo ObjectOutput to send the object through
 	 * @throws IOException Network failure
 	 */
@@ -27,7 +27,7 @@ public class IllegalRequestResponse extends Response {
 	}
 
 	/**
-	 * Used for loading this object from ObjectInput
+	 * Loads this object from ObjectInput
 	 * @param oi ObjectInput object
 	 * @return IllegalRequestResponse object
 	 * @throws IOException Network failure

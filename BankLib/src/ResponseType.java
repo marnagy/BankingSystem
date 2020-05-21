@@ -1,5 +1,5 @@
 /**
- * Used for recognizing type of response sent from server to client
+ * Identifier of type of response
  */
 public enum ResponseType {
     Success,

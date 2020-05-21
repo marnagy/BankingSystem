@@ -9,8 +9,8 @@ import java.util.Hashtable;
 import java.util.Map;
 
 /**
- * Used for storing information about bank account after log in.
- * Stores accountID, datetime of creation/registration, current balance and history of payments.
+ * Stores information about bank account
+ * Stores values: accountID, datetime of creation/registration, current balance and history of payments.
  */
 public class Account {
 	/**
@@ -31,7 +31,7 @@ public class Account {
 	private final Map<YearMonth, Payment[]> History = new Hashtable<YearMonth, Payment[]>();
 
 	/**
-	 * Constructor used on server when creating new account
+	 * Constructs new account with positive value for each currency
 	 * @param email Email adress of the account
 	 */
 	public Account(String email){
@@ -45,7 +45,7 @@ public class Account {
 	}
 
 	/**
-	 * Constructor used when loading from AccountInfoResponse
+	 * Constructs an account from AccountInfoResponse
 	 * @param air AccountInfoResponse object
 	 */
 	private Account(AccountInfoResponse air){
@@ -55,7 +55,7 @@ public class Account {
 	}
 
 	/**
-	 * Wrapper method for adding money to current balance
+	 * Tries to add money to current balance
 	 * @param currencyType CurrencyType for which you want to change value
 	 * @param amount Amount to be added
 	 * @return Success value
@@ -72,7 +72,7 @@ public class Account {
 		}
 	}
 	/**
-	 * Wrapper method for subtracting money from current balance
+	 * Tries to subtract money from current balance
 	 * @param currencyType CurrencyType for which you want to change value
 	 * @param amount Amount to be subtracted
 	 * @return Success value
@@ -89,7 +89,7 @@ public class Account {
 	}
 
 	/**
-	 * Wrapper method for getting current balance for CurrencyType
+	 * Gets current balance for CurrencyType
 	 * @param curr CurrencyType object
 	 * @return Balance in long with 2 decimal places
 	 */
@@ -98,7 +98,7 @@ public class Account {
 	}
 
 	/**
-	 * Method used to save payment history to the Account object
+	 * Saves payment history to the Account object
 	 * @param yearMonth YearMonth corresponding to the histrory
 	 * @param payments Array of payments made in corresponding YearMonth
 	 */
@@ -107,7 +107,7 @@ public class Account {
 	}
 
 	/**
-	 * Method for loading Account object on successful log in
+	 * Loads an account from AccountInfoResponse
 	 * @param air AccountInfoResponse
 	 * @return Loaded Account object
 	 */
@@ -116,8 +116,7 @@ public class Account {
 	}
 
 	/**
-	 * Static method used for loading Account object from folder.
-	 * Used by server.
+	 * Loads an account object from folder.
 	 * @param accountDir File object containing account's information
 	 * @return Loaded Account object
 	 * @throws IOException Files failure

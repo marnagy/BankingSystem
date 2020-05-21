@@ -3,7 +3,7 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 /**
- * Used for sending request to change category of payment in history
+ * Sends request to change category of payment in history
  */
 public class PaymentCategoryChangeRequest extends Request {
 	/**
@@ -16,7 +16,7 @@ public class PaymentCategoryChangeRequest extends Request {
 	public final PaymentCategory newCategory;
 
 	/**
-	 * Constructor for PaymentCategoryChangeRequest object
+	 * Creates a PaymentCategoryChangeRequest object
 	 * @param toChange Payment to change category for
 	 * @param newCategory New category of the payment
 	 * @param sessionID Long identifier of session
@@ -28,7 +28,7 @@ public class PaymentCategoryChangeRequest extends Request {
 	}
 
 	/**
-	 * Used to send this object to ObjectOutput
+	 * Sends this object to ObjectOutput
 	 * @param oo ObjectOutput object
 	 * @throws IOException Network failure
 	 */
@@ -44,7 +44,7 @@ public class PaymentCategoryChangeRequest extends Request {
 	}
 
 	/**
-	 * Used to load this object from ObjectInput
+	 * Loads this object from ObjectInput
 	 * @param oi ObjectInput object
 	 * @return Request object
 	 * @throws IOException Network failure

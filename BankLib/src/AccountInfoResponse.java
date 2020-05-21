@@ -6,7 +6,7 @@ import java.util.Map;
 
 
 /**
- * Used to send informations about account on log in from server to client
+ * Sends informations about account on log in from server to client
  */
 public class AccountInfoResponse extends Response {
 	/**
@@ -23,7 +23,7 @@ public class AccountInfoResponse extends Response {
 	public final int accountID;
 
 	/**
-	 * Constructor used when loading from ObjectInput
+	 * Creates an AccountInfoResponse from accountID and creation ZonedDateTime
 	 * @param accountID accountID
 	 * @param created ZonedDateTime object of creation of the account
 	 * @param sessionID Long identifier of session
@@ -35,7 +35,7 @@ public class AccountInfoResponse extends Response {
 	}
 
 	/**
-	 * Constructor for loading from account folder
+	 * Loads an account from folder
 	 * @param accountDir account folder
 	 * @param sessionID Long identifier of session
 	 * @throws IOException Network failure
@@ -66,7 +66,7 @@ public class AccountInfoResponse extends Response {
 	}
 
 	/**
-	 * Method to send object to ObjectOutput
+	 * Sends object to ObjectOutput
 	 * @param oo ObjectOutput to send the object through
 	 * @throws IOException Network failure
 	 */

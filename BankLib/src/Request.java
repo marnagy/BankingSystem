@@ -26,14 +26,14 @@ public abstract class Request {
 	}
 
 	/**
-	 * Used to send this object to ObjectOutput
+	 * Sends this object to ObjectOutput
 	 * @param oo ObjectOutput object
 	 * @throws IOException Network failure
 	 */
 	public abstract void send(ObjectOutput oo) throws IOException;
 
 	/**
-	 * Used to load this object from ObjectInput
+	 * Loads this object from ObjectInput
 	 * @param oi ObjectInput object
 	 * @return Request object
 	 * @throws IOException Network failure

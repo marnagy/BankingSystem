@@ -4,7 +4,7 @@ import java.io.ObjectOutput;
 import java.time.ZonedDateTime;
 
 /**
- * Used for sending request for payment from client to server.
+ * Sends request for payment
  */
 public class PaymentRequest extends Request {
 	/**
@@ -49,7 +49,7 @@ public class PaymentRequest extends Request {
 	public final ZonedDateTime sendingDateTime;
 
 	/**
-	 * Constructor used when creating PaymentRequest object
+	 * Creates PaymentRequest object
 	 * @param senderAccountID AccountID of sender
 	 * @param receiverAccountID AccountID of receiver
 	 * @param amount Amount to send with 2 decimal places
@@ -83,7 +83,7 @@ public class PaymentRequest extends Request {
 	}
 
 	/**
-	 * Constructor used when loading from ObjectInput
+	 * Private load without adding new information
 	 * @param senderAccountID AccountID of sender
 	 * @param receiverAccountID AccountID of receiver
 	 * @param amount Amount to send with 2 decimal places
@@ -116,7 +116,7 @@ public class PaymentRequest extends Request {
 	}
 
 	/**
-	 * Used to send this object to ObjectOutput
+	 * Sends this object to ObjectOutput
 	 * @param oo ObjectOutput object
 	 * @throws IOException Network failure
 	 */
@@ -144,7 +144,7 @@ public class PaymentRequest extends Request {
 	}
 
 	/**
-	 * Used to load this object from ObjectInput
+	 * Loads this object from ObjectInput
 	 * @param oi ObjectInput object
 	 * @return Request object
 	 * @throws IOException Network failure

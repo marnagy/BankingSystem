@@ -1,5 +1,5 @@
 /**
- * Used as identifier of currency
+ * Identifier of currency
  */
 public enum CurrencyType {
 	EUR,

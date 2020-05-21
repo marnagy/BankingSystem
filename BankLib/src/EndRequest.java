@@ -3,11 +3,11 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 /**
- * Used when client is logging out and ending connection to the server
+ * Sends request for logging out and ending connection
  */
 public class EndRequest extends Request {
 	/**
-	 * Constructor for EndRequest object
+	 * Creates an EndRequest object
 	 * @param sessionID Long identifier of session
 	 */
 	public EndRequest(long sessionID){
@@ -15,7 +15,7 @@ public class EndRequest extends Request {
 	}
 
 	/**
-	 * Used to send this object to ObjectOutput
+	 * Sends this object to ObjectOutput
 	 * @param oo ObjectOutput object
 	 * @throws IOException Network failure
 	 */
@@ -28,7 +28,7 @@ public class EndRequest extends Request {
 	}
 
 	/**
-	 * Used to load this object from ObjectInput
+	 * Loads this object from ObjectInput
 	 * @param oi ObjectInput object
 	 * @return EndRequest object
 	 * @throws IOException Network failure

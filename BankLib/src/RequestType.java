@@ -1,5 +1,5 @@
 /**
- * Used for recognizing type of request sent from client to server
+ * Identifier of type of request
  */
 public enum RequestType {
     CreateAccount,
